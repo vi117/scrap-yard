@@ -19,6 +19,7 @@ specifiers:
   eslint-plugin-react: ^7.29.4
   husky: ^7.0.4
   jest: ^27.5.1
+  marked: ^4.0.14
   react: ^17.0.2
   react-dom: ^17.0.2
   recoil: ^0.7.0
@@ -33,6 +34,7 @@ dependencies:
   '@emotion/react': 11.9.0_c1cf67fb40c16c390126f300fc197413
   '@emotion/styled': 11.8.1_5154967df6f19c47e31ab6c742104bd5
   '@mui/material': 5.6.0_c81acbfb28fc4f93d039c69ddc14294c
+  marked: 4.0.14
   react: 17.0.2
   react-dom: 17.0.2_react@17.0.2
   recoil: 0.7.0_react-dom@17.0.2+react@17.0.2
@@ -3490,6 +3492,12 @@ packages:
     dependencies:
       tmpl: 1.0.5
     dev: true
+
+  /marked/4.0.14:
+    resolution: {integrity: sha512-HL5sSPE/LP6U9qKgngIIPTthuxC0jrfxpYMZ3LdGDD3vTnLs59m2Z7r6+LNDR3ToqEQdkKd6YaaEfJhodJmijQ==}
+    engines: {node: '>= 12'}
+    hasBin: true
+    dev: false
 
   /merge-stream/2.0.0:
     resolution: {integrity: sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==}

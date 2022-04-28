@@ -2,6 +2,7 @@ import { Button, Stack, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { RecoilState, useRecoilState } from "recoil";
 import csvRenderer from "../csvRenderer";
+import markdownRenderer from "../markdownRenderer";
 
 type Mode = "Read" | "Write";
 
@@ -11,6 +12,8 @@ function render_view(t: string, content: string) {
       return <>{content}</>;
     case "csv":
       return csvRenderer(content);
+    case "md":
+      return markdownRenderer(content);
     default:
       return <>error: invalid type: {t} content: {content}</>;
   }
