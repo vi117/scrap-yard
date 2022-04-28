@@ -1,5 +1,5 @@
 import { Button, Paper, Stack } from "@mui/material";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { atom, atomFamily, RecoilState, selector, useRecoilState } from "recoil";
 import { v4 as uuidv4 } from "uuid";
 
@@ -52,13 +52,13 @@ const Document = () => {
   const chunklist = UUIDs.map((id, i) => {
     const content = contentFamily(id);
     return (
-      <>
+      <Fragment key={id}>
         <Button onClick={() => newChunk(i)}>add to {i}</Button>
         <Paper key={id}>
           <Chunk id={id} content={content} focusedChunk={focusedChunk} />
           <Button onClick={() => delChunk(i)}>delete</Button>
         </Paper>
-      </>
+      </Fragment>
     );
   });
 
