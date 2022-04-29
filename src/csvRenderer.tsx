@@ -1,18 +1,19 @@
 // dummy module
 // TODO: should be replaced to proper library
+import { Table, TableBody, TableCell, TableRow } from "@mui/material";
 
 const renderCsv = (content) => {
   const table = content.split("\n").map((s) => s.split(","));
   return (
-    <table>
-      <tbody>
+    <Table>
+      <TableBody>
         {table.map((row, i) => (
-          <tr key={"r" + i}>
-            {row.map((item, j) => <td key={"r" + i + "c" + j}>{item}</td>)}
-          </tr>
+          <TableRow key={"r" + i}>
+            {row.map((item, j) => <TableCell key={"r" + i + "c" + j}>{item}</TableCell>)}
+          </TableRow>
         ))}
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
   );
 };
 
