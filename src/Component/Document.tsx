@@ -1,12 +1,12 @@
 import { Button, Paper, Stack } from "@mui/material";
-import { Fragment, useState } from "react";
-import { atom, atomFamily, RecoilState, selector, useRecoilState } from "recoil";
+import { Fragment } from "react";
+import { atom, atomFamily, RecoilState, useRecoilState } from "recoil";
 import { v4 as uuidv4 } from "uuid";
 
 // import '../App.css';
 import Chunk from "./Chunk";
 
-const uuidList: RecoilState<int[]> = atom({
+const uuidList: RecoilState<string[]> = atom({
   key: "uuid List",
   default: [],
 });
@@ -43,7 +43,7 @@ const Document = () => {
   };
 
   const delChunk = (i: number) => {
-    const id = UUIDs[i];
+    // const id = UUIDs[i];
     const nids = UUIDs.slice();
     nids.splice(i, 1);
     setUUIDs(nids);
