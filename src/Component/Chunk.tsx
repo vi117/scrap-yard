@@ -1,5 +1,5 @@
-import { Button, Stack, TextField } from "@mui/material";
-import { useEffect, useState } from "react";
+import { Button, Input, Stack, TextField } from "@mui/material";
+import { createRef, useEffect, useState } from "react";
 import { RecoilState, useRecoilState } from "recoil";
 import csvRenderer from "../csvRenderer";
 import markdownRenderer from "../markdownRenderer";
@@ -36,9 +36,9 @@ const TypeForm = (props: {
     <form onSubmit={update}>
       <label>
         type:
-        <input type="text" value={input} onChange={onChange} />
+        <Input type="text" value={input} onChange={onChange} />
       </label>
-      <input type="submit" value="change" />
+      <Input type="submit" value="change" />
     </form>
   );
 };
@@ -52,22 +52,33 @@ const Chunk = (props: {
   const [fc, setFc] = useRecoilState(props.focusedChunk);
   const [type, setType] = useState("text");
   const [mode, setMode] = useState("Read");
+  const contentRef = createRef();
 
-  // Effect
+  // Effects
+
+  // set read mode when other chunk gets focused.
   useEffect(() => {
-    // set read mode when other chunk gets focused.
     if (fc != props.id) setMode("Read");
   }, [fc]);
 
-  // Callbacks
+  // move cursor to the end of the content when in write mode.
+  useEffect(() => {
+    const ref = contentRef.current;
+    if (mode == "Write" && ref != null) {
+      const last = ref.value.length;
+      ref.setSelectionRange(last, last);
+    }
+  }, [mode]);
 
-  const onChange = (e) => setContent(e.target.value);
+  // Callbacks
 
   const changeMode = () => setMode(mode == "Read" ? "Write" : "Read");
 
-  const onFocus = () => setFc(props.id);
+  const updateType = (t: string) => setType(t);
 
-  const updateType = (t) => setType(t);
+  const onChange = (e: Event) => setContent(e.target.value);
+
+  const onFocus = () => setFc(props.id);
 
   // const onBlur = (e) => { }; // for later use
 
@@ -87,6 +98,7 @@ const Chunk = (props: {
           multiline
           minRows={4}
           className="content"
+          inputRef={contentRef}
           onChange={onChange}
           value={content}
         />
@@ -112,5 +124,3 @@ const Chunk = (props: {
 };
 
 export default Chunk;
-
-// vim: sw=2 ts=2
