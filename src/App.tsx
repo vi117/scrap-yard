@@ -1,14 +1,15 @@
+import { RecoilRoot } from "recoil";
 import "./App.css";
-import { Loading } from "./Component/Loading";
+import Document from "./Component/Document";
 
 function App() {
-
   return (
-    <div className="App">
-      <header className="App-header">
-      </header>
-      <Loading></Loading>
-    </div>
+    <RecoilRoot>
+      <div className="App">
+        <header className="App-header"></header>
+        <Document></Document>
+      </div>
+    </RecoilRoot>
   );
 }
 
