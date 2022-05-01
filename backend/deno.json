@@ -1,0 +1,14 @@
+{
+  "$schema": "https://cdn.deno.land/deno/versions/v1.21.0/raw/cli/schemas/config-file.v1.json",
+  "importMap": "import_map.json",
+  "fmt": {
+    "options": {
+      "indentWidth": 2
+    }
+  },
+  "tasks": {
+    "test": "deno test --no-check -A",
+    "serve": "deno run --no-check --allow-all app.ts",
+    "test_debug": "deno test --no-check -A --inspect-brk"
+  }
+}
