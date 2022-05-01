@@ -46,11 +46,13 @@ const Chunk = (props: {
   id: string;
   content: RecoilState<string>;
   focusedChunk: RecoilState<string>;
+  delete: (string) => void;
 }) => {
   const [content, setContent] = useRecoilState(props.content);
   const [fc, setFc] = useRecoilState(props.focusedChunk);
   const [type, setType] = useState("text");
   const [mode, setMode] = useState("Read");
+  const [onDelete, setOnDelete] = useState(false);
   const contentRef = createRef<null | HTMLTextAreaElement>();
 
   // Effects
@@ -79,6 +81,20 @@ const Chunk = (props: {
 
   const onFocus = () => setFc(props.id);
 
+  const onKeyDown = (e : KeyboardEvent) => {
+    if (e.key == "Backspace") {
+      if (!onDelete && e.target.value == "") {
+        props.delete(props.id);
+      } else {
+        setOnDelete(true);
+      }
+    }
+  };
+
+  const onKeyUp = (e : KeyboardEvent) => {
+    if (e.key == "Backspace") { setOnDelete(false); }
+  };
+
   // const onBlur = (e) => { }; // for later use
 
   const renderContent = () => {
@@ -99,6 +115,8 @@ const Chunk = (props: {
           className="content"
           inputRef={contentRef}
           onChange={onChange}
+          onKeyDown={onKeyDown}
+          onKeyUp={onKeyUp}
           value={content}
         />
       );

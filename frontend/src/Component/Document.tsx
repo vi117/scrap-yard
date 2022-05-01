@@ -50,13 +50,23 @@ export function DocumentEditor() {
     setUUIDs(nids);
   };
 
+  const deleteByUUID = (id: string) => {
+    const i = UUIDs.findIndex((i) => i == id);
+    delChunk(i);
+  };
+
   const chunklist = UUIDs.map((id, i) => {
     const content = contentFamily(id);
     return (
       <Fragment key={id}>
         <Button onClick={() => newChunk(i)}>add to {i}</Button>
         <Paper key={id}>
-          <Chunk id={id} content={content} focusedChunk={focusedChunk} />
+          <Chunk
+            id={id}
+            content={content}
+            focusedChunk={focusedChunk}
+            delete={deleteByUUID}
+          />
           <Button onClick={() => delChunk(i)}>delete</Button>
         </Paper>
       </Fragment>
