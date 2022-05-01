@@ -1,5 +1,5 @@
-import { CommonDocumentBase } from "./doc.ts";
-import { createChunk } from "./chunk.ts";
+import { CommonDocumentBase } from "model";
+import { createChunk } from "model";
 
 class FileDocument extends CommonDocumentBase {
   constructor(path: string) {
