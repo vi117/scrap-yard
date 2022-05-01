@@ -8,7 +8,7 @@ import Chunk from "./Chunk";
 
 const uuidList: RecoilState<string[]> = atom({
   key: "uuid List",
-  default: [],
+  default: [] as string[],
 });
 
 const contentFamily = atomFamily({
@@ -31,7 +31,7 @@ const allTextState = selector({
 });
  */
 
-const Document = () => {
+export function Document() {
   const [UUIDs, setUUIDs] = useRecoilState(uuidList);
 
   const newChunk = (i?: number) => {
@@ -68,6 +68,6 @@ const Document = () => {
       <Button onClick={() => newChunk()}>Add</Button>
     </Stack>
   );
-};
+}
 
 export default Document;

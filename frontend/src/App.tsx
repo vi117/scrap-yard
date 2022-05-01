@@ -1,14 +1,24 @@
 import { RecoilRoot } from "recoil";
 import "./App.css";
 import Document from "./Component/Document";
+import {BrowserRouter, Route, Navigate, Routes} from "react-router-dom";
+import {NotFound} from "./Page/NotFoundPage";
+import {Storybooks} from "./Page/StoryBooks";
 
 function App() {
   return (
     <RecoilRoot>
-      <div className="App">
-        <header className="App-header"></header>
-        <Document></Document>
-      </div>
+      <BrowserRouter>
+      <Routes>
+      <Route path="/" element={<Navigate to={"app/"}/>}>
+      </Route>
+      <Route path="app/*" element={<Document></Document>}>
+      </Route>
+      <Route path="storybook/*" element={<Storybooks></Storybooks>}></Route>
+      <Route path="*" element={<NotFound />}>
+      </Route>
+      </Routes>
+      </BrowserRouter>
     </RecoilRoot>
   );
 }

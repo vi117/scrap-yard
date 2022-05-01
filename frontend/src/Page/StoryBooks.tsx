@@ -1,0 +1,22 @@
+import { Typography } from "@mui/material";
+import { Route, Routes } from "react-router-dom";
+import {Document} from "../Component/Document";
+
+const StorybookList = [
+    {
+        name: "document",
+        elem: <Document></Document>
+    }
+]
+
+export function Storybooks(){
+    return <div>
+        <Routes>
+            {StorybookList.map((story, i) => (
+                <Route key={i} path={`${story.name}`} element={story.elem}></Route>
+            ))}
+            <Route path="*" element={<Typography>Nothing Selected</Typography>}></Route>
+        </Routes>
+    </div>
+}
+export default Storybooks;
