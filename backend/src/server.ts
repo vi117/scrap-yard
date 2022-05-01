@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.136.0/http/mod.ts";
+import { serve } from "std/http";
 import {
   getStaticRouter,
   Handler,
