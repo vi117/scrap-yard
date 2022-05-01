@@ -1,11 +1,11 @@
 import { Typography } from "@mui/material";
 import { Route, Routes } from "react-router-dom";
-import {Document} from "../Component/Document";
+import {DocumentEditor} from "../Component/Document";
 
 const StorybookList = [
     {
         name: "document",
-        elem: <Document></Document>
+        elem: <DocumentEditor></DocumentEditor>
     }
 ]
 
