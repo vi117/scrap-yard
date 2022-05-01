@@ -31,7 +31,7 @@ const allTextState = selector({
 });
  */
 
-export function Document() {
+export function DocumentEditor() {
   const [UUIDs, setUUIDs] = useRecoilState(uuidList);
 
   const newChunk = (i?: number) => {
@@ -70,4 +70,4 @@ export function Document() {
   );
 }
 
-export default Document;
+export default DocumentEditor;

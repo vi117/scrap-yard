@@ -1,6 +1,6 @@
 import { RecoilRoot } from "recoil";
 import "./App.css";
-import Document from "./Component/Document";
+import DocumentEditor from "./Component/Document";
 import {BrowserRouter, Route, Navigate, Routes} from "react-router-dom";
 import {NotFound} from "./Page/NotFoundPage";
 import {Storybooks} from "./Page/StoryBooks";
@@ -12,7 +12,7 @@ function App() {
       <Routes>
       <Route path="/" element={<Navigate to={"app/"}/>}>
       </Route>
-      <Route path="app/*" element={<Document></Document>}>
+      <Route path="app/*" element={<DocumentEditor></DocumentEditor>}>
       </Route>
       <Route path="storybook/*" element={<Storybooks></Storybooks>}></Route>
       <Route path="*" element={<NotFound />}>
