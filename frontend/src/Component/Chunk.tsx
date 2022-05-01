@@ -1,8 +1,8 @@
 import { Button, Input, Stack, TextField } from "@mui/material";
 import { createRef, useEffect, useState } from "react";
 import { RecoilState, useRecoilState } from "recoil";
-import csvRenderer from "../csvRenderer";
-import markdownRenderer from "../markdownRenderer";
+import csvRenderer from "./csvRenderer";
+import markdownRenderer from "./markdownRenderer";
 
 type Mode = "Read" | "Write";
 
