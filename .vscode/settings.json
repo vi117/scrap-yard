@@ -1,6 +1,3 @@
 {
-  "editor.defaultFormatter": "dprint.dprint",
   "deno.enablePaths": ["./backend"],
-  "deno.lint": true,
-  "deno.importMap": "./backend/import_map.json",
 }
