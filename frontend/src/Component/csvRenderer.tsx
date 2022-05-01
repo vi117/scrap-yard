@@ -2,7 +2,7 @@
 // TODO: should be replaced to proper library
 import { Table, TableBody, TableCell, TableRow } from "@mui/material";
 
-const renderCsv = (content) => {
+const renderCsv = (content: string) => {
   const table = content.split("\n").map((s) => s.split(","));
   return (
     <Table>

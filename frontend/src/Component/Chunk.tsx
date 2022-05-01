@@ -1,8 +1,8 @@
 import { Button, Input, Stack, TextField } from "@mui/material";
-import { createRef, useEffect, useState } from "react";
+import { ChangeEventHandler, createRef, FormEventHandler, useEffect, useState } from "react";
 import { RecoilState, useRecoilState } from "recoil";
-import csvRenderer from "../csvRenderer";
-import markdownRenderer from "../markdownRenderer";
+import csvRenderer from "./csvRenderer";
+import markdownRenderer from "./markdownRenderer";
 
 type Mode = "Read" | "Write";
 
@@ -25,9 +25,9 @@ const TypeForm = (props: {
 }) => {
   const [input, setInput] = useState(props.value);
 
-  const onChange = (e) => setInput(e.target.value);
+  const onChange: ChangeEventHandler<HTMLInputElement> = (e) => setInput(e.target.value);
 
-  const update = (e) => {
+  const update: FormEventHandler = (e) => {
     e.preventDefault();
     props.update(input);
   };
@@ -52,7 +52,7 @@ const Chunk = (props: {
   const [fc, setFc] = useRecoilState(props.focusedChunk);
   const [type, setType] = useState("text");
   const [mode, setMode] = useState("Read");
-  const contentRef = createRef();
+  const contentRef = createRef<null | HTMLTextAreaElement>();
 
   // Effects
 
@@ -76,7 +76,7 @@ const Chunk = (props: {
 
   const updateType = (t: string) => setType(t);
 
-  const onChange = (e: Event) => setContent(e.target.value);
+  const onChange: ChangeEventHandler<HTMLTextAreaElement> = (e) => setContent(e.target.value);
 
   const onFocus = () => setFc(props.id);
 
