@@ -1,0 +1,13 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "deno.enable": true,
+        "editor.defaultFormatter": "denoland.vscode-deno",
+        "deno.lint": true,
+        "deno.importMap": "./import_map.json",
+    }
+}

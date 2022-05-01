@@ -1,0 +1,14 @@
+{
+    "folders": [
+        {
+            "name": "frontend",
+            "path": "./"
+        },
+    ],
+    "settings": {
+        "files.exclude": {
+            "node_modules": true
+        },
+        "editor.defaultFormatter": "dprint.dprint"
+    }
+}

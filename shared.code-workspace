@@ -1,0 +1,27 @@
+{
+    "folders": [
+        {
+            "name": "frontend",
+            "path": "frontend"
+        },
+        {
+            "name": "backend",
+            "path": "backend"
+        },
+        {
+            "name": "shared",
+            "path": "."
+        }
+    ],
+    "settings": {
+        "deno.enablePaths": [
+            "./backend"
+        ],
+        "files.exclude": {
+            "node_modules": true
+        },
+        "deno.importMap": "./import_map.json",
+        "deno.lint": true,
+        "deno.unstable": false
+    }
+}
