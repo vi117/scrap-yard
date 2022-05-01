@@ -3,6 +3,7 @@ import { ChangeEventHandler, createRef, FormEventHandler, useEffect, useState } 
 import { RecoilState, useRecoilState } from "recoil";
 import csvRenderer from "./csvRenderer";
 import markdownRenderer from "./markdownRenderer";
+import {IDocument} from "model/dist/mod";
 
 type Mode = "Read" | "Write";
 
