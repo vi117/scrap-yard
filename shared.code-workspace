@@ -9,6 +9,10 @@
             "path": "backend"
         },
         {
+            "name": "model",
+            "path": "model"
+        }
+        {
             "name": "shared",
             "path": "."
         }

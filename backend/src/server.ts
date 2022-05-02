@@ -7,6 +7,7 @@ import {
   TreeRouter,
 } from "./router/mod.ts";
 import { FileServeRouter } from "./fileServe.ts";
+import { rpc } from "./rpc.ts";
 
 const router = new TreeRouter<Handler>();
 
@@ -22,6 +23,7 @@ router.register("/", (_req) => {
 router.registerRouter("dist", getStaticRouter("dist"));
 router.registerRouter("fs", new FileServeRouter());
 router.register("/app", app);
+router.register("/ws", rpc);
 
 function app() {
   return new Response("Hello World!", {

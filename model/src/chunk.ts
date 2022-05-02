@@ -1,72 +1,165 @@
-import { CommonChunkBase, IChunk } from "./doc.ts";
+import { JsonRPCMethodHeader, JsonRPCNotificationHeader } from "./rpc.ts";
 
-export type TextChunkContent = {
-  type: string;
+/**
+ * Text Chunk
+ */
+export interface TextChunk {
+  type: "text";
   content: string;
-};
+}
 
 /**
- * common text chunk class
- * @param type the type of the chunk
- * @param content the content of the chunk
+ * Markdown Chunk
  */
-export class CommonTextChunk extends CommonChunkBase {
+export interface MarkdownChunk {
+  type: "markdown";
   content: string;
-  constructor(id: string, type: string, content: string) {
-    super(id, type);
-    this.content = content;
-  }
-  getContent(): TextChunkContent {
-    return {
-      type: this.type,
-      content: this.content,
-    };
-  }
 }
-
-export interface CreateChunkArgs {
-  id: string;
-  type: string;
-}
-
-const CommonTextChunkCreator = (args: {
-  id: string;
-  type: string;
-  content?: string;
-}) => {
-  const content = args.content;
-  if (content !== undefined) {
-    return new CommonTextChunk(args.id, args.type, content);
-  }
-  throw new Error("Missing content");
-};
-type CommonTextChunkCreatorArgs = CreateChunkArgs & {
-  content?: string;
-};
 
 /**
- * A chunk creator which creates a chunk with the given type and data.
+ * Chunk Content
  */
-const ChunkCreatorsMap: Record<
-  string,
-  <T extends CreateChunkArgs>(args: T) => IChunk
-> = {
-  "text": (args: CommonTextChunkCreatorArgs) => CommonTextChunkCreator(args),
-  "markdown": (args: CommonTextChunkCreatorArgs) =>
-    CommonTextChunkCreator(args),
-};
+export type ChunkContent = TextChunk | MarkdownChunk;
+export type ChunkContentKind = ChunkContent["type"];
+
+export type Chunk = {
+  id: string;
+} & ChunkContent;
+
+export type ChunkCreateParam = ChunkContent;
+export type ChunkModifyParam = ChunkContent;
 
 /**
- * Create a chunk with the given type and data.
- * @param args the arguments for creating the chunk
- * @returns the created chunk
- * @throws if the chunk type is not supported
- * @throws if the content is missing
+ * Base of Chunk Method
  */
-export function createChunk<T extends CreateChunkArgs>(args: T): IChunk {
-  const creator = ChunkCreatorsMap[args.type];
-  if (creator) {
-    return creator(args);
-  }
-  throw new Error("Unknown chunk type");
+export interface ChunkMethodParamBase {
+  /**
+   * `docUpdateAt` is the time when the document was last updated.
+   * it is used to determine whether the document is stale or not.
+   * it is also used to determine whether its method conflicts with another methods to be called.
+   * if conflict happens, the method will be rejected.
+   */
+  docUpdatedAt: number;
 }
+
+export interface ChunkCreateMethod extends JsonRPCMethodHeader {
+  method: "chunk.create";
+  params: ChunkMethodParamBase & {
+    docPath: string;
+    /**
+     * position number to insert of the chunk
+     *
+     * for example,
+     *  0 is before the first chunk.
+     *  1 is after the first chunk.
+     *  n is after the nth chunk.
+     */
+    position: number;
+    /**
+     * chunk id to create. if not specified, it will be generated automatically.
+     */
+    chunkId?: string;
+    /**
+     * chunk content to create
+     */
+    chunkContent: ChunkCreateParam;
+  };
+}
+export interface ChunkCreateResult {
+  /**
+   * the created chunk id
+   */
+  chunkId: string;
+}
+/**
+ * Chunk Delete Method
+ */
+export interface ChunkDeleteMethod extends JsonRPCMethodHeader {
+  method: "chunk.delete";
+  params: ChunkMethodParamBase & {
+    docPath: string;
+    chunkId: string;
+  };
+}
+export interface ChunkDeleteResult {
+  /**
+   * the deleted chunk id
+   */
+  chunkId: string;
+}
+/**
+ * Chunk Modify Method
+ */
+export interface ChunkModifyMethod extends JsonRPCMethodHeader {
+  method: "chunk.modify";
+  params: ChunkMethodParamBase & {
+    docPath: string;
+    chunkId: string;
+    chunkContent: ChunkModifyParam;
+  };
+}
+export interface ChunkModifyResult {
+  /**
+   * the modified chunk id
+   */
+  chunkId: string;
+}
+export interface ChunkMoveMethod extends JsonRPCMethodHeader {
+  method: "chunk.move";
+  params: ChunkMethodParamBase & {
+    docPath: string;
+    chunkId: string;
+    /**
+     * position number to insert of the chunk
+     *
+     * for example,
+     *  0 is before the first chunk.
+     *  1 is after the first chunk.
+     *  n is after the nth chunk.
+     */
+    position: number;
+  };
+}
+export interface ChunkMoveResult {
+  /**
+   * the moved chunk id
+   */
+  chunkId: string;
+}
+
+export type ChunkMethod =
+  | ChunkCreateMethod
+  | ChunkDeleteMethod
+  | ChunkModifyMethod
+  | ChunkMoveMethod;
+
+export type ChunkMethodKind = ChunkMethod["method"];
+
+export type ChunkMethodResult =
+  | ChunkCreateResult
+  | ChunkDeleteResult
+  | ChunkModifyResult
+  | ChunkMoveResult;
+
+export interface ChunkUpdateNotification extends JsonRPCNotificationHeader {
+  method: "chunk.update";
+  params: {
+    method: ChunkMethod;
+  };
+}
+
+export interface ChunkRefreshNotification extends JsonRPCNotificationHeader {
+  method: "chunk.refresh";
+  params: {
+    /** if specified, refresh all chunks in the document */
+    docPath?: string;
+    /** if specified, refresh the specified url. */
+    sources?: string[];
+  };
+}
+
+export type ChunkNotification =
+  | ChunkUpdateNotification
+  | ChunkRefreshNotification;
+
+export type ChunkNotificationKind = ChunkNotification["method"];
