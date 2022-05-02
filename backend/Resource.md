@@ -86,7 +86,7 @@ interface DirEntry {
 example:
 
 ```js
-const content = await (await fetch("<hostname>/raw/foo.md").text());
+const content = await (await fetch("<hostname>/fs/foo.md").text());
 console.log(content);
 ```
 
@@ -106,7 +106,7 @@ console.log(content);
 example:
 
 ```js
-const content = await (await fetch("<hostname>/raw/foo.md", {
+const content = await (await fetch("<hostname>/fs/foo.md", {
   body: "# Foo\nbar",
   method: "PUT",
 }).json());
@@ -130,7 +130,7 @@ console.log(content); //201 create
 example:
 
 ```js
-const content = await (await fetch("<hostname>/raw/foo.md", {
+const content = await (await fetch("<hostname>/fs/foo.md", {
   body: "# Foo\nbar",
   method: "DELETE",
 }).json());

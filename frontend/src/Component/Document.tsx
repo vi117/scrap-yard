@@ -2,6 +2,7 @@ import { Button, Paper, Stack } from "@mui/material";
 import { Fragment } from "react";
 import { atom, atomFamily, RecoilState, useRecoilState } from "recoil";
 import { v4 as uuidv4 } from "uuid";
+import { IDocument } from "../Model/Document";
 
 // import '../App.css';
 import Chunk from "./Chunk";

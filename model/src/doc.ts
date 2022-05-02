@@ -1,82 +1,20 @@
-
-export type ChunkContent = {
-  type: string;
-  content: string | Uint8Array;
-};
-
 export interface IChunk {
   /**
-   * The owner of the chunk
+   * The unique identifier of the chunk.
    */
-  owner?: IDocument;
+  id: string;
   /**
    * The type of the chunk
    */
   type: string;
-
-  /**
-   * the link which the chunk has
-   * e.g. if content is `<a href="./doc.md">`, then the link is `["./doc.md"]`
-   */
-  getResources(): Promise<string[]>;
-  /**
-   * remove the chunk from the owner
-   */
-  remove(): void;
-  /**
-   * insert the chunk before the current chunk
-   * @param chunk the chunk to insert
-   * @returns the inserted chunk
-   * @throws if the chunk is not owned by the owner
-   */
-  insertBefore(chunk: IChunk): IChunk;
-  /**
-   * insert the chunk after the current chunk
-   * @param chunk the chunk to insert
-   * @returns the inserted chunk
-   * @throws if the chunk is not owned by the owner
-   */
-  insertAfter(chunk: IChunk): IChunk;
-
-  /**
-   * get content of the chunk
-   */
-  getContent(): ChunkContent;
 }
 
 export class CommonChunkBase implements IChunk {
-  owner?: IDocument | undefined;
+  id: string;
   type: string;
-  constructor(type: string) {
-    this.owner = undefined;
+  constructor(id: string, type: string) {
+    this.id = id;
     this.type = type;
-  }
-  getResources(): Promise<string[]> {
-    throw new Error("Method not implemented.");
-  }
-  remove(): void {
-    if (this.owner) {
-      this.owner.removeChunk(this);
-    }
-  }
-  insertBefore(chunk: IChunk): IChunk {
-    if (this.owner) {
-      this.owner.insertChunkBefore(this, chunk);
-    } else {
-      throw new Error("Chunk is not owned by any document");
-    }
-    return chunk;
-  }
-  insertAfter(chunk: IChunk): IChunk {
-    if (this.owner) {
-      this.owner.insertChunkAfter(this, chunk);
-    } else {
-      throw new Error("Chunk is not owned by any document");
-    }
-    return chunk;
-  }
-  getContent(): ChunkContent {
-    throw new Error("Method not implemented.");
   }
 }
 
@@ -119,6 +57,17 @@ export interface IDocument {
    * @throws Error if the target chunk is not in the document
    */
   insertChunkAfter(target: IChunk, chunk: IChunk): void;
+
+  /**
+   * move the chunk to the target chunk
+   * @param target the target chunk
+   * @param chunk the chunk to be moved
+   * @returns the moved chunk
+   * @throws Error if the target chunk is not in the document
+   * or the chunk is not in the document
+   * or the target chunk is the same as the chunk
+   */
+  moveChunk(target: IChunk, chunk: IChunk): void;
 }
 
 export class CommonDocumentBase implements IDocument {
@@ -134,30 +83,41 @@ export class CommonDocumentBase implements IDocument {
     this.tags = tags;
   }
   removeChunk(chunk: IChunk): boolean {
-    const index = this.chunks.findIndex((c) => c === chunk);
+    const index = this.chunks.findIndex((c) => c.id === chunk.id);
     if (index >= 0) {
       this.chunks.splice(index, 1);
-      chunk.owner = undefined;
       return true;
     }
     return false;
   }
   insertChunkBefore(target: IChunk, chunk: IChunk): void {
-    const index = this.chunks.findIndex((c) => c === target);
+    const index = this.chunks.findIndex((c) => c.id === target.id);
     if (index >= 0) {
       this.chunks.splice(index, 0, chunk);
-      chunk.owner = this;
     } else {
       throw new Error("Target chunk is not in the document");
     }
   }
   insertChunkAfter(target: IChunk, chunk: IChunk): void {
-    const index = this.chunks.findIndex((c) => c === target);
+    const index = this.chunks.findIndex((c) => c.id === target.id);
     if (index >= 0) {
       this.chunks.splice(index + 1, 0, chunk);
-      chunk.owner = this;
     } else {
       throw new Error("Target chunk is not in the document");
+    }
+  }
+  moveChunk(target: IChunk, chunk: IChunk): void {
+    const index = this.chunks.findIndex((c) => c.id === target.id);
+    const index2 = this.chunks.findIndex((c) => c.id === chunk.id);
+    if (index >= 0 && index2 >= 0 && index !== index2) {
+      this.chunks.splice(index2, 1);
+      this.chunks.splice(index, 0, chunk);
+    } else if (index < 0) {
+      throw new Error("Target chunk is not in the document");
+    } else if (index === index2) {
+      throw new Error("Target chunk is the same as the chunk");
+    } else if (index2 < 0) {
+      throw new Error("Chunk is not in the document");
     }
   }
 }

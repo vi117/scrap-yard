@@ -1,0 +1,18 @@
+{
+    "name": "scrap-yard",
+    "scripts": {
+        "build_model": "cd model && deno task build",
+        "lint-backend": "cd backend && deno lint",
+        "lint-frontend": "cd frontend && pnpm lint",
+        "lint-model" : "cd model && deno task lint",
+        "lint": "pnpm run lint-backend && pnpm run lint-frontend && pnpm run lint-model",
+        "test-backend": "cd backend && deno task test",
+        "test-frontend": "cd frontend && pnpm test",
+        "test-model": "cd model && deno task test",
+        "test": "pnpm run test-backend && pnpm run test-frontend && pnpm run test-model",
+        "fmt-backend": "cd backend && deno fmt",
+        "fmt-frontend": "cd frontend && pnpm fmt",
+        "fmt-model": "cd model && deno task fmt",
+        "fmt": "pnpm run fmt-backend && pnpm run fmt-frontend && pnpm run fmt-model"
+    }
+}
