@@ -1,5 +1,5 @@
 import { assertEquals } from "../deps.ts";
-import { createChunk } from "./chunk.ts";
+import { CommonTextChunk, createChunk } from "./chunk.ts";
 import { MockDocument } from "./mockdoc.ts";
 
 Deno.test({
@@ -9,32 +9,41 @@ Deno.test({
       "test.md",
       [
         {
+          id: "1",
           "type": "text",
           "content": "foo",
         },
         {
+          id: "2",
           "type": "text",
           "content": "bar",
         },
         {
+          id: "3",
           "type": "text",
           "content": "baz",
         },
         {
+          id: "4",
           "type": "text",
           "content": "qux",
         },
         {
+          id: "5",
           "type": "markdown",
           "content": "**bold**",
         },
       ].map((x) => createChunk(x)),
     );
-    doc.chunks[0].insertBefore(createChunk({
-      "type": "text",
-      "content": "first",
-    }));
-    assertEquals(doc.chunks.map((x) => x.getContent()), [
+    doc.insertChunkBefore(
+      doc.chunks[0],
+      createChunk({
+        "id": "6",
+        "type": "text",
+        "content": "first",
+      }),
+    );
+    assertEquals(doc.chunks.map((x) => (x as CommonTextChunk).getContent()), [
       {
         "type": "text",
         "content": "first",
@@ -60,11 +69,11 @@ Deno.test({
         "content": "**bold**",
       },
     ]);
-    doc.chunks[2].remove();
-    doc.chunks[2].remove();
+    doc.removeChunk(doc.chunks[2]);
+    doc.removeChunk(doc.chunks[2]);
     const ch = doc.chunks[2];
-    doc.chunks[2].remove();
-    assertEquals(doc.chunks.map((x) => x.getContent()), [
+    doc.removeChunk(doc.chunks[2]);
+    assertEquals(doc.chunks.map((x) => (x as CommonTextChunk).getContent()), [
       {
         "type": "text",
         "content": "first",
@@ -78,8 +87,8 @@ Deno.test({
         "content": "**bold**",
       },
     ]);
-    doc.chunks[0].insertAfter(ch);
-    assertEquals(doc.chunks.map((x) => x.getContent()), [
+    doc.insertChunkAfter(doc.chunks[0], ch);
+    assertEquals(doc.chunks.map((x) => (x as CommonTextChunk).getContent()), [
       {
         "type": "text",
         "content": "first",

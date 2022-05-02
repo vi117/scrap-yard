@@ -1,6 +1,8 @@
 {
-    "tasks": {
-        "test": "deno test --no-check -A",
-        "build": "deno run -A --unstable --no-check build.ts"
-    }
+  "tasks": {
+    "test": "deno test --no-check -A ./src",
+    "build": "deno run -A --unstable --no-check build.ts",
+    "lint": "deno lint src mod.ts",
+    "fmt": "deno fmt src mod.ts"
+  }
 }

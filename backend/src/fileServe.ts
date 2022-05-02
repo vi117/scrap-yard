@@ -8,10 +8,12 @@ import {
   Router,
   Status,
 } from "./router/mod.ts";
-import { normalize } from "std/path";
+import { extname, normalize } from "std/path";
 import { serveFile } from "std/file_server";
 import { copy, readerFromStreamReader } from "std/streams";
 import { asyncAll } from "./util.ts";
+
+const DOC_EXT = ".syd";
 
 export class FileServeRouter implements Router<Handler> {
   fn: Handler;
@@ -39,6 +41,22 @@ export class FileServeRouter implements Router<Handler> {
           return makeResponse(Status.MethodNotAllowed);
         } else {
           return await serveFile(req, path);
+        }
+      } else {
+        const stat = await Deno.stat(path);
+        if (stat.isDirectory) {
+          return makeResponse(
+            Status.BadRequest,
+            "directory request must have raw query param",
+          );
+        } else {
+          const ext = extname(path);
+          if (ext == DOC_EXT) {
+            const doc = await Deno.readTextFile(path);
+            return makeResponse(Status.OK, doc, {
+              "Content-Type": "application/json",
+            });
+          }
         }
       }
       throw new Error("not implemented");

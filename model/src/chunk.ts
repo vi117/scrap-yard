@@ -1,4 +1,9 @@
-import { ChunkContent, CommonChunkBase, IChunk } from "./doc.ts";
+import { CommonChunkBase, IChunk } from "./doc.ts";
+
+export type TextChunkContent = {
+  type: string;
+  content: string;
+};
 
 /**
  * common text chunk class
@@ -7,11 +12,11 @@ import { ChunkContent, CommonChunkBase, IChunk } from "./doc.ts";
  */
 export class CommonTextChunk extends CommonChunkBase {
   content: string;
-  constructor(type: string, content: string) {
-    super(type);
+  constructor(id: string, type: string, content: string) {
+    super(id, type);
     this.content = content;
   }
-  getContent(): ChunkContent {
+  getContent(): TextChunkContent {
     return {
       type: this.type,
       content: this.content,
@@ -20,16 +25,18 @@ export class CommonTextChunk extends CommonChunkBase {
 }
 
 export interface CreateChunkArgs {
+  id: string;
   type: string;
 }
 
 const CommonTextChunkCreator = (args: {
+  id: string;
   type: string;
   content?: string;
 }) => {
   const content = args.content;
   if (content !== undefined) {
-    return new CommonTextChunk(args.type, content);
+    return new CommonTextChunk(args.id, args.type, content);
   }
   throw new Error("Missing content");
 };

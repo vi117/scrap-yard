@@ -34,6 +34,7 @@ function app() {
 }
 
 export function serverRun() {
+  console.log("host is http://localhost:8000");
   serve((req: Request) => {
     try {
       return serveRequest(req);
