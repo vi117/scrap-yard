@@ -43,31 +43,42 @@ const TypeForm = (props: {
 };
 
 const Chunk = (props: {
-  id: string;
-  content: RecoilState<string>;
+  chunk: Chunk;
   focusedChunk: RecoilState<string>;
-  delete: (string) => void;
+  deleteThis: () => void;
 }) => {
-  const [content, setContent] = useRecoilState(props.content);
+  const chunk = props.chunk;
+  const id = chunk.id;
+  const deleteThis = props.deleteThis;
+
+  // Inherited States
   const [fc, setFc] = useRecoilState(props.focusedChunk);
-  const [type, setType] = useState("text");
+  const [content, setContent] = useState(chunk.content);
+  const [type, setType] = useState(chunk.type);
+
+  // Internal States
   const [mode, setMode] = useState("Read");
   const [onDelete, setOnDelete] = useState(false);
-  const contentRef = createRef<null | HTMLTextAreaElement>();
+
+  // reference of textfield
+  const inputRef = createRef<null | HTMLTextAreaElement>();
 
   // Effects
 
   // set read mode when other chunk gets focused.
   useEffect(() => {
-    if (fc != props.id) setMode("Read");
+    if (fc != id) setMode("Read");
   }, [fc]);
 
-  // move cursor to the end of the content when in write mode.
   useEffect(() => {
-    const ref = contentRef.current;
+    const ref = inputRef.current;
     if (mode == "Write" && ref != null) {
+      // move cursor to the end of the content when in write mode.
       const last = ref.value.length;
       ref.setSelectionRange(last, last);
+    } else if (mode == "Read") {
+      // save content when user stops writing.
+      chunk.content = content;
     }
   }, [mode]);
 
@@ -75,35 +86,32 @@ const Chunk = (props: {
 
   const changeMode = () => setMode(mode == "Read" ? "Write" : "Read");
 
-  const updateType = (t: string) => setType(t);
+  const updateType = (t: string) => {
+    // TODO: update chunk type here.
+    setType(t);
+  };
 
   const onChange: ChangeEventHandler<HTMLTextAreaElement> = (e) => setContent(e.target.value);
 
-  const onFocus = () => setFc(props.id);
+  const onFocus = () => setFc(id);
 
-  const onKeyDown = (e : KeyboardEvent) => {
+  const onKeyDown = (e: KeyboardEvent) => {
     if (e.key == "Backspace") {
       if (!onDelete && e.target.value == "") {
-        props.delete(props.id);
+        deleteThis();
       } else {
         setOnDelete(true);
       }
     }
   };
 
-  const onKeyUp = (e : KeyboardEvent) => {
-    if (e.key == "Backspace") { setOnDelete(false); }
+  const onKeyUp = (e: KeyboardEvent) => {
+    if (e.key == "Backspace") setOnDelete(false);
   };
-
-  // const onBlur = (e) => { }; // for later use
 
   const renderContent = () => {
     if (mode == "Read") {
-      return (
-        <div id="content" className="content">
-          {render_view(type, content)}
-        </div>
-      );
+      return <div id="content" className="content">{render_view(type, content)}</div>;
     } else { // edit mode
       // TODO: change this to proper editor
       return (
@@ -113,7 +121,7 @@ const Chunk = (props: {
           multiline
           minRows={4}
           className="content"
-          inputRef={contentRef}
+          inputRef={inputRef}
           onChange={onChange}
           onKeyDown={onKeyDown}
           onKeyUp={onKeyUp}

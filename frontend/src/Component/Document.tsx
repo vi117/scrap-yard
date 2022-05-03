@@ -12,10 +12,7 @@ const uuidList: RecoilState<string[]> = atom({
   default: [] as string[],
 });
 
-const contentFamily = atomFamily({
-  key: "contents",
-  default: "",
-});
+const chunkMap = new Map();
 
 const focusedChunk = atom({
   key: "Focused Chunk",
@@ -38,6 +35,13 @@ export function DocumentEditor() {
   const newChunk = (i?: number) => {
     i = i ?? UUIDs.length;
     const id = uuidv4();
+
+    chunkMap.set(id, {
+      id: id,
+      type: "text",
+      content: "",
+    });
+
     const nids = UUIDs.slice();
     nids.splice(i, 0, id);
     setUUIDs(nids);
@@ -56,18 +60,16 @@ export function DocumentEditor() {
   };
 
   const chunklist = UUIDs.map((id, i) => {
-    const content = contentFamily(id);
+    const chunk = chunkMap.get(id);
     return (
       <Fragment key={id}>
         <Button onClick={() => newChunk(i)}>add to {i}</Button>
         <Paper key={id}>
           <Chunk
-            id={id}
-            content={content}
+            chunk={chunk}
             focusedChunk={focusedChunk}
-            delete={deleteByUUID}
+            deleteThis={() => deleteByUUID(id)}
           />
-          <Button onClick={() => delChunk(i)}>delete</Button>
         </Paper>
       </Fragment>
     );
