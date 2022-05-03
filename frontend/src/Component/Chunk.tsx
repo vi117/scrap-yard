@@ -1,9 +1,8 @@
-import { Button, Input, Stack, TextField } from "@mui/material";
+import { Button, Grid, Paper, Input, TextField } from "@mui/material";
 import { ChangeEventHandler, createRef, FormEventHandler, useEffect, useState } from "react";
 import { RecoilState, useRecoilState } from "recoil";
 import csvRenderer from "./csvRenderer";
 import markdownRenderer from "./markdownRenderer";
-
 
 function render_view(t: string, content: string) {
   switch (t) {
@@ -119,6 +118,7 @@ const Chunk = (props: {
           id="content"
           autoFocus={true}
           multiline
+          fullWidth={true}
           minRows={4}
           className="content"
           inputRef={inputRef}
@@ -138,13 +138,18 @@ const Chunk = (props: {
   );
 
   return (
-    <Stack onFocus={onFocus} /* onBlur={onBlur} */ className="chunk">
-      <TypeForm value={type} update={updateType} />
-      <Stack direction="row" className="chunk-inner">
-        {renderContent()}
-        {editButton}
-      </Stack>
-    </Stack>
+    <Paper key={id} sx={{padding:"1em"}}>
+      <Grid container direction="column" spacing={1} onFocus={onFocus} className="chunk">
+        <Grid item xs={12}> <TypeForm value={type} update={updateType} /> </Grid>
+        <Grid container xs={12} direction="row" spacing={1} className="chunk-inner">
+          <Grid item xs={11}>{renderContent()}</Grid>
+          <Grid container xs={1} direction="column" spacing={0}>
+            <Grid item>{editButton}</Grid>
+            <Grid item><Button onClick={deleteThis}>Delete</Button></Grid>
+          </Grid>
+        </Grid>
+      </Grid>
+    </Paper>
   );
 };
 

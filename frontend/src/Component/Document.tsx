@@ -1,8 +1,7 @@
-import { Button, Paper, Stack } from "@mui/material";
-import { Fragment } from "react";
-import { atom, atomFamily, RecoilState, useRecoilState } from "recoil";
+import { Button, Stack } from "@mui/material";
+import { Fragment, useEffect } from "react";
+import { atom, RecoilState, useRecoilState } from "recoil";
 import { v4 as uuidv4 } from "uuid";
-import { IDocument } from "../Model/Document";
 
 // import '../App.css';
 import Chunk from "./Chunk";
@@ -64,13 +63,11 @@ export function DocumentEditor() {
     return (
       <Fragment key={id}>
         <Button onClick={() => newChunk(i)}>add to {i}</Button>
-        <Paper key={id}>
           <Chunk
             chunk={chunk}
             focusedChunk={focusedChunk}
             deleteThis={() => deleteByUUID(id)}
           />
-        </Paper>
       </Fragment>
     );
   });
