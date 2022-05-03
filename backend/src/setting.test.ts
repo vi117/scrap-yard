@@ -23,7 +23,7 @@ Deno.test({
       });
       const data = await loadSetting<{ a: string; b: number }>("test");
       assertEquals(data, { a: "a", b: 1 });
-      assertRejects(async () => {
+      await assertRejects(async () => {
         await loadSetting<{ a: string; b: number }>("test2");
       }, Error);
     } finally {

@@ -145,6 +145,10 @@ export interface ChunkUpdateNotification extends JsonRPCNotificationHeader {
   method: "chunk.update";
   params: {
     method: ChunkMethod;
+    /**
+     * the updated time of the document
+     */
+    updatedAt: number;
   };
 }
 
