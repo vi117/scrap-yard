@@ -35,6 +35,8 @@ export interface RPCError {
 
 export class RPCErrorBase extends Error implements RPCError {
     code: RPCErrorCode;
+    // deno-lint-ignore no-explicit-any
+    data?: any;
     constructor(message: string, code: RPCErrorCode) {
         super(message);
         this.code = code;
@@ -43,7 +45,6 @@ export class RPCErrorBase extends Error implements RPCError {
 
 function RPCErrorBy(code: RPCErrorCode) {
     return class extends RPCErrorBase{
-        data?: any;
         constructor(message: string) {
             super(message, code);
         }
@@ -64,7 +65,7 @@ export class MethodNotFoundError extends RPCErrorBy(RPCErrorCode.MethodNotFound)
         super(`Unknown method: ${method}`);
         this.data = method;
     }
-    data: string;
+    declare data: string;
 }
 export class InvalidParamsError extends RPCErrorBy(RPCErrorCode.InvalidParams) {
     constructor(message: string) {
@@ -81,8 +82,6 @@ export class InternalError extends RPCErrorBy(RPCErrorCode.InternalError) {
         super(message);
         this.data = data;
     }
-    // deno-lint-ignore no-explicit-any
-    data?: any;
 }
 
 export class InvalidDocPathError extends RPCErrorBy(RPCErrorCode.InvalidDocPath) {
@@ -90,14 +89,14 @@ export class InvalidDocPathError extends RPCErrorBy(RPCErrorCode.InvalidDocPath)
         super(`invalid doc path: ${path}`);
         this.data = path;
     }
-    data: string;
+    declare data: string;
 }
 export class InvalidChunkIdError extends RPCErrorBy(RPCErrorCode.InvalidChunkId) {
     constructor(chunkId: string) {
         super(`invalid chunk id: ${chunkId}`);
         this.data = chunkId;
     }
-    data: string;
+    declare data: string;
 }
 export class InvalidChunkContentError extends RPCErrorBy(RPCErrorCode.InvalidChunkContent) {
     constructor(message: string) {
@@ -109,14 +108,14 @@ export class UnknownChunkContentError extends RPCErrorBy(RPCErrorCode.UnknownChu
         super(`unknown chunk type: ${chunkType}`);
         this.data = chunkType;
     }
-    data: string;
+    declare data: string;
 }
 export class InvalidPositionError extends RPCErrorBy(RPCErrorCode.InvalidPosition) {
     constructor(pos: number) {
         super(`invalid pos: ${pos}`);
         this.data = {position: pos};
     }
-    data: {position: number};
+    declare data: {position: number};
 }
 export class InvalidTimestampError extends RPCErrorBy(RPCErrorCode.InvalidTimestamp) {
     constructor(message: string) {
@@ -138,5 +137,9 @@ export class ChunkConflictError extends RPCErrorBy(RPCErrorCode.ChunkConflict) {
             chunks,
             updatedAt,
         };
+    }
+    declare data: {
+        chunks: Chunk[];
+        updatedAt: number;
     }
 }
