@@ -1,6 +1,5 @@
 import {
   DocumentMethod,
-  DocumentMethodResult,
   DocumentOpenResult,
   InvalidDocPathError,
   makeRPCError,
@@ -23,8 +22,8 @@ export async function handleDocumentMethod(
             docPath: d.docPath,
             chunks: d.chunks,
             tags: d.tags,
+            updatedAt: d.updatedAt,
           },
-          docUpdatedAt: d.updatedAt,
         };
         return makeRPCResult(method.id, result);
       } catch (e) {

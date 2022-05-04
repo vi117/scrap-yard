@@ -4,11 +4,13 @@ export class FileDocumentObject implements DocumentObject {
   docPath: string;
   chunks: Chunk[];
   tags: string[];
+  updatedAt: number;
 
   constructor(path: string) {
     this.docPath = path;
     this.chunks = [];
     this.tags = [];
+    this.updatedAt = 0;
   }
   /**
    * open a file document with `this.docPath`
@@ -24,6 +26,7 @@ export class FileDocumentObject implements DocumentObject {
       throw new Error("Invalid file format");
     }
     this.parse(data);
+    this.updatedAt = Date.now();
   }
   parse(content: unknown[]) {
     for (const item of content) {

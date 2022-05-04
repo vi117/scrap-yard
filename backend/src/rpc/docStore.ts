@@ -15,17 +15,11 @@ export class ActiveDocumentObject extends FileDocumentObject {
     time: number;
     method: ChunkMethod;
   }[];
-  updatedAt: number;
 
   constructor(docPath: string) {
     super(docPath);
     this.conns = new Set();
-    this.updatedAt = 0;
     this.history = [];
-  }
-  async open() {
-    await super.open();
-    this.updatedAt = Date.now();
   }
   join(conn: Participant) {
     this.conns.add(conn);

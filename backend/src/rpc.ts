@@ -21,6 +21,7 @@ export class JsonRPCHandler {
     };
   }
   initialize() {
+    console.log(`${this.conn.id} connected`);
     AllParticipants.add(this.conn.id, this.conn);
   }
   onMessage(message: string) {
@@ -28,7 +29,9 @@ export class JsonRPCHandler {
   }
   onError(_error: ErrorEvent | Event) {
   }
-  onClose(_event: CloseEvent) {}
+  onClose(_event: CloseEvent) {
+    console.log(`${this.conn.id} closed`);
+  }
 }
 
 // it is temporary id generator. it will be replaced with real id.
