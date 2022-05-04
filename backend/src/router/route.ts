@@ -41,7 +41,8 @@ type regElem<T> = { isRouter: false; elem: T } | {
  *
  * @example
  * ```ts
- * const r = new Router<number>();
+ * import { TreeRouter } from "./route.ts";
+ * const r = new TreeRouter<number>();
  * r.register("/", 1);
  * r.register("/users", 2);
  * r.register("/users/:id(\\d)", 3);
@@ -97,9 +98,12 @@ export class TreeRouter<T> implements Router<T> {
    * match router with path
    * if could not found, throw error
    * @returns matching element
-   * @example ```
-   *   const book = match("/books/35");
-   *   console.log("books"+ book);
+   * @example ```ts
+   * import { TreeRouter } from "./route.ts";
+   * const r = new TreeRouter();
+   * // register pathes...
+   * const book = r.match("/books/35");
+   * console.log("books"+ book);
    * ```
    */
   match(path: string, ctx: MatchContext = {}): T | null {
@@ -115,8 +119,9 @@ export class TreeRouter<T> implements Router<T> {
   /**
    * register path to router
    * @example ```
-   *  const book = new Router();
-   *  book.register("/books/:id",(ctx)=>{console.log("books",ctx.id)});
+   * import { TreeRouter } from "./route.ts";
+   * const r = new TreeRouter();
+   * r.register("/books/:id",(ctx:{id:string})=>{console.log("books",ctx.id)});
    * ```
    */
   register(path: string, elem: T) {
