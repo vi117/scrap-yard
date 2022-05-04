@@ -8,6 +8,7 @@ export interface DocumentObject {
   docPath: string;
   chunks: Chunk[];
   tags: string[];
+  updatedAt: number;
 }
 
 /**
@@ -23,7 +24,6 @@ export interface DocumentOpenMethod extends JsonRPCMethodHeader {
 
 export interface DocumentOpenResult {
   doc: DocumentObject,
-  docUpdatedAt: number,
 }
 
 export interface DocumentCloseMethod extends JsonRPCMethodHeader {
