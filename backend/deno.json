@@ -8,7 +8,10 @@
   },
   "tasks": {
     "test": "deno test --no-check -A",
+    "test_coverage": "deno test --no-check -A --coverage coverage",
+    "gen_lcov": "deno coverage --lcov coverage --output=coverage.lcov",
     "serve": "deno run --no-check --allow-all app.ts",
-    "test_debug": "deno test --no-check -A --inspect-brk"
+    "test_debug": "deno test --no-check -A --inspect-brk",
+    "test_doc": "deno test --doc -A"
   }
 }

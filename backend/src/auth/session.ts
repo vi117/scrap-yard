@@ -18,7 +18,7 @@ export class SessionStore<T> {
 }
 
 const password = Deno.env.get("SESSION_PASSWORD") || "secret";
-const session = new SessionStore<UserSession>();
+export const session = new SessionStore<UserSession>();
 
 export function makeSessionId(): string {
   return crypto.randomUUID();

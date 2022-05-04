@@ -1,37 +1,48 @@
-import { CommonDocumentBase, IChunk, IDocument } from "model/dist/mod";
+import { DocumentOpenResult, DocumentCloseResult } from "model";
+import { RPCErrorWrapper } from "./RPCError";
+import { RPCMessageManager } from "./RPCManager";
 
-export { type IDocument };
-
-export class DocumentAccessor {
-  host: string;
-  constructor(host: string) {
-    this.host = host;
+/**
+ * open document
+ * @param manager manager of RPC
+ * @param filePath path of document
+ * @returns document
+ */
+export async function openDocument(manager: RPCMessageManager, filePath: string) {
+  const res = await manager.invokeMethod({
+    method: "document.open",
+    params: {
+      docPath: filePath
+    }
+  });
+  if (res.result) {
+    const doc = res.result as DocumentOpenResult;
+    return doc.doc;
   }
-  async getDocument(path: string): Promise<IDocument> {
-    const ret = new DocumentModel(path, this);
-    await ret.load();
-    return ret;
-  }
-  async getChunks(path: string): Promise<IChunk[]> {
-    const data = await fetch("/fs/" + path);
-    const ret = await data.json();
-    return ret as IChunk[];
-  }
-}
-
-class DocumentModel extends CommonDocumentBase {
-  docaccessor: DocumentAccessor;
-
-  constructor(path: string, docaccessor: DocumentAccessor) {
-    super(path);
-    this.docaccessor = docaccessor;
-  }
-  async load() {
-    const chunks = await this.docaccessor.getChunks(this.path);
-    this.chunks = chunks;
+  else {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    throw new RPCErrorWrapper(res.error!);
   }
 }
-
-export function createDocumentAccessor(host: string): DocumentAccessor {
-  return new DocumentAccessor(host);
+/**
+ * close document
+ * @param manager manager of RPC
+ * @param docPath path of document
+ * @returns path of document
+ */
+export async function closeDocument(manager: RPCMessageManager, docPath: string) {
+  const res = await manager.invokeMethod({
+    method: "document.close",
+    params: {
+      docPath
+    }
+  });
+  if (res.result) {
+    const doc = res.result as DocumentCloseResult;
+    return doc.docPath;
+  }
+  else {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    throw new RPCErrorWrapper(res.error!);
+  }
 }

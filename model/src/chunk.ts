@@ -41,7 +41,12 @@ export interface ChunkMethodParamBase {
    */
   docUpdatedAt: number;
 }
-
+/**
+ * Create Chunk Method
+ * @returns `ChunkCreateResult` if success, otherwise return following type:
+ * `ChunkConflictError`, `InternalError`, `PermissionDeniedError`, `UnknownChunkContentError`,
+ * `InvalidChunkId`, `InvalidDocPath`, `InvalidPosition`, `InvalidTimestamp
+ */
 export interface ChunkCreateMethod extends JsonRPCMethodHeader {
   method: "chunk.create";
   params: ChunkMethodParamBase & {
@@ -145,6 +150,10 @@ export interface ChunkUpdateNotification extends JsonRPCNotificationHeader {
   method: "chunk.update";
   params: {
     method: ChunkMethod;
+    /**
+     * the updated time of the document
+     */
+    updatedAt: number;
   };
 }
 
