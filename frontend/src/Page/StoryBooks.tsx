@@ -1,22 +1,35 @@
-import { Typography } from "@mui/material";
-import { MockDocument } from "model";
-import { Route, Routes } from "react-router-dom";
+import { Box, Tab, Tabs } from "@mui/material";
+import { useState } from "react";
 import { DocumentEditor } from "../Component/Document";
+import { WebsocketIO } from "./Story/WebsocketIO";
 
 const StorybookList = [
   {
     name: "document",
     elem: <DocumentEditor></DocumentEditor>,
   },
+  {
+    name: "websocket io",
+    elem: <WebsocketIO></WebsocketIO>
+  }
 ];
 
 export function Storybooks() {
+  const [selected, setSelected] = useState(0);
   return (
     <div>
-      <Routes>
-        {StorybookList.map((story, i) => <Route key={i} path={`${story.name}`} element={story.elem}></Route>)}
-        <Route path="*" element={<Typography>Nothing Selected</Typography>}></Route>
-      </Routes>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs
+          value={selected}
+          onChange={(e, v) => setSelected(v)}
+          variant="scrollable"
+          scrollButtons="auto">
+          {StorybookList.map((storybook, index) => (
+            <Tab key={index} label={storybook.name} />
+          ))}
+        </Tabs>
+      </Box>
+      {StorybookList[selected].elem}
     </div>
   );
 }
