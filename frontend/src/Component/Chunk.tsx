@@ -3,6 +3,7 @@ import { ChangeEventHandler, createRef, FormEventHandler, useEffect, useState } 
 import { RecoilState, useRecoilState } from "recoil";
 import csvRenderer from "./csvRenderer";
 import markdownRenderer from "./markdownRenderer";
+import { useChunk } from "./LocalDocument";
 
 function render_view(t: string, content: string) {
   switch (t) {
@@ -42,18 +43,20 @@ const TypeForm = (props: {
 };
 
 const Chunk = (props: {
+  doc,
   chunk: Chunk;
   focusedChunk: RecoilState<string>;
   deleteThis: () => void;
 }) => {
+  const doc = props.doc;
   const chunk = props.chunk;
   const id = chunk.id;
   const deleteThis = props.deleteThis;
 
   // Inherited States
   const [fc, setFc] = useRecoilState(props.focusedChunk);
-  const [content, setContent] = useState(chunk.content);
-  const [type, setType] = useState(chunk.type);
+  const [content, type, setContent, setType] = useChunk(doc, chunk);
+  const [buffer, setBuffer] = useState(content);
 
   // Internal States
   const [mode, setMode] = useState("Read");
@@ -77,7 +80,7 @@ const Chunk = (props: {
       ref.setSelectionRange(last, last);
     } else if (mode == "Read") {
       // save content when user stops writing.
-      chunk.content = content;
+      setContent(buffer);
     }
   }, [mode]);
 
@@ -90,7 +93,7 @@ const Chunk = (props: {
     setType(t);
   };
 
-  const onChange: ChangeEventHandler<HTMLTextAreaElement> = (e) => setContent(e.target.value);
+  const onChange: ChangeEventHandler<HTMLTextAreaElement> = (e) => setBuffer(e.target.value);
 
   const onFocus = () => setFc(id);
 
@@ -125,7 +128,7 @@ const Chunk = (props: {
           onChange={onChange}
           onKeyDown={onKeyDown}
           onKeyUp={onKeyUp}
-          value={content}
+          value={buffer}
         />
       );
     }
