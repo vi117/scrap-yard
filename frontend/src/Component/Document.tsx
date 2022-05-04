@@ -18,16 +18,6 @@ const focusedChunk = atom({
   default: "",
 });
 
-// collecting texts of chunks by using selector
-/*
-const allTextState = selector({
-  key: 'Chunk Texts',
-  get: ({get}) => {
-  return get(uuidList).map((id) => get(contentFamily(id)));
-  }
-});
- */
-
 export function DocumentEditor() {
   const [UUIDs, setUUIDs] = useRecoilState(uuidList);
 
