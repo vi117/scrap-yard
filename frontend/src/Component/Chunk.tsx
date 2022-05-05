@@ -1,9 +1,9 @@
-import { Button, Grid, Paper, Input, TextField } from "@mui/material";
+import { Button, Grid, Input, Paper, TextField } from "@mui/material";
 import { ChangeEventHandler, createRef, FormEventHandler, useEffect, useState } from "react";
 import { RecoilState, useRecoilState } from "recoil";
 import csvRenderer from "./csvRenderer";
-import markdownRenderer from "./markdownRenderer";
 import { useChunk } from "./LocalDocument";
+import markdownRenderer from "./markdownRenderer";
 
 function render_view(t: string, content: string) {
   switch (t) {
@@ -43,7 +43,7 @@ const TypeForm = (props: {
 };
 
 const Chunk = (props: {
-  doc,
+  doc;
   chunk: Chunk;
   focusedChunk: RecoilState<string>;
   deleteThis: () => void;
@@ -141,14 +141,18 @@ const Chunk = (props: {
   );
 
   return (
-    <Paper key={id} sx={{padding:"1em"}}>
+    <Paper key={id} sx={{ padding: "1em" }}>
       <Grid container direction="column" spacing={1} onFocus={onFocus} className="chunk">
-        <Grid item xs={12}> <TypeForm value={type} update={updateType} /> </Grid>
+        <Grid item xs={12}>
+          <TypeForm value={type} update={updateType} />
+        </Grid>
         <Grid container xs={12} direction="row" spacing={1} className="chunk-inner">
           <Grid item xs={11}>{renderContent()}</Grid>
           <Grid container xs={1} direction="column" spacing={0}>
             <Grid item>{editButton}</Grid>
-            <Grid item><Button onClick={deleteThis}>Delete</Button></Grid>
+            <Grid item>
+              <Button onClick={deleteThis}>Delete</Button>
+            </Grid>
           </Grid>
         </Grid>
       </Grid>

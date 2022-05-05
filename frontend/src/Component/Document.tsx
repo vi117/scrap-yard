@@ -2,7 +2,7 @@ import { Button, Stack } from "@mui/material";
 import { Fragment, useEffect } from "react";
 import { atom, RecoilState, useRecoilState } from "recoil";
 import { v4 as uuidv4 } from "uuid";
-//import { newDocument, useChunks } from "./LocalDocument";
+// import { newDocument, useChunks } from "./LocalDocument";
 import { newDocument, useChunks } from "./RemoteDocument";
 
 // import '../App.css';
@@ -55,7 +55,7 @@ export function DocumentEditor() {
   if (doc != null) {
     return <Doc doc={doc} />;
   } else {
-    return <div> please wait...</div>;
+    return <div>please wait...</div>;
   }
 }
 

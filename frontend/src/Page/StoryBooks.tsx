@@ -10,23 +10,22 @@ const StorybookList = [
   },
   {
     name: "websocket io",
-    elem: <WebsocketIO></WebsocketIO>
-  }
+    elem: <WebsocketIO></WebsocketIO>,
+  },
 ];
 
 export function Storybooks() {
   const [selected, setSelected] = useState(0);
   return (
     <div>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs
           value={selected}
           onChange={(e, v) => setSelected(v)}
           variant="scrollable"
-          scrollButtons="auto">
-          {StorybookList.map((storybook, index) => (
-            <Tab key={index} label={storybook.name} />
-          ))}
+          scrollButtons="auto"
+        >
+          {StorybookList.map((storybook, index) => <Tab key={index} label={storybook.name} />)}
         </Tabs>
       </Box>
       {StorybookList[selected].elem}

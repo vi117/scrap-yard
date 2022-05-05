@@ -1,8 +1,8 @@
-import { useEffect, useState, useMemo } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { openDocument, closeDocument } from '../Model/Document';
-import { RPCMessageManager } from '../Model/RPCManager';
-import { chunkCreate, chunkDelete } from '../Model/chunk';
+import { useEffect, useMemo, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { chunkCreate, chunkDelete } from "../Model/chunk";
+import { closeDocument, openDocument } from "../Model/Document";
+import { RPCMessageManager } from "../Model/RPCManager";
 
 const url = "ws://localhost:8000/ws";
 const path = "test.syd";
@@ -20,7 +20,7 @@ export function newDocument() {
   const getDoc = async () => {
     const d = await openDocument(manager, path);
     setDoc(d);
-  }
+  };
 
   return doc;
 }
@@ -32,9 +32,9 @@ export function useChunks(doc) {
     i = i ?? chunks.length;
 
     const chunkContent = {
-        type: "text",
-        text: ""
-    }
+      type: "text",
+      text: "",
+    };
 
     const ps = {
       docPath: doc.docPath,
@@ -71,10 +71,9 @@ export function useChunks(doc) {
      };
    */
 
-  return [chunks, {create, del}];
+  return [chunks, { create, del }];
 }
 
 export function useChunk(doc, chunk) {
-
-  return [chunk, {type, content}];
+  return [chunk, { type, content }];
 }
