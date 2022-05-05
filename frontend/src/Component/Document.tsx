@@ -1,9 +1,9 @@
-import { Button, Stack } from "@mui/material";
-import { Fragment, useEffect } from "react";
+import { Button, Chip, Input, Stack } from "@mui/material";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { atom, RecoilState, useRecoilState } from "recoil";
 import { v4 as uuidv4 } from "uuid";
 // import { newDocument, useChunks } from "./LocalDocument";
-import { newDocument, useChunks } from "./RemoteDocument";
+import { newDocument, useChunks, useTags } from "./RemoteDocument";
 
 // import '../App.css';
 import Chunk from "./Chunk";
@@ -21,6 +21,39 @@ const focusedChunk = atom({
   key: "Focused Chunk",
   default: "",
 });
+
+function TagBar(props: { doc: Document }) {
+  const [tags, setTags] = useTags(props.doc);
+  const [taglist, setTaglist] = useState(tags.join(" "));
+  const [editable, setEditable] = useState(false);
+
+  const update: FormEventHandler = (e) => {
+    e.preventDefault();
+    const ntags = taglist.split(" ");
+    setTags(ntags);
+    setEditable(false);
+  };
+
+  const onChange = (e) => setTaglist(e.target.value);
+
+  if (editable) {
+    return (
+      <form onSubmit={update}>
+        <Input type="text" onChange={onChange} value={taglist} />
+        <Input type="submit" value="Set" />
+      </form>
+    );
+  } else {
+    return (
+      <>
+        <Stack direction="row" spacing={1}>
+          {tags.map((tag, i) => <Chip key={i} label={tag} />)}
+          <Button onClick={() => setEditable(true)}>Edit</Button>
+        </Stack>
+      </>
+    );
+  }
+}
 
 function Doc(props: { doc: Document }) {
   const doc = props.doc;
@@ -42,10 +75,13 @@ function Doc(props: { doc: Document }) {
   });
 
   return (
-    <Stack className="document" spacing={2}>
-      {chunklist}
-      <Button onClick={() => setChunks.create()}>Add</Button>
-    </Stack>
+    <>
+      <TagBar doc={doc} />
+      <Stack className="document" spacing={2}>
+        {chunklist}
+        <Button onClick={() => setChunks.create()}>Add</Button>
+      </Stack>
+    </>
   );
 }
 

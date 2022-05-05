@@ -72,6 +72,17 @@ export function useChunks(doc) {
   return [chunks, { create, del }];
 }
 
+export function useTags(doc) {
+  const [get, set] = useState(doc.tags);
+
+  const setTags = async (tags) => {
+    set(tags);
+    // TODO: update tags to server
+  };
+
+  return [get, setTags];
+}
+
 export function useChunk(docPath, chunkData) {
   const [chunk, setChunk] = useState(chunkData);
 
