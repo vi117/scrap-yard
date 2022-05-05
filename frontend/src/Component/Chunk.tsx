@@ -2,8 +2,8 @@ import { Button, Grid, Input, Paper, TextField } from "@mui/material";
 import { ChangeEventHandler, createRef, FormEventHandler, useEffect, useState } from "react";
 import { RecoilState, useRecoilState } from "recoil";
 import csvRenderer from "./csvRenderer";
-import { useChunk } from "./LocalDocument";
 import markdownRenderer from "./markdownRenderer";
+import { useChunk } from "./RemoteDocument";
 
 function render_view(t: string, content: string) {
   switch (t) {
@@ -48,14 +48,14 @@ const Chunk = (props: {
   focusedChunk: RecoilState<string>;
   deleteThis: () => void;
 }) => {
-  const doc = props.doc;
-  const chunk = props.chunk;
-  const id = chunk.id;
+  const docPath = props.doc.docPath;
+  const chunkData = props.chunk;
+  const id = chunkData.id;
   const deleteThis = props.deleteThis;
 
   // Inherited States
   const [fc, setFc] = useRecoilState(props.focusedChunk);
-  const [content, type, setContent, setType] = useChunk(doc, chunk);
+  const [{ type, content }, { setType, setContent }] = useChunk(docPath, chunkData);
   const [buffer, setBuffer] = useState(content);
 
   // Internal States

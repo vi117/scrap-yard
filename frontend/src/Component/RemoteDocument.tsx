@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { chunkCreate, chunkDelete } from "../Model/chunk";
+import { chunkCreate, chunkDelete, chunkModify } from "../Model/chunk";
 import { closeDocument, openDocument } from "../Model/Document";
 import { RPCMessageManager } from "../Model/RPCManager";
 
@@ -48,7 +48,6 @@ export function useChunks(doc) {
     setChunks(nc);
     // FIXME: this sends requests, but reutrns error.
     await chunkCreate(manager, ps);
-    console.log("request sent");
   };
 
   const del = async (id) => {
@@ -62,7 +61,6 @@ export function useChunks(doc) {
     nc.splice(i, 1);
     setChunks(nc);
     await chunkDelete(manager, ps);
-    console.log("request sent");
   };
 
   // TODO: do this after implmenting drag&drop
@@ -74,6 +72,30 @@ export function useChunks(doc) {
   return [chunks, { create, del }];
 }
 
-export function useChunk(doc, chunk) {
-  return [chunk, { type, content }];
+export function useChunk(docPath, chunkData) {
+  const [chunk, setChunk] = useState(chunkData);
+
+  const updateChunk = async (nchunk) => {
+    const ps = {
+      docPath: docPath,
+      chunkId: chunk.id,
+      chunkContent: nchunk as ChunkModifyParam,
+    };
+
+    setChunk(nchunk);
+    chunkData = nchunk;
+    await chunkModify(manager, ps);
+  };
+
+  const setType = async (t) => {
+    const nchunk = { ...chunk, type: t };
+    await updateChunk(nchunk);
+  };
+
+  const setContent = async (c) => {
+    const nchunk = { ...chunk, content: c };
+    await updateChunk(nchunk);
+  };
+
+  return [chunk, { setType, setContent }];
 }
