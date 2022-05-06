@@ -8,6 +8,7 @@ import {
 } from "./router/mod.ts";
 import { FileServeRouter } from "./fileServe.ts";
 import { rpc } from "./rpc.ts";
+import * as log from "std/log";
 
 const router = new TreeRouter<Handler>();
 
@@ -36,7 +37,7 @@ function app() {
 }
 
 export function serverRun() {
-  console.log("host is http://localhost:8000");
+  log.info("host is http://localhost:8000");
   serve((req: Request) => {
     try {
       return serveRequest(req);
@@ -49,7 +50,7 @@ export function serverRun() {
   function serveRequest(req: Request) {
     const ctx = {};
     const url = new URL(req.url);
-    console.log(`${(new Date()).toUTCString()} ${req.method} ${req.url}`);
+    log.info(`${(new Date()).toUTCString()} ${req.method} ${req.url}`);
     const m = router.match(url.pathname, ctx);
     if (m) {
       return m(req, ctx);

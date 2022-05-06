@@ -74,7 +74,6 @@ export class FileServeRouter implements Router<Handler> {
           truncate: true,
         });
         if (body) {
-          console.log(path, body);
           const src = readerFromStreamReader(body.getReader());
           await copy(src, file);
         }
