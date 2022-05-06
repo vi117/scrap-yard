@@ -1,6 +1,8 @@
 import { makeResponse, Status } from "./router/util.ts";
 import { AllParticipants, Connection } from "./rpc/connection.ts";
 import { handleMethodOnMessage } from "./rpc/rpc.ts";
+import * as log from "std/log";
+
 export class JsonRPCHandler {
   socket: WebSocket;
   conn: Connection;
@@ -21,16 +23,19 @@ export class JsonRPCHandler {
     };
   }
   initialize() {
-    console.log(`${this.conn.id} connected`);
+    log.info(`${this.conn.id} connected`);
     AllParticipants.add(this.conn.id, this.conn);
   }
   onMessage(message: string) {
+    log.debug(`${this.conn.id} on message: ${message}`);
     handleMethodOnMessage(this.conn, message);
   }
-  onError(_error: ErrorEvent | Event) {
+  onError(error: ErrorEvent | Event) {
+    log.error(`${this.conn.id} error: ${error.type}`);
   }
   onClose(_event: CloseEvent) {
-    console.log(`${this.conn.id} closed`);
+    log.info(`${this.conn.id} closed`);
+    AllParticipants.remove(this.conn.id);
   }
 }
 
