@@ -1,6 +1,6 @@
 import { Button, Grid, Input, Paper, TextField } from "@mui/material";
 import { ChangeEventHandler, createRef, FormEventHandler, useEffect, useState } from "react";
-import { monitor, useDrag } from "react-dnd";
+import { useDrag } from "react-dnd";
 import { RecoilState, useRecoilState } from "recoil";
 import csvRenderer from "./csvRenderer";
 import markdownRenderer from "./markdownRenderer";
@@ -66,6 +66,7 @@ const Chunk = (props: {
   // drag
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "chunk", // TODO: make this constant
+    item: { id: id },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { chunkCreate, chunkDelete, chunkModify } from "../Model/chunk";
+import { chunkCreate, chunkDelete, chunkModify, chunkMove } from "../Model/chunk";
 import { closeDocument, openDocument } from "../Model/Document";
 import { RPCMessageManager } from "../Model/RPCManager";
 
@@ -63,13 +63,23 @@ export function useChunks(doc) {
     await chunkDelete(manager, ps);
   };
 
-  // TODO: do this after implmenting drag&drop
-  /*
-     const move = () => {
-     };
-   */
+  const move = async (id, pos) => {
+    const ps = {
+      docPath: doc.docPath,
+      chunkId: id,
+      position: pos,
+    };
 
-  return [chunks, { create, del }];
+    const i = chunks.findIndex((c) => c.id === id);
+    const chunk = chunks[i];
+    const nc = chunks.slice();
+    nc.splice(i, 1);
+    nc.splice((pos < i) ? pos : pos - 1, 0, chunk);
+    setChunks(nc);
+    await chunkMove(manager, ps);
+  };
+
+  return [chunks, { create, del, move }];
 }
 
 export function useTags(doc) {
