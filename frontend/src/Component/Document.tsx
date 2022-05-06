@@ -1,73 +1,98 @@
-import { Button, Paper, Stack } from "@mui/material";
-import { Fragment } from "react";
-import { atom, atomFamily, RecoilState, useRecoilState } from "recoil";
+import { Button, Chip, Input, Stack } from "@mui/material";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { atom, RecoilState, useRecoilState } from "recoil";
 import { v4 as uuidv4 } from "uuid";
+// import { newDocument, useChunks } from "./LocalDocument";
+import { newDocument, useChunks, useTags } from "./RemoteDocument";
 
 // import '../App.css';
 import Chunk from "./Chunk";
 
+/*
 const uuidList: RecoilState<string[]> = atom({
   key: "uuid List",
   default: [] as string[],
 });
 
-const contentFamily = atomFamily({
-  key: "contents",
-  default: "",
-});
+const chunkMap = new Map();
+ */
 
 const focusedChunk = atom({
   key: "Focused Chunk",
   default: "",
 });
 
-// collecting texts of chunks by using selector
-/*
-const allTextState = selector({
-  key: 'Chunk Texts',
-  get: ({get}) => {
-  return get(uuidList).map((id) => get(contentFamily(id)));
+function TagBar(props: { doc: Document }) {
+  const [tags, setTags] = useTags(props.doc);
+  const [taglist, setTaglist] = useState(tags.join(" "));
+  const [editable, setEditable] = useState(false);
+
+  const update: FormEventHandler = (e) => {
+    e.preventDefault();
+    const ntags = taglist.split(" ");
+    setTags(ntags);
+    setEditable(false);
+  };
+
+  const onChange = (e) => setTaglist(e.target.value);
+
+  if (editable) {
+    return (
+      <form onSubmit={update}>
+        <Input type="text" onChange={onChange} value={taglist} />
+        <Input type="submit" value="Set" />
+      </form>
+    );
+  } else {
+    return (
+      <>
+        <Stack direction="row" spacing={1}>
+          {tags.map((tag, i) => <Chip key={i} label={tag} />)}
+          <Button onClick={() => setEditable(true)}>Edit</Button>
+        </Stack>
+      </>
+    );
   }
-});
- */
+}
 
-export function DocumentEditor() {
-  const [UUIDs, setUUIDs] = useRecoilState(uuidList);
+function Doc(props: { doc: Document }) {
+  const doc = props.doc;
+  const [chunks, setChunks] = useChunks(doc);
 
-  const newChunk = (i?: number) => {
-    i = i ?? UUIDs.length;
-    const id = uuidv4();
-    const nids = UUIDs.slice();
-    nids.splice(i, 0, id);
-    setUUIDs(nids);
-  };
-
-  const delChunk = (i: number) => {
-    // const id = UUIDs[i];
-    const nids = UUIDs.slice();
-    nids.splice(i, 1);
-    setUUIDs(nids);
-  };
-
-  const chunklist = UUIDs.map((id, i) => {
-    const content = contentFamily(id);
+  const chunklist = chunks.map((chunk, i) => {
+    const id = chunk.id;
     return (
       <Fragment key={id}>
-        <Button onClick={() => newChunk(i)}>add to {i}</Button>
-        <Paper key={id}>
-          <Chunk id={id} content={content} focusedChunk={focusedChunk} />
-          <Button onClick={() => delChunk(i)}>delete</Button>
-        </Paper>
+        <Button onClick={() => setChunks.create(i)}>add to {i}</Button>
+        <Chunk
+          doc={doc}
+          chunk={chunk}
+          focusedChunk={focusedChunk}
+          deleteThis={() => setChunks.del(id)}
+        />
       </Fragment>
     );
   });
 
   return (
-    <Stack className="document" spacing={2}>
-      {chunklist}
-      <Button onClick={() => newChunk()}>Add</Button>
-    </Stack>
+    <>
+      <TagBar doc={doc} />
+      <Stack className="document" spacing={2}>
+        {chunklist}
+        <Button onClick={() => setChunks.create()}>Add</Button>
+      </Stack>
+    </>
   );
+}
+
+export function DocumentEditor() {
+  const doc = newDocument();
+
+  if (doc != null) {
+    return <Doc doc={doc} />;
+  } else {
+    return <div>please wait...</div>;
+  }
 }
 
 export default DocumentEditor;

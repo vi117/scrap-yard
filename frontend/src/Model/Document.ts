@@ -1,4 +1,4 @@
-import { DocumentOpenResult, DocumentCloseResult } from "model";
+import { DocumentCloseResult, DocumentOpenResult } from "model";
 import { RPCErrorWrapper } from "./RPCError";
 import { RPCMessageManager } from "./RPCManager";
 
@@ -12,14 +12,13 @@ export async function openDocument(manager: RPCMessageManager, filePath: string)
   const res = await manager.invokeMethod({
     method: "document.open",
     params: {
-      docPath: filePath
-    }
+      docPath: filePath,
+    },
   });
   if (res.result) {
     const doc = res.result as DocumentOpenResult;
     return doc.doc;
-  }
-  else {
+  } else {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     throw new RPCErrorWrapper(res.error!);
   }
@@ -34,14 +33,13 @@ export async function closeDocument(manager: RPCMessageManager, docPath: string)
   const res = await manager.invokeMethod({
     method: "document.close",
     params: {
-      docPath
-    }
+      docPath,
+    },
   });
   if (res.result) {
     const doc = res.result as DocumentCloseResult;
     return doc.docPath;
-  }
-  else {
+  } else {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     throw new RPCErrorWrapper(res.error!);
   }

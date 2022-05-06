@@ -1,9 +1,9 @@
-import { Button, Input, Stack, TextField } from "@mui/material";
+import { Button, Grid, Input, Paper, TextField } from "@mui/material";
 import { ChangeEventHandler, createRef, FormEventHandler, useEffect, useState } from "react";
 import { RecoilState, useRecoilState } from "recoil";
 import csvRenderer from "./csvRenderer";
 import markdownRenderer from "./markdownRenderer";
-
+import { useChunk } from "./RemoteDocument";
 
 function render_view(t: string, content: string) {
   switch (t) {
@@ -43,29 +43,44 @@ const TypeForm = (props: {
 };
 
 const Chunk = (props: {
-  id: string;
-  content: RecoilState<string>;
+  doc;
+  chunk: Chunk;
   focusedChunk: RecoilState<string>;
+  deleteThis: () => void;
 }) => {
-  const [content, setContent] = useRecoilState(props.content);
+  const docPath = props.doc.docPath;
+  const chunkData = props.chunk;
+  const id = chunkData.id;
+  const deleteThis = props.deleteThis;
+
+  // Inherited States
   const [fc, setFc] = useRecoilState(props.focusedChunk);
-  const [type, setType] = useState("text");
+  const [{ type, content }, { setType, setContent }] = useChunk(docPath, chunkData);
+  const [buffer, setBuffer] = useState(content);
+
+  // Internal States
   const [mode, setMode] = useState("Read");
-  const contentRef = createRef<null | HTMLTextAreaElement>();
+  const [onDelete, setOnDelete] = useState(false);
+
+  // reference of textfield
+  const inputRef = createRef<null | HTMLTextAreaElement>();
 
   // Effects
 
   // set read mode when other chunk gets focused.
   useEffect(() => {
-    if (fc != props.id) setMode("Read");
+    if (fc != id) setMode("Read");
   }, [fc]);
 
-  // move cursor to the end of the content when in write mode.
   useEffect(() => {
-    const ref = contentRef.current;
+    const ref = inputRef.current;
     if (mode == "Write" && ref != null) {
+      // move cursor to the end of the content when in write mode.
       const last = ref.value.length;
       ref.setSelectionRange(last, last);
+    } else if (mode == "Read") {
+      // save content when user stops writing.
+      setContent(buffer);
     }
   }, [mode]);
 
@@ -73,21 +88,32 @@ const Chunk = (props: {
 
   const changeMode = () => setMode(mode == "Read" ? "Write" : "Read");
 
-  const updateType = (t: string) => setType(t);
+  const updateType = (t: string) => {
+    // TODO: update chunk type here.
+    setType(t);
+  };
 
-  const onChange: ChangeEventHandler<HTMLTextAreaElement> = (e) => setContent(e.target.value);
+  const onChange: ChangeEventHandler<HTMLTextAreaElement> = (e) => setBuffer(e.target.value);
 
-  const onFocus = () => setFc(props.id);
+  const onFocus = () => setFc(id);
 
-  // const onBlur = (e) => { }; // for later use
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key == "Backspace") {
+      if (!onDelete && e.target.value == "") {
+        deleteThis();
+      } else {
+        setOnDelete(true);
+      }
+    }
+  };
+
+  const onKeyUp = (e: KeyboardEvent) => {
+    if (e.key == "Backspace") setOnDelete(false);
+  };
 
   const renderContent = () => {
     if (mode == "Read") {
-      return (
-        <div id="content" className="content">
-          {render_view(type, content)}
-        </div>
-      );
+      return <div id="content" className="content">{render_view(type, content)}</div>;
     } else { // edit mode
       // TODO: change this to proper editor
       return (
@@ -95,11 +121,14 @@ const Chunk = (props: {
           id="content"
           autoFocus={true}
           multiline
+          fullWidth={true}
           minRows={4}
           className="content"
-          inputRef={contentRef}
+          inputRef={inputRef}
           onChange={onChange}
-          value={content}
+          onKeyDown={onKeyDown}
+          onKeyUp={onKeyUp}
+          value={buffer}
         />
       );
     }
@@ -112,13 +141,22 @@ const Chunk = (props: {
   );
 
   return (
-    <Stack onFocus={onFocus} /* onBlur={onBlur} */ className="chunk">
-      <TypeForm value={type} update={updateType} />
-      <Stack direction="row" className="chunk-inner">
-        {renderContent()}
-        {editButton}
-      </Stack>
-    </Stack>
+    <Paper key={id} sx={{ padding: "1em" }}>
+      <Grid container direction="column" spacing={1} onFocus={onFocus} className="chunk">
+        <Grid item xs={12}>
+          <TypeForm value={type} update={updateType} />
+        </Grid>
+        <Grid container xs={12} direction="row" spacing={1} className="chunk-inner">
+          <Grid item xs={11}>{renderContent()}</Grid>
+          <Grid container xs={1} direction="column" spacing={0}>
+            <Grid item>{editButton}</Grid>
+            <Grid item>
+              <Button onClick={deleteThis}>Delete</Button>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
+    </Paper>
   );
 };
 
