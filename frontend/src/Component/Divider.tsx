@@ -2,19 +2,32 @@
 
 import { Box, Button } from "@mui/material";
 import { useDrop } from "react-dnd";
+import { NativeTypes } from "react-dnd-html5-backend";
+import * as ReactDOMServer from "react-dom/server";
 
 export function Divider(props: {
   position: number;
   newChunk: () => void;
   moveChunk: (number) => void;
+  addFromText: (number, string) => void;
 }) {
-  const { position, newChunk, moveChunk } = props;
+  const { position, newChunk, moveChunk, addFromText } = props;
 
   const [{ isOver }, drop] = useDrop(
     () => ({
-      accept: "chunk",
-      drop: ({ id }) => {
-        moveChunk(id, position);
+      accept: ["chunk", NativeTypes.TEXT, NativeTypes.HTML],
+      drop: (item, monitor) => {
+        const t = monitor.getItemType();
+        if (t == "chunk") {
+          moveChunk(id, position);
+        } else if (t == NativeTypes.TEXT) {
+          addFromText(position, item.text);
+        } else if (t == NativeTypes.HTML) {
+          // TODO: add proper html to text processing.
+          const stripped = item.html.replace(/<[^>]+>/g, "");
+          const text = ReactDOMServer.renderToString(stripped);
+          addFromText(position, text);
+        }
       },
       collect: (monitor) => ({
         isOver: !!monitor.isOver(),

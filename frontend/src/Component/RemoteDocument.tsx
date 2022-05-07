@@ -28,10 +28,10 @@ export function newDocument() {
 export function useChunks(doc) {
   const [chunks, setChunks] = useState(doc.chunks);
 
-  const create = async (i?) => {
+  const add = async (i?, chunkContent?) => {
     i = i ?? chunks.length;
 
-    const chunkContent = {
+    chunkContent = chunkContent ?? {
       type: "text",
       text: "",
     };
@@ -48,6 +48,14 @@ export function useChunks(doc) {
     setChunks(nc);
     // FIXME: this sends requests, but reutrns error.
     await chunkCreate(manager, ps);
+  };
+
+  const create = async (i?) => {
+    await add(i);
+  };
+
+  const addFromText = async (i?, text) => {
+    await add(i, { type: "text", content: text });
   };
 
   const del = async (id) => {
@@ -79,7 +87,7 @@ export function useChunks(doc) {
     await chunkMove(manager, ps);
   };
 
-  return [chunks, { create, del, move }];
+  return [chunks, { create, del, move, addFromText }];
 }
 
 export function useTags(doc) {

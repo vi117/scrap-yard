@@ -68,6 +68,7 @@ function Doc(props: { doc: Document }) {
           position={i}
           newChunk={setChunks.create}
           moveChunk={setChunks.move}
+          addFromText={setChunks.addFromText}
         />
 
         <Chunk
@@ -89,6 +90,7 @@ function Doc(props: { doc: Document }) {
           position={chunks.length}
           newChunk={setChunks.create}
           moveChunk={setChunks.move}
+          addFromText={setChunks.addFromText}
         />
       </Stack>
     </>
