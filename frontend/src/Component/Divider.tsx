@@ -20,7 +20,6 @@ export function Divider(props: {
         isOver: !!monitor.isOver(),
       }),
     }),
-    [position],
   );
 
   return (

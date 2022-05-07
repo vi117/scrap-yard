@@ -64,12 +64,9 @@ const Chunk = (props: {
   const [onDelete, setOnDelete] = useState(false);
 
   // drag
-  const [{ isDragging }, drag] = useDrag(() => ({
+  const [, drag] = useDrag(() => ({
     type: "chunk", // TODO: make this constant
     item: { id: id },
-    collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
-    }),
   }));
 
   // reference of textfield
@@ -151,7 +148,7 @@ const Chunk = (props: {
   );
 
   return (
-    <Paper ref={drag} key={id} sx={{ padding: "1em" }}>
+    <Paper ref={(mode == "Read") ? drag : null} key={id} sx={{ padding: "1em" }}>
       <Grid container direction="column" spacing={1} onFocus={onFocus} className="chunk">
         <Grid item xs={12}>
           <TypeForm value={type} update={updateType} />
