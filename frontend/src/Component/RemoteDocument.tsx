@@ -74,7 +74,7 @@ export function useChunks(doc) {
     const chunk = chunks[i];
     const nc = chunks.slice();
     nc.splice(i, 1);
-    nc.splice((pos < i) ? pos : pos - 1, 0, chunk);
+    nc.splice((pos <= i) ? pos : pos - 1, 0, chunk);
     setChunks(nc);
     await chunkMove(manager, ps);
   };
