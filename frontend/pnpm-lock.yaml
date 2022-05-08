@@ -4,6 +4,7 @@ specifiers:
   '@babel/core': ^7.0.0
   '@emotion/react': ^11.9.0
   '@emotion/styled': ^11.8.1
+  '@mui/icons-material': ^5.6.2
   '@mui/material': ^5.6.0
   '@types/jest': ^27.4.1
   '@types/marked': ^4.0.3
@@ -34,6 +35,7 @@ specifiers:
 dependencies:
   '@emotion/react': 11.9.0_yhhwp62ayfwdsajg6mapyglucm
   '@emotion/styled': 11.8.1_kfkjm7pw6goepyy2w3dueecl2u
+  '@mui/icons-material': 5.6.2_cg6zmfbylrcehph66o5ietgzqe
   '@mui/material': 5.6.0_zanmx6zi7rhzhubzy2o5yfbjjq
   marked: 4.0.14
   react: 17.0.2
@@ -864,6 +866,23 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-is: 17.0.2
+    dev: false
+
+  /@mui/icons-material/5.6.2_cg6zmfbylrcehph66o5ietgzqe:
+    resolution: {integrity: sha512-9QdI7axKuBAyaGz4mtdi7Uy1j73/thqFmEuxpJHxNC7O8ADEK1Da3t2veK2tgmsXsUlAHcAG63gg+GvWWeQNqQ==}
+    engines: {node: '>=12.0.0'}
+    peerDependencies:
+      '@mui/material': ^5.0.0
+      '@types/react': ^17.0.0 || ^18.0.0
+      react: ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.17.9
+      '@mui/material': 5.6.0_zanmx6zi7rhzhubzy2o5yfbjjq
+      '@types/react': 17.0.43
+      react: 17.0.2
     dev: false
 
   /@mui/material/5.6.0_zanmx6zi7rhzhubzy2o5yfbjjq:

@@ -1,3 +1,4 @@
+import DragHandleIcon from "@mui/icons-material/DragHandle";
 import { Button, Grid, Input, Paper, TextField } from "@mui/material";
 import { Chunk as ChunkType } from "model";
 import React, { ChangeEventHandler, createRef, FormEventHandler, useEffect, useState } from "react";
@@ -149,7 +150,7 @@ const Chunk = (props: {
   );
 
   return (
-    <Paper ref={(mode == "Read") ? drag : null} key={id} sx={{ padding: "1em" }}>
+    <Paper key={id} sx={{ padding: "1em" }}>
       <Grid container direction="column" spacing={1} onFocus={onFocus} className="chunk">
         <Grid item xs={12}>
           <TypeForm value={type} update={updateType} />
@@ -157,6 +158,9 @@ const Chunk = (props: {
         <Grid container xs={12} direction="row" spacing={1} className="chunk-inner">
           <Grid item xs={11}>{renderContent()}</Grid>
           <Grid container xs={1} direction="column" spacing={0}>
+            <Grid item ref={(mode == "Read") ? drag : null}>
+              <DragHandleIcon />
+            </Grid>
             <Grid item>{editButton}</Grid>
             <Grid item>
               <Button onClick={deleteThis}>Delete</Button>
