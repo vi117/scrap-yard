@@ -40,7 +40,7 @@ export function Divider(props: {
       ref={drop}
       sx={isOver && { background: "grey" }}
     >
-      <Button onClick={() => newChunk(position)}>Add</Button>
+      <Button fullWidth={true} onClick={() => newChunk(position)}>Add</Button>
     </Box>
   );
 }
