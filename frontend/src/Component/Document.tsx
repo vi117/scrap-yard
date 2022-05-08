@@ -7,6 +7,7 @@ import { newDocument, useChunks, useTags } from "./RemoteDocument";
 
 // import '../App.css';
 import Chunk from "./Chunk";
+import Divider from "./Divider";
 
 /*
 const uuidList: RecoilState<string[]> = atom({
@@ -63,7 +64,13 @@ function Doc(props: { doc: Document }) {
     const id = chunk.id;
     return (
       <Fragment key={id}>
-        <Button onClick={() => setChunks.create(i)}>add to {i}</Button>
+        <Divider
+          position={i}
+          newChunk={setChunks.create}
+          moveChunk={setChunks.move}
+          addFromText={setChunks.addFromText}
+        />
+
         <Chunk
           doc={doc}
           chunk={chunk}
@@ -79,7 +86,12 @@ function Doc(props: { doc: Document }) {
       <TagBar doc={doc} />
       <Stack className="document" spacing={2}>
         {chunklist}
-        <Button onClick={() => setChunks.create()}>Add</Button>
+        <Divider
+          position={chunks.length}
+          newChunk={setChunks.create}
+          moveChunk={setChunks.move}
+          addFromText={setChunks.addFromText}
+        />
       </Stack>
     </>
   );
