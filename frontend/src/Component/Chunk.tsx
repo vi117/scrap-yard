@@ -1,4 +1,7 @@
+import DeleteIcon from "@mui/icons-material/Delete";
 import DragHandleIcon from "@mui/icons-material/DragHandle";
+import EditIcon from "@mui/icons-material/Edit";
+import SaveIcon from "@mui/icons-material/Save";
 import { Button, Grid, Input, Paper, TextField } from "@mui/material";
 import { Chunk as ChunkType } from "model";
 import React, { ChangeEventHandler, createRef, FormEventHandler, useEffect, useState } from "react";
@@ -145,7 +148,14 @@ const Chunk = (props: {
 
   const editButton = (
     <Button onClick={changeMode}>
+      {mode == "Read" ? <EditIcon /> : <SaveIcon />}
       {mode == "Read" ? "Edit" : "Save"}
+    </Button>
+  );
+
+  const deleteButton = (
+    <Button onClick={deleteThis}>
+      <DeleteIcon />Delete
     </Button>
   );
 
@@ -162,9 +172,7 @@ const Chunk = (props: {
               <DragHandleIcon />
             </Grid>
             <Grid item>{editButton}</Grid>
-            <Grid item>
-              <Button onClick={deleteThis}>Delete</Button>
-            </Grid>
+            <Grid item>{deleteButton}</Grid>
           </Grid>
         </Grid>
       </Grid>
