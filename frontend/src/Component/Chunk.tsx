@@ -2,8 +2,8 @@ import { Button, Grid, Input, Paper, TextField } from "@mui/material";
 import { ChangeEventHandler, createRef, FormEventHandler, useEffect, useState } from "react";
 import { useDrag } from "react-dnd";
 import { RecoilState, useRecoilState } from "recoil";
-import csvRenderer from "./csvRenderer";
-import markdownRenderer from "./markdownRenderer";
+import csvRenderer from "./Chunk/csvRenderer";
+import markdownRenderer from "./Chunk/markdownRenderer";
 import { useChunk } from "./RemoteDocument";
 
 function render_view(t: string, content: string) {
