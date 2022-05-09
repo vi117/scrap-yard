@@ -16,10 +16,15 @@ export interface MarkdownChunk {
   content: string;
 }
 
+export interface CSVChunk {
+  type: "csv";
+  content: string;
+}
+
 /**
  * Chunk Content
  */
-export type ChunkContent = TextChunk | MarkdownChunk;
+export type ChunkContent = TextChunk | MarkdownChunk | CSVChunk;
 export type ChunkContentKind = ChunkContent["type"];
 
 export type Chunk = {
