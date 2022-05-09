@@ -1,43 +1,43 @@
-import { EventEmitter } from "https://deno.land/std@0.137.0/node/events.ts";
-
-interface ParticipantEventListener {
-  "close": (event: CloseEvent) => void;
-}
-
 export interface Participant {
   id: string;
   send(data: string): void;
-  on(type: "close", listener: ParticipantEventListener["close"]): this;
-  off(type: "close", listener: ParticipantEventListener["close"]): this;
-  emit(type: keyof ParticipantEventListener, event: CloseEvent): boolean;
+  addEventListener<T extends keyof WebSocketEventMap>(
+    type: T,
+    listener: (this: WebSocket, event: WebSocketEventMap[T]) => void
+  ): void;
+  removeEventListener<T extends keyof WebSocketEventMap>(
+    type: T,
+    listener: (this: WebSocket, event: WebSocketEventMap[T]) => void
+  ): void;
   close(): void;
 }
 
-export class Connection extends EventEmitter implements Participant {
+export class Connection implements Participant {
   id: string;
   socket: WebSocket;
   constructor(id: string, socket: WebSocket) {
-    super();
     this.id = id;
     this.socket = socket;
   }
-  on(_type: "close", listener: (event: CloseEvent) => void): this {
-    super.on("close", listener);
-    return this;
-  }
-  off(_type: "close", listener: (event: CloseEvent) => void): this {
-    super.off("close", listener);
-    return this;
-  }
-  emit(_type: "close", event: CloseEvent): boolean {
-    return super.emit("close", event);
-  }
 
   send(data: string): void {
-    this.socket.send(data);
+    this.send(data);
   }
-  close(): void {
-    this.socket.close();
+
+  addEventListener<T extends keyof WebSocketEventMap>(
+    type: T,
+    listener: (this: WebSocket, event: WebSocketEventMap[T]) => void): void {
+    this.socket.addEventListener(type, listener);
+  }
+
+  removeEventListener<T extends keyof WebSocketEventMap>(
+    type: T,
+    listener: (this: WebSocket, event: WebSocketEventMap[T]) => void): void {
+    this.socket.removeEventListener(type, listener);
+  }
+
+  close(code?: number, reason?: string): void {
+    this.socket.close(code, reason);
   }
 }
 
