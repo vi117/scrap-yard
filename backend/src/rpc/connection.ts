@@ -21,7 +21,7 @@ export class Connection implements Participant {
   }
 
   send(data: string): void {
-    this.send(data);
+    this.socket.send(data);
   }
 
   addEventListener<T extends keyof WebSocketEventMap>(
