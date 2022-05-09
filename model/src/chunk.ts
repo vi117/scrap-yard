@@ -75,6 +75,10 @@ export interface ChunkCreateResult {
    * the created chunk id
    */
   chunkId: string;
+  /**
+   * document updated time at server 
+   */
+   updatedAt: number
 }
 /**
  * Chunk Delete Method
@@ -91,6 +95,10 @@ export interface ChunkDeleteResult {
    * the deleted chunk id
    */
   chunkId: string;
+  /**
+   * document updated time at server 
+   */
+  updatedAt: number
 }
 /**
  * Chunk Modify Method
@@ -108,6 +116,10 @@ export interface ChunkModifyResult {
    * the modified chunk id
    */
   chunkId: string;
+  /**
+   * document updated time at server 
+   */
+  updatedAt: number
 }
 export interface ChunkMoveMethod extends JsonRPCMethodHeader {
   method: "chunk.move";
@@ -130,6 +142,10 @@ export interface ChunkMoveResult {
    * the moved chunk id
    */
   chunkId: string;
+  /**
+   * document updated time at server 
+   */
+  updatedAt: number
 }
 
 export type ChunkMethod =

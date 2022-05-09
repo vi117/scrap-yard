@@ -7,16 +7,17 @@ import {
   RPCResponse,
 } from "model";
 import { DocStore } from "./docStore.ts";
-import { Connection } from "./connection.ts";
+import { Participant } from "./connection.ts";
+import { retrunRequest } from "./rpc.ts";
 
 export async function handleDocumentMethod(
-  conInfo: Connection,
+  conn: Participant,
   method: DocumentMethod,
-): Promise<RPCResponse> {
+): Promise<void> {
   switch (method.method) {
     case "document.open": {
       try {
-        const d = await DocStore.open(conInfo, method.params.docPath);
+        const d = await DocStore.open(conn, method.params.docPath);
         const result: DocumentOpenResult = {
           doc: {
             docPath: d.docPath,
@@ -25,16 +26,17 @@ export async function handleDocumentMethod(
             updatedAt: d.updatedAt,
           },
         };
-        return makeRPCResult(method.id, result);
+        retrunRequest(conn,makeRPCResult(method.id, result));
       } catch (e) {
         if (e instanceof Deno.errors.NotFound) {
-          return makeRPCError(
+          retrunRequest(conn,makeRPCError(
             method.id,
             new InvalidDocPathError(method.params.docPath),
-          );
+          ));
         } else throw e;
       }
     }
+    break;
     case "document.close":
       throw new Error("Not implemented");
   }

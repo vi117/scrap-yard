@@ -39,10 +39,10 @@ sequenceDiagram
     S ->> A: document.open
     A ->> S: chunk.create
     S ->> B: document.open
-    B ->> S: chunk.create
     S -->> A: response
-    S -->> B: response
     S -) B: chunk.update
+    B ->> S: chunk.create
+    S -->> B: response
     S -) A: chunk.update
 ```
 여기서는 Bob의 문서가 최신이기 

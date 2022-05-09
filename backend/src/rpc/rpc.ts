@@ -2,8 +2,14 @@ import { handleDocumentMethod } from "./doc.ts";
 import { handleChunkMethod } from "./chunk.ts";
 import { MethodNotFoundError } from "model";
 import * as RPC from "model";
-import { Connection } from "./connection.ts";
+import { Connection, Participant } from "./connection.ts";
 import * as log from "std/log";
+
+export function retrunRequest(conn: Participant, res: RPC.RPCResponse){
+  const json = JSON.stringify(res);
+  log.debug(`Sending response: ${json}`);
+  conn.send(json);
+}
 
 function parseAndCheck(msg: string): RPC.RPCMethod {
   const p = JSON.parse(msg);
@@ -25,7 +31,7 @@ function parseAndCheck(msg: string): RPC.RPCMethod {
 async function handleMethods(
   conn: Connection,
   p: RPC.RPCMethod,
-): Promise<RPC.RPCResponse> {
+): Promise<void> {
   switch (p.method) {
     case "document.open":
     case "document.close":
@@ -44,10 +50,7 @@ export async function handleMethodOnMessage(conn: Connection, msg: string) {
   let p: RPC.RPCMethod | undefined = undefined;
   try {
     p = parseAndCheck(msg);
-    const res = await handleMethods(conn, p);
-    const json = JSON.stringify(res);
-    log.debug(`Sending response: ${json}`);
-    conn.send(json);
+    await handleMethods(conn, p);
   } catch (e) {
     if (p === undefined) {
       log.error(`invalid message: not rpc error ${e}`);
