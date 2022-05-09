@@ -13,6 +13,7 @@
         "fmt-backend": "cd backend && deno fmt",
         "fmt-frontend": "cd frontend && pnpm fmt",
         "fmt-model": "cd model && deno task fmt",
-        "fmt": "pnpm run fmt-backend && pnpm run fmt-frontend && pnpm run fmt-model"
+        "fmt": "pnpm run fmt-backend && pnpm run fmt-frontend && pnpm run fmt-model",
+        "dev": "python dev.py"
     }
 }

@@ -53,7 +53,12 @@ export async function handleMethodOnMessage(conn: Connection, msg: string) {
       log.error(`invalid message: not rpc error ${e}`);
       return;
     } else {
-      log.error(`%d: %o error`, p.id, e);
+      if (e instanceof Error){
+        log.error(`connection ${p.id}: ${e} error:\n ${e.stack}`);
+      }
+      else{
+        log.error(`connection ${p.id}: ${e}`);
+      }
       conn.send(
         JSON.stringify(
           RPC.makeRPCError(p.id, new RPC.InternalError(e.message)),

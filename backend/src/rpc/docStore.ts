@@ -2,6 +2,7 @@ import { FileDocumentObject } from "../document/filedoc.ts";
 import { Participant } from "./connection.ts";
 import { ChunkMethod } from "model";
 import * as RPC from "model";
+import * as log from "std/log";
 
 /**
  * A active document.
@@ -23,7 +24,8 @@ export class ActiveDocumentObject extends FileDocumentObject {
   }
   join(conn: Participant) {
     this.conns.add(conn);
-    conn.on("close", () => {
+    conn.addEventListener("close", () => {
+      log.warning(`connection ${conn.id} closed`);
       this.leave(conn);
     });
   }
