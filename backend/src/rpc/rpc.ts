@@ -5,7 +5,7 @@ import * as RPC from "model";
 import { Connection, Participant } from "./connection.ts";
 import * as log from "std/log";
 
-export function retrunRequest(conn: Participant, res: RPC.RPCResponse){
+export function retrunRequest(conn: Participant, res: RPC.RPCResponse) {
   const json = JSON.stringify(res);
   log.debug(`Sending response: ${json}`);
   conn.send(json);
@@ -56,10 +56,9 @@ export async function handleMethodOnMessage(conn: Connection, msg: string) {
       log.error(`invalid message: not rpc error ${e}`);
       return;
     } else {
-      if (e instanceof Error){
+      if (e instanceof Error) {
         log.error(`connection ${p.id}: ${e} error:\n ${e.stack}`);
-      }
-      else{
+      } else {
         log.error(`connection ${p.id}: ${e}`);
       }
       conn.send(

@@ -10,8 +10,8 @@ const StorybookList = [
   },
   {
     name: "test",
-    elem: <TestStorybook></TestStorybook>
-  }
+    elem: <TestStorybook></TestStorybook>,
+  },
 ];
 
 export function Storybooks() {

@@ -81,9 +81,9 @@ export interface ChunkCreateResult {
    */
   chunkId: string;
   /**
-   * document updated time at server 
+   * document updated time at server
    */
-   updatedAt: number
+  updatedAt: number;
 }
 /**
  * Chunk Delete Method
@@ -101,9 +101,9 @@ export interface ChunkDeleteResult {
    */
   chunkId: string;
   /**
-   * document updated time at server 
+   * document updated time at server
    */
-  updatedAt: number
+  updatedAt: number;
 }
 /**
  * Chunk Modify Method
@@ -122,9 +122,9 @@ export interface ChunkModifyResult {
    */
   chunkId: string;
   /**
-   * document updated time at server 
+   * document updated time at server
    */
-  updatedAt: number
+  updatedAt: number;
 }
 export interface ChunkMoveMethod extends JsonRPCMethodHeader {
   method: "chunk.move";
@@ -148,9 +148,9 @@ export interface ChunkMoveResult {
    */
   chunkId: string;
   /**
-   * document updated time at server 
+   * document updated time at server
    */
-  updatedAt: number
+  updatedAt: number;
 }
 
 export type ChunkMethod =

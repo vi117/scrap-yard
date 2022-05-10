@@ -6,16 +6,16 @@ type RPCCallback = {
 };
 
 const NotificationEventName = "notification";
-type RPCMessageManagerEventType = "notification"; 
+type RPCMessageManagerEventType = "notification";
 
-export class RPCNotificationEvent extends Event{
-  constructor(public readonly notification: RPCNotification,eventInit?:EventInit){
-    super(NotificationEventName,eventInit);
+export class RPCNotificationEvent extends Event {
+  constructor(public readonly notification: RPCNotification, eventInit?: EventInit) {
+    super(NotificationEventName, eventInit);
   }
 }
 
-type RPCMessageMessagerEventListener = (e:RPCNotificationEvent)=> void;
-export class RPCMessageManager extends EventTarget{
+type RPCMessageMessagerEventListener = (e: RPCNotificationEvent) => void;
+export class RPCMessageManager extends EventTarget {
   close() {
     if (this.ws) {
       this.ws.close();
@@ -40,14 +40,13 @@ export class RPCMessageManager extends EventTarget{
       this.ws.onmessage = (e) => {
         const data = JSON.parse(e.data);
         // TODO(vi117): check validation
-        if("id" in data){
+        if ("id" in data) {
           const response = data as RPCResponse;
           const callback = this.callbackList.get(response.id);
           if (callback) {
             callback.resolve(response);
           }
-        }
-        else{
+        } else {
           this.dispatchEvent(new RPCNotificationEvent(data as RPCNotification));
         }
       };
@@ -60,8 +59,7 @@ export class RPCMessageManager extends EventTarget{
     });
   }
 
-
-  //TODO(vi117): extract id generator
+  // TODO(vi117): extract id generator
   private genId() {
     const ret = this.curId;
     this.curId++;
@@ -95,15 +93,19 @@ export class RPCMessageManager extends EventTarget{
     this.ws.send(JSON.stringify(message));
   }
 
-  addEventListener(type: RPCMessageManagerEventType,
-     callback: RPCMessageMessagerEventListener | EventListenerOrEventListenerObject | null,
-     options?: boolean | AddEventListenerOptions): void {
-    super.addEventListener(type,callback as EventListener,options);
+  addEventListener(
+    type: RPCMessageManagerEventType,
+    callback: RPCMessageMessagerEventListener | EventListenerOrEventListenerObject | null,
+    options?: boolean | AddEventListenerOptions,
+  ): void {
+    super.addEventListener(type, callback as EventListener, options);
   }
-  removeEventListener(type: RPCMessageManagerEventType, 
-     callback: RPCMessageMessagerEventListener | EventListenerOrEventListenerObject | null,
-     options?: boolean | EventListenerOptions): void {
-    super.removeEventListener(type,callback as EventListener,options);
+  removeEventListener(
+    type: RPCMessageManagerEventType,
+    callback: RPCMessageMessagerEventListener | EventListenerOrEventListenerObject | null,
+    options?: boolean | EventListenerOptions,
+  ): void {
+    super.removeEventListener(type, callback as EventListener, options);
   }
 
   async invokeMethod(m: Omit<RPCMethod, "id" | "jsonrpc">): Promise<RPCResponse> {

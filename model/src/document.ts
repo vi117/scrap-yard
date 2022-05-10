@@ -24,7 +24,7 @@ export interface DocumentOpenMethod extends JsonRPCMethodHeader {
 }
 
 export interface DocumentOpenResult {
-  doc: DocumentObject,
+  doc: DocumentObject;
 }
 
 export interface DocumentCloseMethod extends JsonRPCMethodHeader {

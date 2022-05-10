@@ -6,9 +6,9 @@ import { v4 as uuidv4 } from "uuid";
 import { createTestDocViewModel, DocumentViewModel } from "../ViewModel/doc";
 
 // import '../App.css';
+import { DocumentObject } from "model";
 import Chunk from "./Chunk";
 import Divider from "./Divider";
-import { DocumentObject } from "model";
 
 /*
 const uuidList: RecoilState<string[]> = atom({
@@ -99,7 +99,7 @@ function Doc(props: { doc: DocumentViewModel }) {
 }
 
 export function DocumentEditor() {
-  const doc = createTestDocViewModel("ws://localhost:8000/ws","test.syd");
+  const doc = createTestDocViewModel("ws://localhost:8000/ws", "test.syd");
 
   if (doc != null) {
     return <Doc doc={doc} />;
