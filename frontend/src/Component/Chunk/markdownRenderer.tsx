@@ -1,6 +1,6 @@
 import { marked } from "marked";
 
-const markdownRenderer = (text: string| undefined) => {
+const markdownRenderer = (text: string | undefined) => {
   if (text === undefined) {
     text = "";
   }

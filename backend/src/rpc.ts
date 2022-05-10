@@ -13,7 +13,7 @@ export function rpc(req: Request, _ctx: unknown): Response {
   const { socket, response } = Deno.upgradeWebSocket(req);
   idGen++;
   const conn = new Connection(idGen.toString(), socket);
-  conn.addEventListener("open",()=>{
+  conn.addEventListener("open", () => {
     log.info(`${conn.id} connected`);
     AllParticipants.add(conn.id, conn);
   });
@@ -21,10 +21,10 @@ export function rpc(req: Request, _ctx: unknown): Response {
     log.debug(`${conn.id} on message: ${e.data}`);
     handleMethodOnMessage(conn, e.data);
   });
-  conn.addEventListener("error",(e)=>{
+  conn.addEventListener("error", (e) => {
     log.error(`${conn.id} error: ${e.type}`);
-  })
-  conn.addEventListener("close",(e)=>{
+  });
+  conn.addEventListener("close", (e) => {
     log.info(`${conn.id} closed: ${e.code} ${e.reason}`);
     AllParticipants.remove(conn.id);
   });

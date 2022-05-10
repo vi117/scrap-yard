@@ -3,11 +3,11 @@ export interface Participant {
   send(data: string): void;
   addEventListener<T extends keyof WebSocketEventMap>(
     type: T,
-    listener: (this: WebSocket, event: WebSocketEventMap[T]) => void
+    listener: (this: WebSocket, event: WebSocketEventMap[T]) => void,
   ): void;
   removeEventListener<T extends keyof WebSocketEventMap>(
     type: T,
-    listener: (this: WebSocket, event: WebSocketEventMap[T]) => void
+    listener: (this: WebSocket, event: WebSocketEventMap[T]) => void,
   ): void;
   close(): void;
 }
@@ -26,13 +26,15 @@ export class Connection implements Participant {
 
   addEventListener<T extends keyof WebSocketEventMap>(
     type: T,
-    listener: (this: WebSocket, event: WebSocketEventMap[T]) => void): void {
+    listener: (this: WebSocket, event: WebSocketEventMap[T]) => void,
+  ): void {
     this.socket.addEventListener(type, listener);
   }
 
   removeEventListener<T extends keyof WebSocketEventMap>(
     type: T,
-    listener: (this: WebSocket, event: WebSocketEventMap[T]) => void): void {
+    listener: (this: WebSocket, event: WebSocketEventMap[T]) => void,
+  ): void {
     this.socket.removeEventListener(type, listener);
   }
 

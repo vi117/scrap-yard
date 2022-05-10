@@ -1,11 +1,11 @@
 import { Button, Grid, Input, Paper, TextField } from "@mui/material";
+import { Chunk as ChunkType } from "model";
 import React, { ChangeEventHandler, createRef, FormEventHandler, useEffect, useState } from "react";
 import { useDrag } from "react-dnd";
 import { RecoilState, useRecoilState } from "recoil";
 import { DocumentViewModel } from "../ViewModel/doc";
 import csvRenderer from "./Chunk/csvRenderer";
 import markdownRenderer from "./Chunk/markdownRenderer";
-import { Chunk as ChunkType } from "model";
 
 function render_view(t: string, content: string) {
   switch (t) {

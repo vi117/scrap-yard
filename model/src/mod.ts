@@ -28,7 +28,7 @@ export function makeRPCResult(id: number, result?: MethodResult): RPCResponse {
   return {
     jsonrpc: "2.0",
     id,
-    result
+    result,
   };
 }
 /**
@@ -41,6 +41,6 @@ export function makeRPCError(id: number, error: RPCError): RPCResponse {
   return {
     jsonrpc: "2.0",
     id,
-    error
+    error,
   };
 }

@@ -12,11 +12,11 @@ export function Divider(props: {
   addFromText: (pos: number, content: string) => void;
 }) {
   const { position, newChunk, moveChunk, addFromText } = props;
-  //TODO(vi117): add proper type
-  const [{ isOver }, drop] = useDrop<{id: string} & {text: string} & {html: string}>(
+  // TODO(vi117): add proper type
+  const [{ isOver }, drop] = useDrop<{ id: string } & { text: string } & { html: string }>(
     () => ({
       accept: ["chunk", NativeTypes.TEXT, NativeTypes.HTML],
-      drop: (item, monitor) => { 
+      drop: (item, monitor) => {
         const t = monitor.getItemType();
         if (t == "chunk") {
           moveChunk(item.id, position);
