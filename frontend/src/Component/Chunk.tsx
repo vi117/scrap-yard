@@ -1,10 +1,11 @@
 import { Button, Grid, Input, Paper, TextField } from "@mui/material";
-import { ChangeEventHandler, createRef, FormEventHandler, useEffect, useState } from "react";
+import React, { ChangeEventHandler, createRef, FormEventHandler, useEffect, useState } from "react";
 import { useDrag } from "react-dnd";
 import { RecoilState, useRecoilState } from "recoil";
-import csvRenderer from "./csvRenderer";
-import markdownRenderer from "./markdownRenderer";
-import { useChunk } from "./RemoteDocument";
+import { DocumentViewModel } from "../ViewModel/doc";
+import csvRenderer from "./Chunk/csvRenderer";
+import markdownRenderer from "./Chunk/markdownRenderer";
+import { Chunk as ChunkType } from "model";
 
 function render_view(t: string, content: string) {
   switch (t) {
@@ -44,19 +45,18 @@ const TypeForm = (props: {
 };
 
 const Chunk = (props: {
-  doc;
-  chunk: Chunk;
+  doc: DocumentViewModel;
+  chunk: ChunkType;
   focusedChunk: RecoilState<string>;
   deleteThis: () => void;
 }) => {
-  const docPath = props.doc.docPath;
-  const chunkData = props.chunk;
-  const id = chunkData.id;
+  const chunk = props.chunk;
+  const id = chunk.id;
   const deleteThis = props.deleteThis;
 
   // Inherited States
   const [fc, setFc] = useRecoilState(props.focusedChunk);
-  const [{ type, content }, { setType, setContent }] = useChunk(docPath, chunkData);
+  const [{ type, content }, { setType, setContent }] = props.doc.useChunk(chunk);
   const [buffer, setBuffer] = useState(content);
 
   // Internal States
@@ -97,16 +97,17 @@ const Chunk = (props: {
 
   const updateType = (t: string) => {
     // TODO: update chunk type here.
-    setType(t);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setType(t as any);
   };
 
-  const onChange: ChangeEventHandler<HTMLTextAreaElement> = (e) => setBuffer(e.target.value);
+  const onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement> = (e) => setBuffer(e.target.value);
 
   const onFocus = () => setFc(id);
 
-  const onKeyDown = (e: KeyboardEvent) => {
+  const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
     if (e.key == "Backspace") {
-      if (!onDelete && e.target.value == "") {
+      if (!onDelete && buffer == "") {
         deleteThis();
       } else {
         setOnDelete(true);
@@ -114,7 +115,7 @@ const Chunk = (props: {
     }
   };
 
-  const onKeyUp = (e: KeyboardEvent) => {
+  const onKeyUp: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
     if (e.key == "Backspace") setOnDelete(false);
   };
 

@@ -10,6 +10,7 @@ import { RPCMessageManager } from "./RPCManager";
  */
 export async function openDocument(manager: RPCMessageManager, filePath: string) {
   const res = await manager.invokeMethod({
+    ...manager.genHeader(),
     method: "document.open",
     params: {
       docPath: filePath,
@@ -31,6 +32,7 @@ export async function openDocument(manager: RPCMessageManager, filePath: string)
  */
 export async function closeDocument(manager: RPCMessageManager, docPath: string) {
   const res = await manager.invokeMethod({
+    ...manager.genHeader(),
     method: "document.close",
     params: {
       docPath,

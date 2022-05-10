@@ -5,7 +5,17 @@ type RPCCallback = {
   reject: (e: Error) => void;
 };
 
-export class RPCMessageManager {
+const NotificationEventName = "notification";
+type RPCMessageManagerEventType = "notification"; 
+
+export class RPCNotificationEvent extends Event{
+  constructor(public readonly notification: RPCNotification,eventInit?:EventInit){
+    super(NotificationEventName,eventInit);
+  }
+}
+
+type RPCMessageMessagerEventListener = (e:RPCNotificationEvent)=> void;
+export class RPCMessageManager extends EventTarget{
   close() {
     if (this.ws) {
       this.ws.close();
@@ -16,6 +26,7 @@ export class RPCMessageManager {
   private curId: number;
   private ws?: WebSocket;
   constructor() {
+    super();
     this.curId = 1;
     this.callbackList = new Map();
   }
@@ -24,12 +35,20 @@ export class RPCMessageManager {
   }
   async open(url: string | URL, protocals?: string | string) {
     return new Promise<void>((resolve, reject) => {
+      console.log("connect to", url);
       this.ws = new WebSocket(url, protocals);
       this.ws.onmessage = (e) => {
-        const data = JSON.parse(e.data) as RPCResponse;
-        const callback = this.callbackList.get(data.id);
-        if (callback) {
-          callback.resolve(data);
+        const data = JSON.parse(e.data);
+        // TODO(vi117): check validation
+        if("id" in data){
+          const response = data as RPCResponse;
+          const callback = this.callbackList.get(response.id);
+          if (callback) {
+            callback.resolve(response);
+          }
+        }
+        else{
+          this.dispatchEvent(new RPCNotificationEvent(data as RPCNotification));
         }
       };
       this.ws.onopen = () => {
@@ -41,6 +60,8 @@ export class RPCMessageManager {
     });
   }
 
+
+  //TODO(vi117): extract id generator
   private genId() {
     const ret = this.curId;
     this.curId++;
@@ -73,6 +94,18 @@ export class RPCMessageManager {
     }
     this.ws.send(JSON.stringify(message));
   }
+
+  addEventListener(type: RPCMessageManagerEventType,
+     callback: RPCMessageMessagerEventListener | EventListenerOrEventListenerObject | null,
+     options?: boolean | AddEventListenerOptions): void {
+    super.addEventListener(type,callback as EventListener,options);
+  }
+  removeEventListener(type: RPCMessageManagerEventType, 
+     callback: RPCMessageMessagerEventListener | EventListenerOrEventListenerObject | null,
+     options?: boolean | EventListenerOptions): void {
+    super.removeEventListener(type,callback as EventListener,options);
+  }
+
   async invokeMethod(m: Omit<RPCMethod, "id" | "jsonrpc">): Promise<RPCResponse> {
     const message = {
       ...this.genHeader(),
@@ -82,3 +115,5 @@ export class RPCMessageManager {
     return await this.send(message);
   }
 }
+
+export const RPCManager = new RPCMessageManager();
