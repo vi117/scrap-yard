@@ -1,9 +1,14 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import { useState } from "react";
 import { TestStorybook } from "./Story/Test";
+import { UI } from "./Story/UI";
 import { WebsocketIO } from "./Story/WebsocketIO";
 
 const StorybookList = [
+  {
+    name: "ui",
+    elem: <UI></UI>,
+  },
   {
     name: "websocket io",
     elem: <WebsocketIO></WebsocketIO>,
