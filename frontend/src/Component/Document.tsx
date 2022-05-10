@@ -1,13 +1,14 @@
 import { Button, Chip, Input, Stack } from "@mui/material";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { FormEventHandler, Fragment, useState } from "react";
 import { atom, RecoilState, useRecoilState } from "recoil";
 import { v4 as uuidv4 } from "uuid";
 // import { newDocument, useChunks } from "./LocalDocument";
-import { newDocument, useChunks, useTags } from "./RemoteDocument";
+import { createTestDocViewModel, DocumentViewModel } from "../ViewModel/doc";
 
 // import '../App.css';
 import Chunk from "./Chunk";
 import Divider from "./Divider";
+import { DocumentObject } from "model";
 
 /*
 const uuidList: RecoilState<string[]> = atom({
@@ -23,8 +24,8 @@ const focusedChunk = atom({
   default: "",
 });
 
-function TagBar(props: { doc: Document }) {
-  const [tags, setTags] = useTags(props.doc);
+function TagBar(props: { doc: DocumentViewModel }) {
+  const [tags, setTags] = props.doc.useTags();
   const [taglist, setTaglist] = useState(tags.join(" "));
   const [editable, setEditable] = useState(false);
 
@@ -35,7 +36,7 @@ function TagBar(props: { doc: Document }) {
     setEditable(false);
   };
 
-  const onChange = (e) => setTaglist(e.target.value);
+  const onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => setTaglist(e.target.value);
 
   if (editable) {
     return (
@@ -56,9 +57,9 @@ function TagBar(props: { doc: Document }) {
   }
 }
 
-function Doc(props: { doc: Document }) {
+function Doc(props: { doc: DocumentViewModel }) {
   const doc = props.doc;
-  const [chunks, setChunks] = useChunks(doc);
+  const [chunks, mutation] = doc.useChunks();
 
   const chunklist = chunks.map((chunk, i) => {
     const id = chunk.id;
@@ -66,16 +67,16 @@ function Doc(props: { doc: Document }) {
       <Fragment key={id}>
         <Divider
           position={i}
-          newChunk={setChunks.create}
-          moveChunk={setChunks.move}
-          addFromText={setChunks.addFromText}
+          newChunk={mutation.create}
+          moveChunk={mutation.move}
+          addFromText={mutation.addFromText}
         />
 
         <Chunk
           doc={doc}
           chunk={chunk}
           focusedChunk={focusedChunk}
-          deleteThis={() => setChunks.del(id)}
+          deleteThis={() => mutation.del(id)}
         />
       </Fragment>
     );
@@ -88,9 +89,9 @@ function Doc(props: { doc: Document }) {
         {chunklist}
         <Divider
           position={chunks.length}
-          newChunk={setChunks.create}
-          moveChunk={setChunks.move}
-          addFromText={setChunks.addFromText}
+          newChunk={mutation.create}
+          moveChunk={mutation.move}
+          addFromText={mutation.addFromText}
         />
       </Stack>
     </>
@@ -98,7 +99,7 @@ function Doc(props: { doc: Document }) {
 }
 
 export function DocumentEditor() {
-  const doc = newDocument();
+  const doc = createTestDocViewModel("ws://localhost:8000/ws","test.syd");
 
   if (doc != null) {
     return <Doc doc={doc} />;

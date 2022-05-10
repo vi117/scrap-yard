@@ -7,19 +7,19 @@ import * as ReactDOMServer from "react-dom/server";
 
 export function Divider(props: {
   position: number;
-  newChunk: () => void;
-  moveChunk: (number) => void;
-  addFromText: (number, string) => void;
+  newChunk: (pos: number) => void;
+  moveChunk: (id: string, pos: number) => void;
+  addFromText: (pos: number, content: string) => void;
 }) {
   const { position, newChunk, moveChunk, addFromText } = props;
-
-  const [{ isOver }, drop] = useDrop(
+  //TODO(vi117): add proper type
+  const [{ isOver }, drop] = useDrop<{id: string} & {text: string} & {html: string}>(
     () => ({
       accept: ["chunk", NativeTypes.TEXT, NativeTypes.HTML],
-      drop: (item, monitor) => {
+      drop: (item, monitor) => { 
         const t = monitor.getItemType();
         if (t == "chunk") {
-          moveChunk(id, position);
+          moveChunk(item.id, position);
         } else if (t == NativeTypes.TEXT) {
           addFromText(position, item.text);
         } else if (t == NativeTypes.HTML) {
