@@ -7,6 +7,7 @@
     "settings": {
         "deno.enable": true,
         "editor.defaultFormatter": "denoland.vscode-deno",
+        "editor.formatOnSave": true,
         "deno.lint": true,
         "deno.unstable": true,
         "deno.importMap": "./import_map.json",
