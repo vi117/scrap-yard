@@ -3,7 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   husky: ^8.0.1
 
-dependencies:
+devDependencies:
   husky: 8.0.1
 
 packages:
@@ -12,4 +12,4 @@ packages:
     resolution: {integrity: sha512-xs7/chUH/CKdOCs7Zy0Aev9e/dKOMZf3K1Az1nar3tzlv0jfqnYtu235bstsWTmXOR0EfINrPa97yy4Lz6RiKw==}
     engines: {node: '>=14'}
     hasBin: true
-    dev: false
+    dev: true
