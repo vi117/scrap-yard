@@ -14,7 +14,7 @@
         "fmt-frontend": "cd frontend && pnpm fmt",
         "fmt-model": "cd model && deno task fmt",
         "fmt": "pnpm run fmt-backend && pnpm run fmt-frontend && pnpm run fmt-model",
-        "dev": "python dev.py",
+        "dev": "python dev.py"
     },
     "dependencies": {
         "husky": "^8.0.1"

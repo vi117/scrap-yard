@@ -1,6 +1,6 @@
 {
     "$schema": "https://json.schemastore.org/huskyrc.json",
     "hooks": {
-        "pre-commit": "pnpm fmt"
+        "pre-commit": "pnpm fmt && exit -1"
     }
 }
