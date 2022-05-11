@@ -14,12 +14,20 @@ export type DocHistory = {
 setting.register("docHistory", {
   type: "number",
   default: 10,
-  min: 1,
-  max: 100,
-  step: 1,
-  label: "History Length",
+  minimum: 1,
+  maximum: 100,
+  title: "History Length",
   description: "The number of historys to keep",
 });
+
+/**
+ * get the maximum number of historys to keep
+ * must be called after setting is loaded
+ * @returns The number of historys to keep
+ */
+export function getSettingDocHistoryMaximum(): number {
+  return setting.get<number>("docHistory");
+}
 
 /**
  * A active document.
@@ -32,11 +40,13 @@ setting.register("docHistory", {
 export class ActiveDocumentObject extends FileDocumentObject {
   conns: Set<Participant>;
   history: DocHistory[];
+  readonly maxHistory: number;
 
-  constructor(docPath: string) {
+  constructor(docPath: string, maxHistory: number) {
     super(docPath);
     this.conns = new Set();
     this.history = [];
+    this.maxHistory = maxHistory;
   }
 
   join(conn: Participant) {
@@ -57,7 +67,7 @@ export class ActiveDocumentObject extends FileDocumentObject {
       time: now,
       method: method,
     });
-    if (this.history.length > setting.get<number>("docHistory")) {
+    if (this.history.length > this.maxHistory) {
       this.history.shift();
     }
     this.updatedAt = now;
@@ -98,7 +108,9 @@ export class DocumentStore {
   async open(conn: Participant, docPath: string) {
     const docGroup = this.documents[docPath];
     if (!docGroup) {
-      const doc = new ActiveDocumentObject(docPath);
+      //TODO(vi117): use a factory to create docGroup
+      // remove magic number
+      const doc = new ActiveDocumentObject(docPath, 10);
       await doc.open();
       doc.conns.add(conn);
       this.documents[docPath] = doc;

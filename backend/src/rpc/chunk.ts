@@ -25,6 +25,7 @@ function makeChunkId(): string {
 export type ChunkCreateHistory = {
   type: "create";
   position: number;
+  chunkId: string;
 };
 
 export type ChunkModifyHistory = {
@@ -35,12 +36,14 @@ export type ChunkModifyHistory = {
 export type ChunkRemoveHistory = {
   type: "remove";
   position: number;
+  chunkId: string;
 };
 
 export type ChunkMoveHistory = {
   type: "move";
   fromPosition: number;
   toPosition: number;
+  chunkId: string;
 };
 
 export type ChunkMethodHistory =
@@ -63,7 +66,9 @@ class ChunkCreateAction implements ChunkMethodAction {
   }
 
   action(doc: ActiveDocumentObject): ChunkCreateHistory {
-    if (this.params.position > doc.chunks.length || this.params.position < 0) {
+    if (
+      this.params.position > doc.chunks.length || this.params.position < 0
+    ) {
       throw new InvalidPositionError(this.params.position);
     }
     if (
@@ -80,6 +85,7 @@ class ChunkCreateAction implements ChunkMethodAction {
     return {
       type: "create",
       position: this.params.position,
+      chunkId: chunk.id,
     };
   }
 
@@ -150,6 +156,7 @@ class ChunkDeleteAction implements ChunkMethodAction {
     return {
       type: "remove",
       position: chunkIndex,
+      chunkId: this.params.chunkId,
     };
   }
 
@@ -221,10 +228,11 @@ class ChunkMoveAction implements ChunkMethodAction {
       type: "move",
       fromPosition: chunkIndex,
       toPosition: this.params.position,
+      chunkId: this.params.chunkId,
     };
   }
 
-  checkConflict(m: ChunkMethodHistory): boolean {
+  checkConflict(_m: ChunkMethodHistory): boolean {
     //TODO(vi117): conflict check implementation
     return true;
   }
@@ -270,7 +278,10 @@ export async function handleChunkMethod(
     if (lastSeenIndex < 0) {
       returnRequest(
         conn,
-        makeRPCError(p.id, new ChunkConflictError(doc.chunks, doc.updatedAt)),
+        makeRPCError(
+          p.id,
+          new ChunkConflictError(doc.chunks, doc.updatedAt),
+        ),
       );
       return;
     }
@@ -295,9 +306,18 @@ export async function handleChunkMethod(
     const hist = action.action(doc);
     doc.updateDocHistory(hist);
     doc.broadcastMethod(p, doc.updatedAt, conn);
+    returnRequest(
+      conn,
+      makeRPCResult(p.id, {
+        chunkId: hist.chunkId,
+        updatedAt: doc.updatedAt,
+      }),
+    );
+    return;
   } catch (e) {
     if (e instanceof RPCErrorBase) {
       returnRequest(conn, makeRPCError(p.id, e));
-    }
+      return;
+    } else throw e;
   }
 }

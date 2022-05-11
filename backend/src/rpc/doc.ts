@@ -4,7 +4,6 @@ import {
   InvalidDocPathError,
   makeRPCError,
   makeRPCResult,
-  RPCResponse,
 } from "model";
 import { DocStore } from "./docStore.ts";
 import { Participant } from "./connection.ts";

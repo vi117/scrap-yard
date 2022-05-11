@@ -8,28 +8,31 @@ import * as RPC from "model";
 Deno.test({
   name: "basic chunk operation",
   fn: async (t) => {
+    const messageBuffer: string[] = [];
     const conn: Participant = {
       id: "connId",
-      send() {},
+      send(s: string) {
+        messageBuffer.push(s);
+      },
       close() {},
-      emit() {
-        return true;
-      },
-      off() {
-        return this;
-      },
-      on() {
-        return this;
-      },
+      addEventListener() {},
+      removeEventListener() {},
     };
-    const docObj = new ActiveDocumentObject("docPath");
+    const popObject = () => {
+      const ret = messageBuffer.shift();
+      if (ret === undefined) {
+        throw new Error("no message");
+      }
+      return JSON.parse(ret);
+    };
+    const docObj = new ActiveDocumentObject("docPath", 10);
     docObj.chunks = [];
     const docStore = stub(DocStore, "open", () => {
       return docObj;
     });
     try {
       await t.step("create chunk", async () => {
-        const result = await handleChunkMethod(conn, {
+        await handleChunkMethod(conn, {
           method: "chunk.create",
           params: {
             docPath: "docPath",
@@ -44,11 +47,13 @@ Deno.test({
           jsonrpc: "2.0",
           id: 1,
         });
+        const result = popObject();
         assertEquals(result, {
           jsonrpc: "2.0",
           id: 1,
           result: {
             chunkId: "chunkId",
+            updatedAt: docObj.updatedAt,
           },
         });
         assertEquals(docObj.chunks, [{
@@ -58,7 +63,7 @@ Deno.test({
         }]);
       });
       await t.step("delete chunk", async () => {
-        const result = await handleChunkMethod(conn, {
+        await handleChunkMethod(conn, {
           method: "chunk.delete",
           params: {
             docPath: "docPath",
@@ -68,11 +73,13 @@ Deno.test({
           jsonrpc: "2.0",
           id: 2,
         });
+        const result = popObject();
         assertEquals(result, {
           jsonrpc: "2.0",
           id: 2,
           result: {
             chunkId: "chunkId",
+            updatedAt: docObj.updatedAt,
           },
         });
         assertEquals(docObj.chunks, []);
@@ -87,7 +94,7 @@ Deno.test({
         content: "content2",
       }];
       await t.step("modify chunk", async () => {
-        const result = await handleChunkMethod(conn, {
+        await handleChunkMethod(conn, {
           method: "chunk.modify",
           params: {
             docPath: "docPath",
@@ -101,11 +108,13 @@ Deno.test({
           jsonrpc: "2.0",
           id: 3,
         });
+        const result = popObject();
         assertEquals(result, {
           jsonrpc: "2.0",
           id: 3,
           result: {
             chunkId: "chunkId1",
+            updatedAt: docObj.updatedAt,
           },
         });
         assertEquals(docObj.chunks, [{
@@ -118,10 +127,10 @@ Deno.test({
           content: "content2",
         }]);
       });
-      // todo(vi117): write move chunk test
+      // TODO(vi117): write move chunk test
       // t.step("move chunk", async () => {});
       await t.step("invalid chunk operation", async () => {
-        const result = await handleChunkMethod(conn, {
+        await handleChunkMethod(conn, {
           method: "chunk.create",
           params: {
             docPath: "docPath",
@@ -136,7 +145,11 @@ Deno.test({
           jsonrpc: "2.0",
           id: 1,
         });
-        assertEquals(result.error?.code, RPC.RPCErrorCode.InvalidPosition);
+        const result = popObject();
+        assertEquals(
+          result.error?.code,
+          RPC.RPCErrorCode.InvalidPosition,
+        );
         assertEquals(docObj.chunks, [{
           id: "chunkId1",
           type: "text",
@@ -156,38 +169,34 @@ Deno.test({
 Deno.test({
   name: "test chunk notification operation",
   fn: async () => {
+    const aliceMessageBuffer: string[] = [];
     const connAlice: Participant = {
       id: "connId",
-      send() {},
+      send(s) {
+        aliceMessageBuffer.push(s);
+      },
       close() {},
-      emit() {
-        return true;
-      },
-      off() {
-        return this;
-      },
-      on() {
-        return this;
-      },
+      addEventListener() {},
+      removeEventListener() {},
     };
-    const BobRecv: string[] = [];
+    const popAliceObject = () => {
+      const ret = aliceMessageBuffer.shift();
+      if (ret === undefined) {
+        throw new Error("no message");
+      }
+      return JSON.parse(ret);
+    };
+    const bobMessageBuffer: string[] = [];
     const connBob: Participant = {
       id: "connId",
       send(msg: string) {
-        BobRecv.push(msg);
+        bobMessageBuffer.push(msg);
       },
       close() {},
-      emit() {
-        return true;
-      },
-      off() {
-        return this;
-      },
-      on() {
-        return this;
-      },
+      addEventListener() {},
+      removeEventListener() {},
     };
-    const docObj = new ActiveDocumentObject("docPath");
+    const docObj = new ActiveDocumentObject("docPath", 10);
     docObj.chunks = [];
     docObj.conns.add(connAlice);
     docObj.conns.add(connBob);
@@ -196,7 +205,7 @@ Deno.test({
       return docObj;
     });
     try {
-      const result = await handleChunkMethod(connAlice, {
+      await handleChunkMethod(connAlice, {
         method: "chunk.create",
         params: {
           docPath: "docPath",
@@ -211,6 +220,7 @@ Deno.test({
         jsonrpc: "2.0",
         id: 1,
       });
+      const result = popAliceObject();
       const expected: RPC.ChunkNotification = {
         jsonrpc: "2.0",
         method: "chunk.update",
@@ -233,12 +243,13 @@ Deno.test({
           updatedAt: docObj.updatedAt,
         },
       };
-      assertEquals(JSON.parse(BobRecv[0]), expected);
+      assertEquals(JSON.parse(bobMessageBuffer[0]), expected);
       assertEquals(result, {
         jsonrpc: "2.0",
         id: 1,
         result: {
           chunkId: "chunkId",
+          updatedAt: docObj.updatedAt,
         },
       });
     } finally {

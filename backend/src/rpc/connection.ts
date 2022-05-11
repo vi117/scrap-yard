@@ -3,6 +3,7 @@ import { handleMethodOnMessage } from "./rpc.ts";
 
 export interface Participant {
   id: string;
+  // TODO(vi117): replace `send` to `sendNotification` and `respondWith`
   send(data: string): void;
   addEventListener<T extends keyof WebSocketEventMap>(
     type: T,

@@ -33,9 +33,8 @@ export class FileServeRouter implements Router<Handler> {
           const method = req.method.toLocaleLowerCase();
           if (method == "get") {
             return makeJsonResponse(Status.OK, {
-              fileList: (await asyncAll(await Deno.readDir(path))).map((v) =>
-                v
-              ),
+              fileList: (await asyncAll(await Deno.readDir(path)))
+                .map((v) => v),
             });
           }
           return makeResponse(Status.MethodNotAllowed);

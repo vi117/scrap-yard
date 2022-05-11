@@ -9,6 +9,7 @@ const settingSchemas: Record<string, {
   validate: ValidateFunction;
 }> = {};
 
+// deno-lint-ignore no-explicit-any
 const setting: Record<string, any> = {};
 
 function getDefaultPath(): string {
@@ -51,7 +52,10 @@ export async function load() {
       if (settingSchemas[key].validate(v)) {
         setting[key] = v;
       } else {
-        logger.warning(`invalid setting: ${key} ${JSON.stringify(v)}`, v);
+        logger.warning(
+          `invalid setting: ${key} ${JSON.stringify(v)}`,
+          v,
+        );
         throw new Error(`invalid setting: ${key}`);
       }
     }
@@ -110,7 +114,10 @@ export function set<T>(name: string, value: T): T {
  * @throws Error if setting file is not writable
  */
 export async function save(): Promise<void> {
-  await Deno.writeTextFile(settingPath, JSON.stringify(setting, undefined, 2));
+  await Deno.writeTextFile(
+    settingPath,
+    JSON.stringify(setting, undefined, 2),
+  );
 }
 
 /**
