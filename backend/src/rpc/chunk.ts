@@ -1,4 +1,13 @@
-import { ChunkCreateMethod, ChunkDeleteMethod, ChunkMethod, ChunkModifyMethod, ChunkMoveMethod, makeRPCError, makeRPCResult, RPCErrorBase } from "model";
+import {
+  ChunkCreateMethod,
+  ChunkDeleteMethod,
+  ChunkMethod,
+  ChunkModifyMethod,
+  ChunkMoveMethod,
+  makeRPCError,
+  makeRPCResult,
+  RPCErrorBase,
+} from "model";
 import { Participant } from "./connection.ts";
 import { ActiveDocumentObject, DocStore } from "./docStore.ts";
 import {
@@ -12,7 +21,6 @@ import * as log from "std/log";
 
 function makeChunkId(): string {
   return crypto.randomUUID();
-
 }
 export type ChunkCreateHistory = {
   type: "create";
@@ -22,7 +30,7 @@ export type ChunkCreateHistory = {
 export type ChunkModifyHistory = {
   type: "modify";
   chunkId: string;
-}
+};
 
 export type ChunkRemoveHistory = {
   type: "remove";
@@ -36,10 +44,10 @@ export type ChunkMoveHistory = {
 };
 
 export type ChunkMethodHistory =
-  ChunkCreateHistory |
-  ChunkModifyHistory |
-  ChunkRemoveHistory |
-  ChunkMoveHistory;
+  | ChunkCreateHistory
+  | ChunkModifyHistory
+  | ChunkRemoveHistory
+  | ChunkMoveHistory;
 
 interface ChunkMethodAction {
   action: (doc: ActiveDocumentObject) => ChunkMethodHistory;
@@ -59,7 +67,8 @@ class ChunkCreateAction implements ChunkMethodAction {
       throw new InvalidPositionError(this.params.position);
     }
     if (
-      this.params.chunkId && doc.chunks.find((c) => c.id === this.params.chunkId)
+      this.params.chunkId &&
+      doc.chunks.find((c) => c.id === this.params.chunkId)
     ) {
       throw new InvalidChunkIdError(this.params.chunkId);
     }
@@ -71,27 +80,25 @@ class ChunkCreateAction implements ChunkMethodAction {
     return {
       type: "create",
       position: this.params.position,
-    }
+    };
   }
 
   checkConflict(m: ChunkMethodHistory): boolean {
     //TODO(vi117): change `if` to `switch`.
     if (m.type === "create") {
-      // If the positions are the same, 
+      // If the positions are the same,
       // it creates the chunk after the first one.
       return (m.position <= this.params.position);
-    }
-    else if (m.type === "remove") {
+    } else if (m.type === "remove") {
       return (m.position < this.params.position);
-    }
-    else if (m.type === "modify") {
+    } else if (m.type === "modify") {
       return false;
-    }
-    else if (m.type === "move") {
-      return (m.fromPosition < this.params.position && m.toPosition >= this.params.position)
-        || (m.fromPosition > this.params.position && m.toPosition < this.params.position);
-    }
-    else {
+    } else if (m.type === "move") {
+      return (m.fromPosition < this.params.position &&
+        m.toPosition >= this.params.position) ||
+        (m.fromPosition > this.params.position &&
+          m.toPosition < this.params.position);
+    } else {
       log.error(`unknown history type: ${m}, unreachable`);
       throw new Error("unknown history type");
     }
@@ -102,26 +109,23 @@ class ChunkCreateAction implements ChunkMethodAction {
     if (m.type === "create") {
       this.params.position += 1;
       return true;
-    }
-    else if (m.type === "remove") {
+    } else if (m.type === "remove") {
       this.params.position -= 1;
       return true;
-    }
-    else if (m.type === "modify") {
+    } else if (m.type === "modify") {
       throw new Error("unreachable");
-    }
-    else if (m.type === "move") {
-      if (m.fromPosition < this.params.position &&
-        m.toPosition >= this.params.position) {
+    } else if (m.type === "move") {
+      if (
+        m.fromPosition < this.params.position &&
+        m.toPosition >= this.params.position
+      ) {
         this.params.position -= 1;
         return true;
-      }
-      else {
+      } else {
         this.params.position += 1;
         return true;
       }
-    }
-    else {
+    } else {
       log.error(`unknown history type: ${m}, unreachable`);
       throw new Error("unknown history type");
     }
@@ -137,15 +141,16 @@ class ChunkDeleteAction implements ChunkMethodAction {
 
   action(doc: ActiveDocumentObject): ChunkRemoveHistory {
     const chunkIndex = doc.chunks.findIndex((c) =>
-      c.id === this.params.chunkId);
+      c.id === this.params.chunkId
+    );
     if (chunkIndex < 0) {
-      throw new InvalidChunkIdError(this.params.chunkId)
+      throw new InvalidChunkIdError(this.params.chunkId);
     }
     doc.chunks.splice(chunkIndex, 1);
     return {
       type: "remove",
       position: chunkIndex,
-    }
+    };
   }
 
   checkConflict(_m: ChunkMethodHistory): boolean {
@@ -166,9 +171,10 @@ class ChunkModifyAction implements ChunkMethodAction {
 
   action(doc: ActiveDocumentObject): ChunkModifyHistory {
     const chunkIndex = doc.chunks.findIndex((c) =>
-      c.id === this.params.chunkId);
+      c.id === this.params.chunkId
+    );
     if (chunkIndex < 0) {
-      throw new InvalidChunkIdError(this.params.chunkId)
+      throw new InvalidChunkIdError(this.params.chunkId);
     }
     doc.chunks[chunkIndex] = {
       ...doc.chunks[chunkIndex],
@@ -177,7 +183,7 @@ class ChunkModifyAction implements ChunkMethodAction {
     return {
       type: "modify",
       chunkId: this.params.chunkId,
-    }
+    };
   }
 
   checkConflict(m: ChunkMethodHistory): boolean {
@@ -201,9 +207,10 @@ class ChunkMoveAction implements ChunkMethodAction {
 
   action(doc: ActiveDocumentObject): ChunkMoveHistory {
     const chunkIndex = doc.chunks.findIndex((c) =>
-      c.id === this.params.chunkId);
+      c.id === this.params.chunkId
+    );
     if (chunkIndex < 0) {
-      throw new InvalidChunkIdError(this.params.chunkId)
+      throw new InvalidChunkIdError(this.params.chunkId);
     }
 
     const chunk = doc.chunks[chunkIndex];
@@ -214,7 +221,7 @@ class ChunkMoveAction implements ChunkMethodAction {
       type: "move",
       fromPosition: chunkIndex,
       toPosition: this.params.position,
-    }
+    };
   }
 
   checkConflict(m: ChunkMethodHistory): boolean {
@@ -227,7 +234,9 @@ class ChunkMoveAction implements ChunkMethodAction {
   }
 }
 
-const chunkMethodActions: { [key: string]: (m: ChunkMethod) => ChunkMethodAction } = {
+const chunkMethodActions: {
+  [key: string]: (m: ChunkMethod) => ChunkMethodAction;
+} = {
   "chunk.create": (m) => new ChunkCreateAction(m as ChunkCreateMethod),
   "chunk.delete": (m) => new ChunkDeleteAction(m as ChunkDeleteMethod),
   "chunk.modify": (m) => new ChunkModifyAction(m as ChunkModifyMethod),
@@ -256,18 +265,26 @@ export async function handleChunkMethod(
   if (updateAt < doc.updatedAt) {
     //TODO(vi117): find with binary search solution
     const lastSeenIndex = doc.history.findIndex(
-      (m) => m.time === updateAt);
+      (m) => m.time === updateAt,
+    );
     if (lastSeenIndex < 0) {
-      returnRequest(conn, makeRPCError(p.id,
-        new ChunkConflictError(doc.chunks, doc.updatedAt)));
+      returnRequest(
+        conn,
+        makeRPCError(p.id, new ChunkConflictError(doc.chunks, doc.updatedAt)),
+      );
       return;
     }
     for (let i = lastSeenIndex + 1; i < doc.history.length; i++) {
       const m = doc.history[i];
       if (action.checkConflict(m.method)) {
         if (!action.trySolveConflict(m.method)) {
-          returnRequest(conn, makeRPCError(p.id,
-            new ChunkConflictError(doc.chunks, doc.updatedAt)));
+          returnRequest(
+            conn,
+            makeRPCError(
+              p.id,
+              new ChunkConflictError(doc.chunks, doc.updatedAt),
+            ),
+          );
           return;
         }
       }
@@ -278,8 +295,7 @@ export async function handleChunkMethod(
     const hist = action.action(doc);
     doc.updateDocHistory(hist);
     doc.broadcastMethod(p, doc.updatedAt, conn);
-  }
-  catch (e) {
+  } catch (e) {
     if (e instanceof RPCErrorBase) {
       returnRequest(conn, makeRPCError(p.id, e));
     }

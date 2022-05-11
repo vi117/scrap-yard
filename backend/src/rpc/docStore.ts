@@ -4,12 +4,12 @@ import { ChunkMethod } from "model";
 import * as RPC from "model";
 import * as log from "std/log";
 import { ChunkMethodHistory } from "./chunk.ts";
-import * as setting from "../setting.ts"
+import * as setting from "../setting.ts";
 
 export type DocHistory = {
   time: number;
   method: ChunkMethodHistory;
-}
+};
 
 setting.register("docHistory", {
   type: "number",
