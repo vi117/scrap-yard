@@ -5,7 +5,7 @@ import * as RPC from "model";
 import { Connection, Participant } from "./connection.ts";
 import * as log from "std/log";
 
-export function retrunRequest(conn: Participant, res: RPC.RPCResponse) {
+export function returnRequest(conn: Participant, res: RPC.RPCResponse) {
   const json = JSON.stringify(res);
   log.debug(`Sending response: ${json}`);
   conn.send(json);

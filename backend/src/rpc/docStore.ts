@@ -3,19 +3,35 @@ import { Participant } from "./connection.ts";
 import { ChunkMethod } from "model";
 import * as RPC from "model";
 import * as log from "std/log";
+import { ChunkMethodHistory } from "./chunk.ts";
+import * as setting from "../setting.ts"
+
+export type DocHistory = {
+  time: number;
+  method: ChunkMethodHistory;
+}
+
+setting.register("docHistory", {
+  type: "number",
+  default: 10,
+  min: 1,
+  max: 100,
+  step: 1,
+  label: "History Length",
+  description: "The number of historys to keep",
+});
 
 /**
  * A active document.
- * @todo(vi117)
- *  Optimize this class.
  *  each `conn` manages a staleness of the document.
  */
+//TODO(vi117)
+//Optimize this class.
+//Inheriting FileDocumentObject is not a good idea.
+//Consider to compose FileDocumentObject.
 export class ActiveDocumentObject extends FileDocumentObject {
   conns: Set<Participant>;
-  history: {
-    time: number;
-    method: ChunkMethod;
-  }[];
+  history: DocHistory[];
 
   constructor(docPath: string) {
     super(docPath);
@@ -35,13 +51,13 @@ export class ActiveDocumentObject extends FileDocumentObject {
     this.conns.delete(conn);
   }
 
-  updateDocHistory(method: ChunkMethod) {
+  updateDocHistory(method: ChunkMethodHistory) {
     const now = Date.now();
     this.history.push({
       time: now,
       method: method,
     });
-    if (this.history.length > 10) {
+    if (this.history.length > setting.get<number>("docHistory")) {
       this.history.shift();
     }
     this.updatedAt = now;

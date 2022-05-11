@@ -8,7 +8,7 @@ import {
 } from "model";
 import { DocStore } from "./docStore.ts";
 import { Participant } from "./connection.ts";
-import { retrunRequest } from "./rpc.ts";
+import { returnRequest } from "./rpc.ts";
 
 export async function handleDocumentMethod(
   conn: Participant,
@@ -25,12 +25,13 @@ export async function handleDocumentMethod(
               chunks: d.chunks,
               tags: d.tags,
               updatedAt: d.updatedAt,
+              tagsUpdatedAt: d.tagsUpdatedAt,
             },
           };
-          retrunRequest(conn, makeRPCResult(method.id, result));
+          returnRequest(conn, makeRPCResult(method.id, result));
         } catch (e) {
           if (e instanceof Deno.errors.NotFound) {
-            retrunRequest(
+            returnRequest(
               conn,
               makeRPCError(
                 method.id,
