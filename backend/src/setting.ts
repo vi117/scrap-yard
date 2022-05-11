@@ -1,5 +1,5 @@
 import Ajv, { Schema, ValidateFunction } from "ajv";
-import * as logger from "std/log"
+import * as logger from "std/log";
 
 const ajv = new Ajv();
 
@@ -50,8 +50,7 @@ export async function load() {
       const v = json[key];
       if (settingSchemas[key].validate(v)) {
         setting[key] = v;
-      }
-      else {
+      } else {
         logger.warning(`invalid setting: ${key} ${JSON.stringify(v)}`, v);
         throw new Error(`invalid setting: ${key}`);
       }
@@ -96,8 +95,7 @@ export function set<T>(name: string, value: T): T {
   }
   if (settingSchemas[name].validate(value)) {
     setting[name] = value;
-  }
-  else {
+  } else {
     throw new Error(`invalid setting: ${name}`);
   }
   return value;
