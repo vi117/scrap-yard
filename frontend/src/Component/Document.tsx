@@ -31,7 +31,8 @@ function TagBar(props: { doc: DocumentViewModel }) {
 
   const update: FormEventHandler = (e) => {
     e.preventDefault();
-    const ntags = taglist.split(" ");
+    const ntags = taglist.split(" ").filter((s) => s != "");
+
     setTags(ntags);
     setEditable(false);
   };
@@ -47,12 +48,10 @@ function TagBar(props: { doc: DocumentViewModel }) {
     );
   } else {
     return (
-      <>
-        <Stack direction="row" spacing={1}>
-          {tags.map((tag, i) => <Chip key={i} label={tag} />)}
-          <Button onClick={() => setEditable(true)}>Edit</Button>
-        </Stack>
-      </>
+      <Stack direction="row" spacing={1}>
+        {tags.map((tag, i) => <Chip key={i} label={tag} />)}
+        <Button onClick={() => setEditable(true)}>Edit</Button>
+      </Stack>
     );
   }
 }

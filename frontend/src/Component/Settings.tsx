@@ -1,15 +1,4 @@
-import {
-  Autocomplete,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  List,
-  ListItem,
-  TextField,
-} from "@mui/material";
+import { Autocomplete, Button, Dialog, DialogTitle, List, ListItem, TextField } from "@mui/material";
 import React, { useState } from "react";
 
 export function Settings(props: {
@@ -18,7 +7,7 @@ export function Settings(props: {
 }) {
   const langSetting = (
     <Autocomplete
-      options={["ko", "en"]}
+      options={["korean", "english"]}
       renderInput={(p) => <TextField {...p} label="Language" />}
     />
   );
@@ -32,7 +21,6 @@ export function Settings(props: {
 
   return (
     <Dialog
-      fullScreen
       open={props.open}
       onClose={props.onClose}
     >

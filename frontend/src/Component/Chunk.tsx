@@ -172,22 +172,29 @@ const Chunk = (props: {
   const typeDialogButton = (
     <>
       <Tooltip title="chunk type">
-        <Button onClick={() => setTOpen(true)}>type</Button>
+        <Button onClick={() => setTOpen(true)}>{type}</Button>
       </Tooltip>
       <TypeDialog open={tOpen} onClose={updateType} value={type} />
     </>
   );
 
   return (
-    <Paper key={id} ref={(mode == "Read") ? drag : null} sx={{ padding: "1em" }}>
-      <Grid container xs={12} direction="row" spacing={1} onFocus={onFocus} className="chunk">
+    <Paper
+      key={id}
+      ref={(mode == "Read") ? drag : null}
+      style={{
+        margin: "0.5em",
+        padding: "0.5em",
+      }}
+    >
+      <Grid container direction="row" spacing={1} onFocus={onFocus}>
         {/* content */}
         <Grid item xs={11} onClick={() => setMode("Write")}>
           {renderContent()}
         </Grid>
 
         {/* sidebar */}
-        <Grid item xs={1} direction="column" spacing={0}>
+        <Grid item xs={1} spacing={0}>
           {editButton}
           {deleteButton}
           {typeDialogButton}
