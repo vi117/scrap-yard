@@ -22,6 +22,7 @@ export class ActiveDocumentObject extends FileDocumentObject {
     this.conns = new Set();
     this.history = [];
   }
+
   join(conn: Participant) {
     this.conns.add(conn);
     conn.addEventListener("close", () => {
@@ -29,9 +30,11 @@ export class ActiveDocumentObject extends FileDocumentObject {
       this.leave(conn);
     });
   }
+
   leave(conn: Participant) {
     this.conns.delete(conn);
   }
+
   updateDocHistory(method: ChunkMethod) {
     const now = Date.now();
     this.history.push({

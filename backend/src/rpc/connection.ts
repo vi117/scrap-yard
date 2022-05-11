@@ -1,3 +1,6 @@
+import { UserSession } from "../auth/user.ts";
+import { handleMethodOnMessage } from "./rpc.ts";
+
 export interface Participant {
   id: string;
   send(data: string): void;
@@ -14,9 +17,11 @@ export interface Participant {
 
 export class Connection implements Participant {
   id: string;
+  user: UserSession;
   socket: WebSocket;
-  constructor(id: string, socket: WebSocket) {
+  constructor(id: string, user: UserSession, socket: WebSocket) {
     this.id = id;
+    this.user = user;
     this.socket = socket;
   }
 
@@ -71,3 +76,15 @@ export class ParticipantList {
 }
 
 export const AllParticipants = new ParticipantList();
+
+export function registerParticipant(p: Connection) {
+  p.addEventListener("open", () => {
+    AllParticipants.add(p.id, p);
+  });
+  p.addEventListener("close", () => {
+    AllParticipants.remove(p.id);
+  });
+  p.addEventListener("message", (e) => {
+    handleMethodOnMessage(p, e.data);
+  });
+}
