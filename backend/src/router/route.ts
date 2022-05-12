@@ -71,7 +71,10 @@ export class TreeRouter<T> implements Router<T> {
     this.elem = undefined;
   }
 
-  private findRouter(path: string, ctx: MatchContext): [TreeRouter<T>, string] {
+  private findRouter(
+    path: string,
+    ctx: MatchContext,
+  ): [TreeRouter<T>, string] {
     const pathes = path.split("/");
     // deno-lint-ignore no-this-alias
     let cur: TreeRouter<T> = this;

@@ -36,7 +36,7 @@ class ViewModel implements IViewModel {
 // export const store = new ViewModel();
 
 interface IPageViewModel extends ViewModelBase {
-  type: string;
+  readonly type: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

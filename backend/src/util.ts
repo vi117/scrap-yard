@@ -5,3 +5,10 @@ export async function asyncAll<T>(a: AsyncIterable<T>): Promise<Awaited<T>[]> {
   }
   return ret;
 }
+
+export class IdGenerator {
+  private id = 0;
+  next(): number {
+    return this.id++;
+  }
+}

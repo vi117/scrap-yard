@@ -1,17 +1,20 @@
 import { serverRun } from "./src/server.ts";
 import * as log from "std/log";
+import * as setting from "./src/setting.ts";
 
-await log.setup({
-  handlers: {
-    console: new log.handlers.ConsoleHandler("DEBUG"),
-  },
-  loggers: {
-    default: {
-      level: "DEBUG",
-      handlers: ["console"],
+if (import.meta.main) {
+  await log.setup({
+    handlers: {
+      console: new log.handlers.ConsoleHandler("DEBUG"),
     },
-  },
-});
-
-Deno.chdir("testworkspace");
-serverRun();
+    loggers: {
+      default: {
+        level: "DEBUG",
+        handlers: ["console"],
+      },
+    },
+  });
+  Deno.chdir("testworkspace");
+  await setting.load();
+  serverRun();
+}

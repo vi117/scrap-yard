@@ -14,6 +14,8 @@ export class RPCNotificationEvent extends Event {
   }
 }
 
+type RPCMessageBody = Omit<RPCMethod, "id" | "jsonrpc">;
+
 type RPCMessageMessagerEventListener = (e: RPCNotificationEvent) => void;
 export class RPCMessageManager extends EventTarget {
   close() {
@@ -108,7 +110,7 @@ export class RPCMessageManager extends EventTarget {
     super.removeEventListener(type, callback as EventListener, options);
   }
 
-  async invokeMethod(m: Omit<RPCMethod, "id" | "jsonrpc">): Promise<RPCResponse> {
+  async invokeMethod(m: RPCMessageBody): Promise<RPCResponse> {
     const message = {
       ...this.genHeader(),
       method: m.method,

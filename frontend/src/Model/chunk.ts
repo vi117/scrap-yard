@@ -33,12 +33,11 @@ import { RPCMessageManager } from "./RPCManager";
  * ```
  */
 export async function chunkCreate(manager: RPCMessageManager, params: ChunkCreateMethod["params"]) {
-  const method: ChunkCreateMethod = {
+  const res = await manager.invokeMethod({
     ...manager.genHeader(),
     method: "chunk.create",
     params,
-  };
-  const res = await manager.send(method);
+  });
   if (res.result) {
     const result = res.result as ChunkCreateResult;
     return result;
@@ -64,12 +63,10 @@ export async function chunkCreate(manager: RPCMessageManager, params: ChunkCreat
  * console.log(chunkId); // "some chunk id"
  */
 export async function chunkDelete(manager: RPCMessageManager, params: ChunkDeleteMethod["params"]) {
-  const method: ChunkDeleteMethod = {
-    ...manager.genHeader(),
+  const res = await manager.invokeMethod({
     method: "chunk.delete",
     params,
-  };
-  const res = await manager.send(method);
+  });
   if (res.result) {
     const result = res.result as ChunkDeleteResult;
     return result;
@@ -99,12 +96,10 @@ export async function chunkDelete(manager: RPCMessageManager, params: ChunkDelet
  * console.log(chunkId); // "some chunk id"
  */
 export async function chunkModify(manager: RPCMessageManager, params: ChunkModifyMethod["params"]) {
-  const method: ChunkModifyMethod = {
-    ...manager.genHeader(),
+  const res = await manager.invokeMethod({
     method: "chunk.modify",
     params,
-  };
-  const res = await manager.send(method);
+  });
   if (res.result) {
     const result = res.result as ChunkModifyResult;
     return result;
@@ -132,12 +127,10 @@ export async function chunkModify(manager: RPCMessageManager, params: ChunkModif
  * ```
  */
 export async function chunkMove(manager: RPCMessageManager, params: ChunkMoveMethod["params"]) {
-  const method: ChunkMoveMethod = {
-    ...manager.genHeader(),
+  const res = await manager.invokeMethod({
     method: "chunk.move",
     params,
-  };
-  const res = await manager.send(method);
+  });
   if (res.result) {
     const result = res.result as ChunkMoveResult;
     return result;

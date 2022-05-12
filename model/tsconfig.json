@@ -1,21 +1,21 @@
 {
-    "compilerOptions": {
-        "lib": ["esnext"],
-        "outDir": "dist",
-        "declaration": true,
-        "sourceMap": true,
-        "target": "esnext",
-        "module": "esnext",
-    },
-    "include": [
-        "src/**/*.ts",
-        "mod.ts"
-    ],
-    "exclude": [
-        "node_modules",
-        "dist",
-        "build.ts",
-        "deps.ts",
-        "src/**/*.test.ts",
-    ],
+  "compilerOptions": {
+    "lib": ["esnext"],
+    "outDir": "dist",
+    "declaration": true,
+    "sourceMap": true,
+    "target": "esnext",
+    "module": "esnext"
+  },
+  "include": [
+    "src/**/*.ts",
+    "mod.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build.ts",
+    "deps.ts",
+    "src/**/*.test.ts"
+  ]
 }

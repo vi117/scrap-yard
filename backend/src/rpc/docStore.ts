@@ -3,25 +3,52 @@ import { Participant } from "./connection.ts";
 import { ChunkMethod } from "model";
 import * as RPC from "model";
 import * as log from "std/log";
+import { ChunkMethodHistory } from "./chunk.ts";
+import * as setting from "../setting.ts";
+
+export type DocHistory = {
+  time: number;
+  method: ChunkMethodHistory;
+};
+
+setting.register("docHistory", {
+  type: "number",
+  default: 10,
+  minimum: 1,
+  maximum: 100,
+  title: "History Length",
+  description: "The number of historys to keep",
+});
+
+/**
+ * get the maximum number of historys to keep
+ * must be called after setting is loaded
+ * @returns The number of historys to keep
+ */
+export function getSettingDocHistoryMaximum(): number {
+  return setting.get<number>("docHistory");
+}
 
 /**
  * A active document.
- * @todo(vi117)
- *  Optimize this class.
  *  each `conn` manages a staleness of the document.
  */
+//TODO(vi117)
+//Optimize this class.
+//Inheriting FileDocumentObject is not a good idea.
+//Consider to compose FileDocumentObject.
 export class ActiveDocumentObject extends FileDocumentObject {
   conns: Set<Participant>;
-  history: {
-    time: number;
-    method: ChunkMethod;
-  }[];
+  history: DocHistory[];
+  readonly maxHistory: number;
 
-  constructor(docPath: string) {
+  constructor(docPath: string, maxHistory: number) {
     super(docPath);
     this.conns = new Set();
     this.history = [];
+    this.maxHistory = maxHistory;
   }
+
   join(conn: Participant) {
     this.conns.add(conn);
     conn.addEventListener("close", () => {
@@ -29,16 +56,18 @@ export class ActiveDocumentObject extends FileDocumentObject {
       this.leave(conn);
     });
   }
+
   leave(conn: Participant) {
     this.conns.delete(conn);
   }
-  updateDocHistory(method: ChunkMethod) {
+
+  updateDocHistory(method: ChunkMethodHistory) {
     const now = Date.now();
     this.history.push({
       time: now,
       method: method,
     });
-    if (this.history.length > 10) {
+    if (this.history.length > this.maxHistory) {
       this.history.shift();
     }
     this.updatedAt = now;
@@ -79,7 +108,9 @@ export class DocumentStore {
   async open(conn: Participant, docPath: string) {
     const docGroup = this.documents[docPath];
     if (!docGroup) {
-      const doc = new ActiveDocumentObject(docPath);
+      //TODO(vi117): use a factory to create docGroup
+      // remove magic number
+      const doc = new ActiveDocumentObject(docPath, 10);
       await doc.open();
       doc.conns.add(conn);
       this.documents[docPath] = doc;

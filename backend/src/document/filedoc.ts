@@ -5,12 +5,14 @@ export class FileDocumentObject implements DocumentObject {
   chunks: Chunk[];
   tags: string[];
   updatedAt: number;
+  tagsUpdatedAt: number;
 
   constructor(path: string) {
     this.docPath = path;
     this.chunks = [];
     this.tags = [];
     this.updatedAt = 0;
+    this.tagsUpdatedAt = 0;
   }
   /**
    * open a file document with `this.docPath`

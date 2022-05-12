@@ -3,7 +3,8 @@
   "importMap": "import_map.json",
   "fmt": {
     "options": {
-      "indentWidth": 2
+      "indentWidth": 2,
+      "lineWidth": 80
     }
   },
   "tasks": {
@@ -12,6 +13,7 @@
     "gen_lcov": "deno coverage --lcov coverage --output=coverage.lcov",
     "serve": "deno run --no-check --allow-all app.ts",
     "test_debug": "deno test --no-check -A --inspect-brk",
-    "test_doc": "deno test --doc -A"
+    "test_doc": "deno test --doc -A",
+    "fmt": "deno fmt src/"
   }
 }

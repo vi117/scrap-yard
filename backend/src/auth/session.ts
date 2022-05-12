@@ -1,5 +1,6 @@
 import { makeResponse } from "../router/util.ts";
 import { createAdminUser, UserSession } from "./user.ts";
+import * as setting from "../setting.ts";
 
 export class SessionStore<T> {
   sessions: Record<string, T>;
@@ -15,10 +16,17 @@ export class SessionStore<T> {
   delete(id: string): void {
     delete this.sessions[id];
   }
+  async saveToFile(path: string): Promise<void> {
+    await Deno.writeTextFile(path, JSON.stringify(this.sessions));
+  }
+  async loadFromFile(path: string): Promise<void> {
+    const data = await Deno.readTextFile(path);
+    this.sessions = JSON.parse(data);
+  }
 }
 
 const password = Deno.env.get("SESSION_PASSWORD") || "secret";
-export const session = new SessionStore<UserSession>();
+export const sessionStore = new SessionStore<UserSession>();
 
 export function makeSessionId(): string {
   return crypto.randomUUID();
@@ -47,7 +55,7 @@ export async function handleLogin(req: Request): Promise<Response> {
     );
   }
   const id = makeSessionId();
-  session.set(id, createAdminUser(id));
+  sessionStore.set(id, createAdminUser(id));
   return new Response('{"ok":true}', {
     status: 200,
     statusText: "OK",
@@ -68,7 +76,7 @@ export function handleLogout(req: Request): Response {
       }),
     );
   }
-  session.delete(id);
+  sessionStore.delete(id);
   return makeResponse(
     200,
     JSON.stringify({
@@ -91,5 +99,28 @@ export function getSession(req: Request): UserSession | undefined {
   if (!id) {
     return undefined;
   }
-  return session.get(id);
+  return sessionStore.get(id);
+}
+
+type SessionSetting = {
+  allowAnonymous: boolean;
+};
+
+setting.register("session", {
+  type: "object",
+  properties: {
+    allowAnonymous: { type: "boolean", default: true },
+  },
+});
+
+export function getSessionUser(req: Request): UserSession {
+  const session = getSession(req);
+  if (!session) {
+    if (!setting.get<SessionSetting>("session").allowAnonymous) {
+      throw new Error("no session");
+    }
+    //TODO(vi117): create anonymous user. not admin user
+    return createAdminUser("default");
+  }
+  return session;
 }
