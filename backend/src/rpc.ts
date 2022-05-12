@@ -4,7 +4,6 @@ import { IdGenerator } from "./util.ts";
 import { getSessionUser } from "./auth/session.ts";
 import * as log from "std/log";
 
-// it is temporary id generator. it will be replaced with real id.
 const idGen = new IdGenerator();
 
 export function rpc(req: Request, _ctx: unknown): Response {

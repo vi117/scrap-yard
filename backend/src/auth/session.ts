@@ -119,6 +119,7 @@ export function getSessionUser(req: Request): UserSession {
     if (!setting.get<SessionSetting>("session").allowAnonymous) {
       throw new Error("no session");
     }
+    //TODO(vi117): create anonymous user. not admin user
     return createAdminUser("default");
   }
   return session;

@@ -4,6 +4,7 @@ import {
   InvalidDocPathError,
   makeRPCError,
   makeRPCResult,
+  PermissionDeniedError,
 } from "model";
 import { DocStore } from "./docStore.ts";
 import { Participant } from "./connection.ts";
@@ -13,6 +14,13 @@ export async function handleDocumentMethod(
   conn: Participant,
   method: DocumentMethod,
 ): Promise<void> {
+  if (!conn.user.permissionSet.canRead(method.params.docPath)) {
+    returnRequest(
+      conn,
+      makeRPCError(method.id, new PermissionDeniedError(method.params.docPath)),
+    );
+    return;
+  }
   switch (method.method) {
     case "document.open":
       {
@@ -42,6 +50,7 @@ export async function handleDocumentMethod(
       }
       break;
     case "document.close":
+      //TODO(vi117): close document
       throw new Error("Not implemented");
   }
 }

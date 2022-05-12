@@ -2,9 +2,12 @@ import { UserSession } from "../auth/user.ts";
 import { handleMethodOnMessage } from "./rpc.ts";
 
 export interface Participant {
-  id: string;
+  readonly id: string;
+  readonly user: UserSession;
+
   // TODO(vi117): replace `send` to `sendNotification` and `respondWith`
   send(data: string): void;
+
   addEventListener<T extends keyof WebSocketEventMap>(
     type: T,
     listener: (this: WebSocket, event: WebSocketEventMap[T]) => void,

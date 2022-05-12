@@ -6,6 +6,7 @@ import {
   ChunkMoveMethod,
   makeRPCError,
   makeRPCResult,
+  PermissionDeniedError,
   RPCErrorBase,
 } from "model";
 import { Participant } from "./connection.ts";
@@ -269,6 +270,10 @@ export async function handleChunkMethod(
   const doc = await DocStore.open(conn, docPath);
   const action = getAction(p);
   //TODO(vi117): permission check
+  if (!conn.user.permissionSet.canWrite(docPath)) {
+    returnRequest(conn, makeRPCError(p.id, new PermissionDeniedError(docPath)));
+    return;
+  }
 
   if (updateAt < doc.updatedAt) {
     //TODO(vi117): find with binary search solution
