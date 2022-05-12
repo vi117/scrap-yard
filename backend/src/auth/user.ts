@@ -12,6 +12,6 @@ export function createAdminUser(tokenKey: string): UserSession {
     id: tokenKey,
     superuser: true,
     expiredAt: new Date().getTime() + 1000 * 60 * 60 * 24 * 30,
-    permissionSet: createPermission("/", { writable: true }),
+    permissionSet: createPermission("", { writable: true }),
   };
 }

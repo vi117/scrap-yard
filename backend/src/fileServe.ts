@@ -1,6 +1,5 @@
 import {
   Handler,
-  isQueryValueTrue,
   makeJsonResponse,
   makeResponse,
   MatchContext,
@@ -8,12 +7,12 @@ import {
   Router,
   Status,
 } from "./router/mod.ts";
-import { extname, normalize } from "std/path";
+import { normalize } from "std/path";
 import { serveFile } from "std/file_server";
 import { copy, readerFromStreamReader } from "std/streams";
 import { asyncAll } from "./util.ts";
-
-const DOC_EXT = ".syd";
+import { getSessionUser } from "./auth/session.ts";
+import * as log from "std/log";
 
 export class FileServeRouter implements Router<Handler> {
   fn: Handler;
@@ -23,50 +22,52 @@ export class FileServeRouter implements Router<Handler> {
       .put(putHandler)
       .delete(deleteHandler)
       .build();
+    //TODO(vi117): file diff propergate to other clients
+
     async function getHandler(req: Request, ctx: MatchContext) {
       const path = ctx["path"];
+      const user = getSessionUser(req);
       const url = new URL(req.url);
-      const isRaw = url.searchParams.get("raw");
-      if (isQueryValueTrue(isRaw)) {
-        const stat = await Deno.stat(path);
+      const isStat = url.searchParams.get("stat") === "true";
+
+      if (!user.permissionSet.canRead(path)) {
+        log.warning(`${user.id} try to read ${path}`);
+        return makeResponse(Status.Forbidden);
+      }
+
+      const stat = await Deno.stat(path);
+      if (isStat) {
         if (stat.isDirectory) {
-          const method = req.method.toLocaleLowerCase();
-          if (method == "get") {
-            return makeJsonResponse(Status.OK, {
-              fileList: (await asyncAll(await Deno.readDir(path)))
-                .map((v) => v),
-            });
-          }
-          return makeResponse(Status.MethodNotAllowed);
+          return makeJsonResponse(Status.OK, {
+            ...stat,
+            entries: (await asyncAll(await Deno.readDir(path)))
+              .map((v) => v),
+          });
         } else {
-          return await serveFile(req, path);
+          return makeJsonResponse(Status.OK, {
+            ...stat,
+          });
         }
       } else {
-        const stat = await Deno.stat(path);
         if (stat.isDirectory) {
-          return makeResponse(
-            Status.BadRequest,
-            "directory request must have raw query param",
-          );
-        } else {
-          const ext = extname(path);
-          if (ext == DOC_EXT) {
-            const doc = await Deno.readTextFile(path);
-            return makeResponse(Status.OK, doc, {
-              "Content-Type": "application/json",
-            });
-          }
+          return makeResponse(Status.BadRequest, "Not file");
         }
+
+        return await serveFile(req, path, { fileInfo: stat });
       }
-      throw new Error("not implemented");
     }
+
     async function putHandler(req: Request, ctx: MatchContext) {
       const path = ctx["path"];
-      const url = new URL(req.url);
-      const isRaw = url.searchParams.get("raw");
-      if (isQueryValueTrue(isRaw)) {
-        const body = req.body;
-        const file = await Deno.open(path, {
+      const user = getSessionUser(req);
+      if (!user.permissionSet.canWrite(path)) {
+        log.warning(`${user.id} try to write ${path}`);
+        return makeResponse(Status.Forbidden);
+      }
+      const body = req.body;
+      let file: Deno.FsFile | null = null;
+      try {
+        file = await Deno.open(path, {
           write: true,
           append: false,
           create: true,
@@ -76,32 +77,38 @@ export class FileServeRouter implements Router<Handler> {
           const src = readerFromStreamReader(body.getReader());
           await copy(src, file);
         }
-        file.close();
         return makeResponse(
           Status.OK,
           JSON.stringify({
             ok: true,
           }),
         );
+      } catch (error) {
+        throw error;
+      } finally {
+        if (file) {
+          file.close();
+        }
       }
-      throw new Error("not implemented");
     }
+
     async function deleteHandler(req: Request, ctx: MatchContext) {
       const path = ctx["path"];
-      const url = new URL(req.url);
-      const isRaw = url.searchParams.get("raw");
-      if (isQueryValueTrue(isRaw)) {
-        await Deno.remove(path, { recursive: true });
-        return makeResponse(
-          Status.OK,
-          JSON.stringify({
-            ok: true,
-          }),
-        );
+      const user = getSessionUser(req);
+      if (!user.permissionSet.canWrite(path)) {
+        log.warning(`${user.id} try to delete ${path}`);
+        return makeResponse(Status.Forbidden);
       }
-      throw new Error("not implemented");
+      await Deno.remove(path, { recursive: true });
+      return makeResponse(
+        Status.OK,
+        JSON.stringify({
+          ok: true,
+        }),
+      );
     }
   }
+
   match(path: string, _ctx: MatchContext): Handler | null {
     return async (req, ctx) => {
       path = normalize(path);

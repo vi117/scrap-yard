@@ -21,6 +21,7 @@ router.register("/", (_req) => {
     },
   });
 });
+
 router.registerRouter("dist", getStaticRouter("dist"));
 router.registerRouter("fs", new FileServeRouter());
 router.register("/app", app);

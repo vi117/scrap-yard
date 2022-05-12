@@ -3,6 +3,7 @@ import { assertEquals } from "std/assert";
 import { stub } from "std/mock";
 import { ActiveDocumentObject, DocStore } from "./docStore.ts";
 import { Participant } from "./connection.ts";
+import { createAdminUser } from "../auth/user.ts";
 import * as RPC from "model";
 
 Deno.test({
@@ -17,6 +18,7 @@ Deno.test({
       close() {},
       addEventListener() {},
       removeEventListener() {},
+      user: createAdminUser("admin"),
     };
     const popObject = () => {
       const ret = messageBuffer.shift();
@@ -178,6 +180,7 @@ Deno.test({
       close() {},
       addEventListener() {},
       removeEventListener() {},
+      user: createAdminUser("alice"),
     };
     const popAliceObject = () => {
       const ret = aliceMessageBuffer.shift();
@@ -195,6 +198,7 @@ Deno.test({
       close() {},
       addEventListener() {},
       removeEventListener() {},
+      user: createAdminUser("bob"),
     };
     const docObj = new ActiveDocumentObject("docPath", 10);
     docObj.chunks = [];

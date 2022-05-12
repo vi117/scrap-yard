@@ -1,4 +1,4 @@
-import { normalize as normalizePath } from "std/path";
+import { normalize as normalizePath, relative } from "std/path";
 
 export interface PermissionDescriptor {
   /**
@@ -37,10 +37,8 @@ class PermissionImpl implements PermissionDescriptor {
 
   canRead(path: string): boolean {
     path = normalizePath(path);
-    if (path.startsWith(this.basePath)) {
-      return true;
-    }
-    return false;
+    const rel = relative(this.basePath, path);
+    return !(rel.startsWith(".."));
   }
 
   canWrite(path: string): boolean {
@@ -60,5 +58,6 @@ export function createPermission(
   basePath: string,
   options?: createPermissionOption,
 ): PermissionDescriptor {
+  //TODO(vi117): permission abs path is not correct
   return new PermissionImpl(basePath, options);
 }
