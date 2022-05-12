@@ -8,22 +8,39 @@ type RPCCallback = {
 const NotificationEventName = "notification";
 type RPCMessageManagerEventType = "notification";
 
-export class RPCNotificationEvent extends Event {
-  constructor(public readonly notification: RPCNotification, eventInit?: EventInit) {
-    super(NotificationEventName, eventInit);
+export class RPCNotificationEvent extends MessageEvent<RPCNotification> {
+  constructor(public readonly notification: RPCNotification, eventInit?: MessageEventInit<RPCNotification>) {
+    super(NotificationEventName, {
+      data: notification,
+      ...eventInit,
+    });
   }
 }
 
 type RPCMessageBody = Omit<RPCMethod, "id" | "jsonrpc">;
 
-type RPCMessageMessagerEventListener = (e: RPCNotificationEvent) => void;
-export class RPCMessageManager extends EventTarget {
-  close() {
-    if (this.ws) {
-      this.ws.close();
-    }
-    this.callbackList.clear();
-  }
+type RPCMessageMessagerEventListener = (this: IRPCMessageManager, e: RPCNotificationEvent) => void;
+
+export interface IRPCMessageManager extends EventTarget {
+  readonly opened: boolean;
+  close(): void;
+  sendNotification(notification: RPCNotification): void;
+  addEventListener(name: RPCMessageManagerEventType, listener: RPCMessageMessagerEventListener): void;
+  addEventListener(
+    name: string,
+    listener: EventListenerOrEventListenerObject | null,
+    options?: boolean | EventListenerOptions,
+  ): void;
+  removeEventListener(name: RPCMessageManagerEventType, listener: RPCMessageMessagerEventListener): void;
+  removeEventListener(
+    name: string,
+    listener: EventListenerOrEventListenerObject | null,
+    options?: boolean | EventListenerOptions,
+  ): void;
+  invokeMethod(m: RPCMessageBody): Promise<RPCResponse>;
+}
+
+export class RPCMessageManager extends EventTarget implements IRPCMessageManager {
   private callbackList: Map<number, RPCCallback>;
   private curId: number;
   private ws?: WebSocket;
@@ -32,9 +49,11 @@ export class RPCMessageManager extends EventTarget {
     this.curId = 1;
     this.callbackList = new Map();
   }
+
   get opened() {
     return this.ws?.readyState === WebSocket.OPEN;
   }
+
   async open(url: string | URL, protocals?: string | string) {
     return new Promise<void>((resolve, reject) => {
       console.log("connect to", url);
@@ -59,6 +78,13 @@ export class RPCMessageManager extends EventTarget {
         reject(new Error("connection error"));
       };
     });
+  }
+
+  close() {
+    if (this.ws) {
+      this.ws.close();
+    }
+    this.callbackList.clear();
   }
 
   // TODO(vi117): extract id generator
