@@ -15,6 +15,5 @@ if (import.meta.main) {
     },
   });
   Deno.chdir("testworkspace");
-  await setting.load();
   serverRun();
 }

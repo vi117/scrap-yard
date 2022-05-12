@@ -11,13 +11,18 @@ export type DocHistory = {
   method: ChunkMethodHistory;
 };
 
-setting.register("docHistory", {
-  type: "number",
-  default: 10,
-  minimum: 1,
-  maximum: 100,
-  title: "History Length",
-  description: "The number of historys to keep",
+setting.register("docStore", {
+  type: "object",
+  properties: {
+    docHitoryLength: {
+      type: "number",
+      default: 10,
+      minimum: 1,
+      maximum: 100,
+      title: "History Length",
+      description: "The number of historys to keep",
+    },
+  },
 });
 
 /**

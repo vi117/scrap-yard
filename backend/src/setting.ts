@@ -1,7 +1,7 @@
 import Ajv, { Schema, ValidateFunction } from "ajv";
 import * as logger from "std/log";
 
-const ajv = new Ajv();
+const ajv = new Ajv({ useDefaults: true });
 
 const settingSchemas: Record<string, {
   name: string;
@@ -41,10 +41,30 @@ export function register(name: string, schema: Schema) {
     schema,
     validate: ajv.compile(schema),
   };
+  if (!(name in setting)) {
+    setting[name] = {};
+  }
+  if (settingSchemas[name].validate(setting[name])) {
+    return;
+  } else {
+    logger.warning(
+      `invalid setting: ${name} ${JSON.stringify(setting[name])}`,
+      name,
+    );
+    throw new Error(`invalid setting: ${name}`);
+  }
 }
 
 export async function load() {
-  const data = await Deno.readTextFile(settingPath);
+  let data;
+  try {
+    data = await Deno.readTextFile(settingPath);
+  } catch (e) {
+    if (e instanceof Deno.errors.NotFound) {
+      logger.info(`setting file not found: ${settingPath}`);
+      data = "{}";
+    } else throw e;
+  }
   const json = JSON.parse(data);
   for (const key in json) {
     if (key in settingSchemas) {
@@ -58,25 +78,26 @@ export async function load() {
         );
         throw new Error(`invalid setting: ${key}`);
       }
-    }
-  }
-  for (const key in settingSchemas) {
-    if (!(key in setting)) {
-      setting[key] = {};
+    } else {
+      setting[key] = json[key];
     }
   }
 }
-
+await load();
 /**
  * get setting
  * @param name key of setting
  * @returns setting value
  */
 export function get<T>(name: string): T {
-  const v = setting[name];
-  if (!v) {
+  if (!(name in setting)) {
+    logger.error(
+      `key ${name} not found in setting file {${JSON.stringify(setting)}}`,
+      setting,
+    );
     throw new Error(`key ${name} not found in setting file`);
   }
+  const v = setting[name];
   return v as T;
 }
 

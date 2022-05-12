@@ -1,5 +1,6 @@
 import * as setting from "./setting.ts";
 import { assertEquals, assertRejects } from "std/assert";
+import { stub } from "std/mock";
 
 Deno.test({
   name: "setting: basic",
@@ -18,5 +19,76 @@ Deno.test({
     await assertRejects(async () => {
       await setting.get<{ a: string; b: number }>("test2");
     }, Error);
+  },
+});
+
+Deno.test({
+  name: "setting: default value",
+  fn: async () => {
+    setting.setPath("src/testdata/test1_setting.json");
+    setting.register("test", {
+      type: "object",
+      properties: {
+        a: { type: "string" },
+        b: { type: "number" },
+        c: { type: "boolean", default: true },
+      },
+    });
+    await setting.load();
+    const data = setting.get<{ a: string; b: number; c: boolean }>("test");
+    assertEquals(data, { a: "a", b: 1, c: true });
+  },
+});
+
+Deno.test({
+  name: "setting: defered register",
+  fn: async () => {
+    const originalReadTextFile = Deno.readTextFile;
+    const readTextFileStore = await stub(
+      Deno,
+      "readTextFile",
+      async (path: string, options?: Deno.ReadFileOptions) => {
+        if (path === "src/testdata/test1_setting.json") {
+          return JSON.stringify({
+            test: {
+              a: "a",
+              b: 1,
+              c: true,
+            },
+            test2: {
+              a: "a",
+              b: 1,
+              c: true,
+            },
+          });
+        } else {
+          return await originalReadTextFile(path, options);
+        }
+      },
+    );
+    try {
+      setting.setPath("src/testdata/test1_setting.json");
+      setting.register("test", {
+        type: "object",
+        properties: {
+          a: { type: "string" },
+          b: { type: "number" },
+          c: { type: "boolean", default: true },
+        },
+      });
+      await setting.load();
+      setting.register("test2", {
+        type: "object",
+        properties: {
+          a: { type: "string" },
+          b: { type: "number" },
+          c: { type: "boolean", default: true },
+        },
+      });
+      const data = setting.get<{ a: string; b: number; c: boolean }>("test2");
+      assertEquals(data, { a: "a", b: 1, c: true });
+    } finally {
+      readTextFileStore.restore();
+    }
   },
 });
