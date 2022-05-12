@@ -3,14 +3,20 @@ import DragHandleIcon from "@mui/icons-material/DragHandle";
 import EditIcon from "@mui/icons-material/Edit";
 import MenuIcon from "@mui/icons-material/Menu";
 import SaveIcon from "@mui/icons-material/Save";
-import { Button, Dialog, DialogTitle, Grid, Input, Paper, TextField, Tooltip } from "@mui/material";
+import { Autocomplete, Button, Dialog, DialogTitle, Grid, Input, Paper, TextField, Tooltip } from "@mui/material";
 import { Chunk as ChunkType } from "model";
-import React, { ChangeEventHandler, createRef, FormEventHandler, useEffect, useState } from "react";
+import React, { ChangeEventHandler, createRef, FormEventHandler, useEffect, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import { RecoilState, useRecoilState } from "recoil";
 import { DocumentViewModel } from "../ViewModel/doc";
 import csvRenderer from "./Chunk/csvRenderer";
 import markdownRenderer from "./Chunk/markdownRenderer";
+
+const types = [
+  "text",
+  "csv",
+  "md",
+];
 
 function render_view(t: string, content: string) {
   switch (t) {
@@ -30,18 +36,24 @@ const TypeDialog = (props: {
   onClose: (t: string) => void;
   value: string;
 }) => {
-  const [input, setInput] = useState(props.value);
-
-  const onChange: ChangeEventHandler<HTMLInputElement> = (e) => setInput(e.target.value);
+  const inputRef = useRef(null);
 
   const update = () => {
-    props.onClose(input);
+    props.onClose(inputRef.current.value);
   };
 
   return (
-    <Dialog open={props.open} onClose={update}>
+    <Dialog
+      style={{ padding: "1em" }}
+      open={props.open}
+      onClose={update}
+    >
       <DialogTitle>Set chunk type</DialogTitle>
-      <Input type="text" value={input} onChange={onChange} />
+      <Autocomplete
+        options={types}
+        sx={{ width: 300 }}
+        renderInput={(param) => <TextField {...param} inputRef={inputRef} type="text" label="type" />}
+      />
       <Input type="button" value="change" onClick={update} />
     </Dialog>
   );
