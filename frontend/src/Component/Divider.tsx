@@ -1,5 +1,6 @@
 // Divider sits inbetween chunks, and is a place for a new chunk to spawn or old to drop on.
 
+import AddIcon from "@mui/icons-material/Add";
 import { Box, Button } from "@mui/material";
 import { useDrop } from "react-dnd";
 import { NativeTypes } from "react-dnd-html5-backend";
@@ -40,7 +41,9 @@ export function Divider(props: {
       ref={drop}
       sx={isOver && { background: "grey" }}
     >
-      <Button onClick={() => newChunk(position)}>Add</Button>
+      <Button fullWidth={true} onClick={() => newChunk(position)}>
+        <AddIcon />
+      </Button>
     </Box>
   );
 }

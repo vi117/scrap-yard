@@ -1,11 +1,22 @@
-import { Button, Grid, Input, Paper, TextField } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DragHandleIcon from "@mui/icons-material/DragHandle";
+import EditIcon from "@mui/icons-material/Edit";
+import MenuIcon from "@mui/icons-material/Menu";
+import SaveIcon from "@mui/icons-material/Save";
+import { Autocomplete, Button, Dialog, DialogTitle, Grid, Input, Paper, TextField, Tooltip } from "@mui/material";
 import { Chunk as ChunkType } from "model";
-import React, { ChangeEventHandler, createRef, FormEventHandler, useEffect, useState } from "react";
+import React, { ChangeEventHandler, createRef, FormEventHandler, useEffect, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import { RecoilState, useRecoilState } from "recoil";
 import { DocumentViewModel } from "../ViewModel/doc";
 import csvRenderer from "./Chunk/csvRenderer";
 import markdownRenderer from "./Chunk/markdownRenderer";
+
+const types = [
+  "text",
+  "csv",
+  "md",
+];
 
 function render_view(t: string, content: string) {
   switch (t) {
@@ -20,27 +31,31 @@ function render_view(t: string, content: string) {
   }
 }
 
-const TypeForm = (props: {
+const TypeDialog = (props: {
+  open: boolean;
+  onClose: (t: string) => void;
   value: string;
-  update: (t: string) => void;
 }) => {
-  const [input, setInput] = useState(props.value);
+  const inputRef = useRef(null);
 
-  const onChange: ChangeEventHandler<HTMLInputElement> = (e) => setInput(e.target.value);
-
-  const update: FormEventHandler = (e) => {
-    e.preventDefault();
-    props.update(input);
+  const update = () => {
+    props.onClose(inputRef.current.value);
   };
 
   return (
-    <form onSubmit={update}>
-      <label>
-        type:
-        <Input type="text" value={input} onChange={onChange} />
-      </label>
-      <Input type="submit" value="change" />
-    </form>
+    <Dialog
+      style={{ padding: "1em" }}
+      open={props.open}
+      onClose={update}
+    >
+      <DialogTitle>Set chunk type</DialogTitle>
+      <Autocomplete
+        options={types}
+        sx={{ width: 300 }}
+        renderInput={(param) => <TextField {...param} inputRef={inputRef} type="text" label="type" />}
+      />
+      <Input type="button" value="change" onClick={update} />
+    </Dialog>
   );
 };
 
@@ -63,8 +78,11 @@ const Chunk = (props: {
   const [mode, setMode] = useState("Read");
   const [onDelete, setOnDelete] = useState(false);
 
+  // Tag Dialog States
+  const [tOpen, setTOpen] = useState(false);
+
   // drag
-  const [, drag] = useDrag(() => ({
+  const [, drag, preview] = useDrag(() => ({
     type: "chunk", // TODO: make this constant
     item: { id: id },
   }));
@@ -99,6 +117,7 @@ const Chunk = (props: {
     // TODO: update chunk type here.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setType(t as any);
+    setTOpen(false);
   };
 
   const onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement> = (e) => setBuffer(e.target.value);
@@ -121,7 +140,11 @@ const Chunk = (props: {
 
   const renderContent = () => {
     if (mode == "Read") {
-      return <div id="content" className="content">{render_view(type, content)}</div>;
+      return (
+        <div id="content" className="content" style={{ minHeight: "8em" }}>
+          {render_view(type, content)}
+        </div>
+      );
     } else { // edit mode
       // TODO: change this to proper editor
       return (
@@ -143,25 +166,50 @@ const Chunk = (props: {
   };
 
   const editButton = (
-    <Button onClick={changeMode}>
-      {mode == "Read" ? "Edit" : "Save"}
-    </Button>
+    <Tooltip title={mode == "Read" ? "Edit" : "Save"}>
+      <Button onClick={changeMode}>
+        {mode == "Read" ? <EditIcon /> : <SaveIcon />}
+      </Button>
+    </Tooltip>
+  );
+
+  const deleteButton = (
+    <Tooltip title="Delete">
+      <Button onClick={deleteThis}>
+        <DeleteIcon />
+      </Button>
+    </Tooltip>
+  );
+
+  const typeDialogButton = (
+    <>
+      <Tooltip title="chunk type">
+        <Button onClick={() => setTOpen(true)}>{type}</Button>
+      </Tooltip>
+      <TypeDialog open={tOpen} onClose={updateType} value={type} />
+    </>
   );
 
   return (
-    <Paper ref={(mode == "Read") ? drag : null} key={id} sx={{ padding: "1em" }}>
-      <Grid container direction="column" spacing={1} onFocus={onFocus} className="chunk">
-        <Grid item xs={12}>
-          <TypeForm value={type} update={updateType} />
+    <Paper
+      key={id}
+      ref={(mode == "Read") ? drag : null}
+      style={{
+        margin: "0.5em",
+        padding: "0.5em",
+      }}
+    >
+      <Grid container direction="row" spacing={1} onFocus={onFocus}>
+        {/* content */}
+        <Grid item xs={11} onClick={() => setMode("Write")}>
+          {renderContent()}
         </Grid>
-        <Grid container xs={12} direction="row" spacing={1} className="chunk-inner">
-          <Grid item xs={11}>{renderContent()}</Grid>
-          <Grid container xs={1} direction="column" spacing={0}>
-            <Grid item>{editButton}</Grid>
-            <Grid item>
-              <Button onClick={deleteThis}>Delete</Button>
-            </Grid>
-          </Grid>
+
+        {/* sidebar */}
+        <Grid item xs={1} spacing={0}>
+          {editButton}
+          {deleteButton}
+          {typeDialogButton}
         </Grid>
       </Grid>
     </Paper>
