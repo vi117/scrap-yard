@@ -223,7 +223,8 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
 
       const { updatedAt } = await chunkModify(manager, ps);
       this.updateMark(updatedAt);
-
+      const index = this.chunks.findIndex((c) => c.id === chunk.id);
+      this.chunks[index] = nchunk;
       setChunk(nchunk);
     };
 
@@ -252,7 +253,10 @@ export function createTestDocViewModel(url: string, path: string) {
     console.log("connect to ", url);
     await manager.open(url);
     const d = await openDocument(manager, path);
-    setDoc(new DocumentViewModel(d));
+    const viewModel = new DocumentViewModel(d);
+    // for debbuging
+    (self as any).docViewModel = viewModel;
+    setDoc(viewModel);
   };
 
   return doc;

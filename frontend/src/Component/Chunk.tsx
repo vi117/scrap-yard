@@ -206,7 +206,7 @@ const Chunk = (props: {
         </Grid>
 
         {/* sidebar */}
-        <Grid item xs={1} spacing={0}>
+        <Grid item xs={1}>
           {editButton}
           {deleteButton}
           {typeDialogButton}
