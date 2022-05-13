@@ -33,6 +33,7 @@ export async function handleDocumentMethod(
               tags: d.tags,
               updatedAt: d.updatedAt,
               tagsUpdatedAt: d.tagsUpdatedAt,
+              seq: d.seq,
             },
           };
           returnRequest(conn, makeRPCResult(method.id, result));

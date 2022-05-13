@@ -30,7 +30,7 @@ export interface Router<T> {
   match(path: string, ctx: MatchContext): T | null;
 }
 
-type regElem<T> = { isRouter: false; elem: T } | {
+type RegElem<T> = { isRouter: false; elem: T } | {
   isRouter: true;
   elem: Router<T>;
 };
@@ -140,14 +140,14 @@ export class TreeRouter<T> implements Router<T> {
       elem: router,
     });
   }
-  private setOrMerge(elem: regElem<T>) {
+  private setOrMerge(elem: RegElem<T>) {
     if (elem.isRouter) {
       this.fallbackNode = elem.elem;
     } else {
       this.elem = elem.elem;
     }
   }
-  private registerPath(path: string, elem: regElem<T>): void {
+  private registerPath(path: string, elem: RegElem<T>): void {
     // deno-lint-ignore no-this-alias
     let cur: TreeRouter<T> = this;
     const pathes = path.split("/");

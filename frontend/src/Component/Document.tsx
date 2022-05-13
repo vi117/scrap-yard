@@ -19,6 +19,7 @@ const uuidList: RecoilState<string[]> = atom({
 const chunkMap = new Map();
  */
 
+// TODO(vi117): remove this and make chunk view model.
 const focusedChunk = atom({
   key: "Focused Chunk",
   default: "",

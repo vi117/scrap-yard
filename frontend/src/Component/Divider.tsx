@@ -34,12 +34,13 @@ export function Divider(props: {
         isOver: !!monitor.isOver(),
       }),
     }),
+    [position],
   );
 
   return (
     <Box
       ref={drop}
-      sx={isOver && { background: "grey" }}
+      sx={isOver ? { background: "grey" } : {}}
     >
       <Button fullWidth={true} onClick={() => newChunk(position)}>
         <AddIcon />

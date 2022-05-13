@@ -75,6 +75,7 @@ export interface ChunkCreateMethod extends JsonRPCMethodHeader {
     chunkContent: ChunkCreateParam;
   };
 }
+
 export interface ChunkCreateResult {
   /**
    * the created chunk id
@@ -84,7 +85,20 @@ export interface ChunkCreateResult {
    * document updated time at server
    */
   updatedAt: number;
+  /**
+   * last sequence number of the operation.
+   * it is used to determine the sequence of the operation.
+   */
+  seq: number;
 }
+
+export interface ChunkCreateNotificationParam {
+  method: "chunk.create";
+  position: number;
+  chunkId: string;
+  chunkContent: ChunkCreateParam;
+}
+
 /**
  * Chunk Delete Method
  */
@@ -95,6 +109,7 @@ export interface ChunkDeleteMethod extends JsonRPCMethodHeader {
     chunkId: string;
   };
 }
+
 export interface ChunkDeleteResult {
   /**
    * the deleted chunk id
@@ -104,6 +119,16 @@ export interface ChunkDeleteResult {
    * document updated time at server
    */
   updatedAt: number;
+  /**
+   * last sequence number of the operation.
+   * it is used to determine the sequence of the operation.
+   */
+  seq: number;
+}
+
+export interface ChunkDeleteNotificationParam {
+  method: "chunk.delete";
+  chunkId: string;
 }
 /**
  * Chunk Modify Method
@@ -116,6 +141,7 @@ export interface ChunkModifyMethod extends JsonRPCMethodHeader {
     chunkContent: ChunkModifyParam;
   };
 }
+
 export interface ChunkModifyResult {
   /**
    * the modified chunk id
@@ -125,7 +151,19 @@ export interface ChunkModifyResult {
    * document updated time at server
    */
   updatedAt: number;
+  /**
+   * last sequence number of the operation.
+   * it is used to determine the sequence of the operation.
+   */
+  seq: number;
 }
+
+export interface ChunkModifyNotificationParam {
+  method: "chunk.modify";
+  chunkId: string;
+  chunkContent: ChunkModifyParam;
+}
+
 export interface ChunkMoveMethod extends JsonRPCMethodHeader {
   method: "chunk.move";
   params: ChunkMethodParamBase & {
@@ -142,6 +180,7 @@ export interface ChunkMoveMethod extends JsonRPCMethodHeader {
     position: number;
   };
 }
+
 export interface ChunkMoveResult {
   /**
    * the moved chunk id
@@ -151,6 +190,17 @@ export interface ChunkMoveResult {
    * document updated time at server
    */
   updatedAt: number;
+  /**
+   * last sequence number of the operation.
+   * it is used to determine the sequence of the operation.
+   */
+  seq: number;
+}
+
+export interface ChunkMoveNotificationParam {
+  method: "chunk.move";
+  chunkId: string;
+  position: number;
 }
 
 export type ChunkMethod =
@@ -167,14 +217,32 @@ export type ChunkMethodResult =
   | ChunkModifyResult
   | ChunkMoveResult;
 
+export type ChunkNotificationParam =
+  | ChunkCreateNotificationParam
+  | ChunkDeleteNotificationParam
+  | ChunkModifyNotificationParam
+  | ChunkMoveNotificationParam;
+
 export interface ChunkUpdateNotification extends JsonRPCNotificationHeader {
   method: "chunk.update";
   params: {
-    method: ChunkMethod;
+    /**
+     * performed operation
+     */
+    method: ChunkNotificationParam;
+    /**
+     * path of the document
+     */
+    docPath: string;
     /**
      * the updated time of the document
      */
     updatedAt: number;
+    /**
+     * last sequence number of the operation.
+     * it is used to determine the sequence of the operation.
+     */
+    seq: number;
   };
 }
 

@@ -114,6 +114,7 @@ const Chunk = (props: {
   const changeMode = () => setMode(mode == "Read" ? "Write" : "Read");
 
   const updateType = (t: string) => {
+    console.log("updateType", t);
     // TODO: update chunk type here.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setType(t as any);
@@ -206,7 +207,7 @@ const Chunk = (props: {
         </Grid>
 
         {/* sidebar */}
-        <Grid item xs={1} spacing={0}>
+        <Grid item xs={1}>
           {editButton}
           {deleteButton}
           {typeDialogButton}

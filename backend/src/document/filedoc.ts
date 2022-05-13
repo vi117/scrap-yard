@@ -6,6 +6,7 @@ export class FileDocumentObject implements DocumentObject {
   tags: string[];
   updatedAt: number;
   tagsUpdatedAt: number;
+  seq: number;
 
   constructor(path: string) {
     this.docPath = path;
@@ -13,6 +14,7 @@ export class FileDocumentObject implements DocumentObject {
     this.tags = [];
     this.updatedAt = 0;
     this.tagsUpdatedAt = 0;
+    this.seq = 0;
   }
   /**
    * open a file document with `this.docPath`
@@ -24,13 +26,16 @@ export class FileDocumentObject implements DocumentObject {
     this.chunks = [];
     const content = await Deno.readTextFile(this.docPath);
     const data = JSON.parse(content);
-    if (!(data instanceof Array)) {
-      throw new Error("Invalid file format");
-    }
     this.parse(data);
     this.updatedAt = Date.now();
   }
-  parse(content: unknown[]) {
+
+  // TODO: change format. tags not initialized.
+  parse(data: unknown) {
+    if (!(data instanceof Array)) {
+      throw new Error("Invalid file format");
+    }
+    const content = data;
     for (const item of content) {
       if (
         typeof item !== "object" ||
