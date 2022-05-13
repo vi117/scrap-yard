@@ -1,54 +1,146 @@
-import { Chunk, ChunkContent, ChunkContentKind, DocumentObject } from "model";
+import { Chunk, ChunkContent, ChunkContentKind, ChunkNotification, DocumentObject } from "model";
 import { useEffect, useState } from "react";
+import * as stl from "tstl";
 import { v4 as uuidv4 } from "uuid";
 import { chunkCreate, chunkDelete, chunkModify, chunkMove } from "../Model/chunk";
 import { openDocument } from "../Model/Document";
-import { RPCManager as manager } from "../Model/RPCManager";
-
-interface ViewModelBase {
-  updateAsSource(path: string, updatedAt: number): void;
-}
-
-export interface IViewModel extends ViewModelBase {
-  pageView: IPageViewModel;
-}
-
-export class BlankPage implements IPageViewModel {
-  type = "blank";
-  constructor() {
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateAsSource(_path: string, _updatedAt: number): void {
-    // do nothing
-  }
-}
-
-class ViewModel implements IViewModel {
-  pageView: IPageViewModel;
-  constructor() {
-    this.pageView = new BlankPage();
-  }
-  updateAsSource(path: string, updatedAt: number): void {
-    this.pageView.updateAsSource(path, updatedAt);
-  }
-}
-
-// export const store = new ViewModel();
-
-interface IPageViewModel extends ViewModelBase {
-  readonly type: string;
-}
+import { RPCManager as manager, RPCNotificationEvent } from "../Model/RPCManager";
+import { IPageViewModel } from "./page";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IDocumentViewModel extends IPageViewModel {
+  updateOnNotification(notification: ChunkNotification): void;
 }
 
 interface ChunkListMutator {
+  /**
+   * add chunk to doc.
+   * @param i position
+   * @param chunkContent content
+   */
   add(i?: number, chunkContent?: ChunkContent): void;
   create(i?: number): void;
   addFromText(i: number, text: string): void;
   del(id: string): void;
   move(id: string, pos: number): void;
+}
+
+class ChunkListState {
+  constructor(public chunks: Chunk[]) {}
+  cloen(): ChunkListState {
+    return new ChunkListState([...this.chunks]);
+  }
+}
+interface ChunkListStateMutator {
+  (state: ChunkListState): ChunkListState;
+}
+
+// TODO(vi117): make class rather than function.
+function makeCreateMutator(chunkId: string, i?: number, chunkContent?: ChunkContent): ChunkListStateMutator {
+  return (state: ChunkListState) => {
+    chunkContent = chunkContent ?? { type: "text", content: "" };
+    const chunks = [...state.chunks];
+    if (i === undefined) {
+      chunks.push({
+        id: chunkId,
+        ...chunkContent,
+      });
+    } else {
+      chunks.splice(i, 0, { id: chunkId, ...chunkContent });
+    }
+    return new ChunkListState(chunks);
+  };
+}
+
+function makeDeleteMutator(id: string): ChunkListStateMutator {
+  return (state: ChunkListState) => {
+    const chunks = [...state.chunks];
+    const i = chunks.findIndex(c => c.id === id);
+    if (i < 0) {
+      return state;
+    }
+    chunks.splice(i, 1);
+    return new ChunkListState(chunks);
+  };
+}
+
+function makeMoveMutator(id: string, pos: number): ChunkListStateMutator {
+  return (state: ChunkListState) => {
+    const chunks = [...state.chunks];
+    const i = chunks.findIndex(c => c.id === id);
+    if (i < 0) {
+      return state;
+    }
+    const chunk = chunks[i];
+    chunks.splice(i, 1);
+    chunks.splice(pos, 0, chunk);
+    return new ChunkListState(chunks);
+  };
+}
+
+function makeModifyMutator(id: string, chunkContent: ChunkContent): ChunkListStateMutator {
+  return (state: ChunkListState) => {
+    const chunks = [...state.chunks];
+    const i = chunks.findIndex(c => c.id === id);
+    if (i < 0) {
+      console.log("chunk not found");
+      return state;
+    }
+    chunks[i] = { ...chunks[i], ...chunkContent };
+    return new ChunkListState(chunks);
+  };
+}
+
+type ChunkListHistoryElem = {
+  state: ChunkListState;
+  mutator: ChunkListStateMutator;
+  updatedAt: number;
+};
+
+class ChunkListHistory {
+  constructor(public history: ChunkListHistoryElem[] = [], public limit: number = 20) {}
+  private applyLast(mutator: ChunkListStateMutator, updatedAt: number): void {
+    const state = this.current.cloen();
+    const newState = mutator(state);
+    this.history.push({ state: newState, mutator, updatedAt });
+    if (this.history.length > this.limit) {
+      this.history.shift();
+    }
+  }
+  get current(): ChunkListState {
+    return this.history[this.history.length - 1].state;
+  }
+  get currentUpdatedAt(): number {
+    return this.history[this.history.length - 1].updatedAt;
+  }
+  revoke(): void {
+    this.history.pop();
+  }
+  /**
+   * apply the mutator
+   * @param mutator mutator to apply
+   * @param updatedAt method time to be applied
+   * @returns if suuccessfully applied. if not, it means the mutator is too old.
+   */
+  apply(mutator: ChunkListStateMutator, updatedAt: number): boolean {
+    // TODO(vi117): if updatedAt is equal to currentUpdatedAt, order is not guaranteed.
+    // so change `model` to give order.
+    const pos = this.history.findIndex(h => h.updatedAt > updatedAt);
+    if (pos < 0) {
+      this.applyLast(mutator, updatedAt);
+      return true;
+    } // if too old, do not apply
+    else if (pos === 0) {
+      return false;
+      // TODO(vi117): we can't use applyLast because it is too old.
+      // implement refreshing document.
+    } else {
+      const reapplied = this.history.splice(pos, this.history.length - pos);
+      this.apply(mutator, updatedAt);
+      reapplied.forEach(h => this.applyLast(h.mutator, h.updatedAt));
+      return true;
+    }
+  }
 }
 
 interface ChunkMutator {
@@ -57,9 +149,12 @@ interface ChunkMutator {
 }
 
 export class DocumentViewModel extends EventTarget implements IDocumentViewModel {
-  type = "document";
-  docPath: string;
+  readonly type = "document";
+  readonly docPath: string;
   chunks: Chunk[];
+  history: ChunkListHistory;
+  buffer: stl.PriorityQueue<{ seq: number; mutate: ChunkListStateMutator; updatedAt: number }>;
+  seq: number;
   tags: string[];
   updatedAt: number;
   tagsUpdatedAt: number;
@@ -71,11 +166,85 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
     this.tags = doc.tags;
     this.updatedAt = doc.updatedAt;
     this.tagsUpdatedAt = doc.tagsUpdatedAt;
+    this.seq = doc.seq;
+    this.history = new ChunkListHistory([{
+      state: new ChunkListState(this.chunks),
+      mutator: () => new ChunkListState(this.chunks),
+      updatedAt: this.updatedAt,
+    }]);
+    this.buffer = new stl.PriorityQueue((a, b) => a.seq < b.seq);
+    manager.addEventListener("notification", (e: RPCNotificationEvent) => {
+      console.log("notification", e.notification);
+      this.updateOnNotification(e.notification);
+    });
   }
 
-  updateMark(updatedAt: number) {
+  get nextSeq(): number {
+    return this.seq + 1;
+  }
+
+  updateOnNotification(notification: ChunkNotification): void {
+    if (notification.method === "chunk.refresh") {
+      // TODO(vi117): implement refreshing document.
+    } else if (notification.method === "chunk.update") {
+      const { docPath, method, seq, updatedAt } = notification.params;
+      if (docPath !== this.docPath) {
+        return;
+      }
+      let mutator: ChunkListStateMutator;
+      const kind = method.method;
+      switch (kind) {
+        case "chunk.create":
+          // TODO(vi117): I assume that chunkId is not undefined.
+          // make notification class that have chunkId.
+          mutator = makeCreateMutator(method.chunkId, method.position, method.chunkContent);
+          break;
+        case "chunk.delete":
+          mutator = makeDeleteMutator(method.chunkId);
+          break;
+        case "chunk.move":
+          mutator = makeMoveMutator(method.chunkId, method.position);
+          break;
+        case "chunk.modify":
+          mutator = makeModifyMutator(method.chunkId, method.chunkContent);
+          break;
+        default:
+          const _: never = kind; // exhaustiveCheck
+          throw new Error(`unknown method: ${method}`);
+      }
+      this.apply(mutator, updatedAt, seq);
+    }
+  }
+
+  private updateMark(updatedAt: number) {
     if (this.updatedAt < updatedAt) {
       this.updatedAt = updatedAt;
+    }
+  }
+
+  apply(mutator: ChunkListStateMutator, updatedAt: number, seq: number, refresh: boolean = true): void {
+    if (this.nextSeq !== seq) {
+      this.buffer.push({ seq, mutate: mutator, updatedAt });
+      return;
+    }
+    let currentUpdatedAt = updatedAt;
+    this.history.apply(mutator, currentUpdatedAt);
+    this.seq = seq;
+    while (
+      (!this.buffer.empty())
+      && this.buffer.top().seq === this.nextSeq
+    ) {
+      const { mutate, updatedAt, seq } = this.buffer.top();
+      this.buffer.pop();
+      this.history.apply(mutate, updatedAt);
+      this.seq = seq;
+      currentUpdatedAt = updatedAt;
+    }
+    this.updateMark(currentUpdatedAt);
+    this.chunks = this.history.current.chunks;
+    if (refresh) {
+      console.log("apply", this.chunks);
+      this.dispatchEvent(new Event("chunksChange"));
     }
   }
 
@@ -98,11 +267,6 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
       };
     }, [chunks]);
 
-    /**
-     * add chunk to doc.
-     * @param i position
-     * @param chunkContent content
-     */
     const add = async (i?: number, chunkContent?: ChunkContent) => {
       i = i ?? chunks.length;
 
@@ -120,11 +284,9 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
       };
 
       // FIXME: this sends requests, but reutrns error.
-      const { updatedAt } = await chunkCreate(manager, ps);
-
-      chunks.splice(i, 0, { ...chunkContent, id: ps.chunkId });
-      this.updateMark(updatedAt);
-      this.dispatchEvent(new Event("chunksChange"));
+      const { updatedAt, chunkId, seq } = await chunkCreate(manager, ps);
+      const mutator = makeCreateMutator(chunkId, i, chunkContent);
+      this.apply(mutator, updatedAt, seq);
     };
 
     const create = async (i?: number) => {
@@ -142,11 +304,9 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
         docUpdatedAt: this.updatedAt,
       };
 
-      const { updatedAt } = await chunkDelete(manager, ps);
-      const i = chunks.findIndex((c) => c.id === id);
-      this.chunks.splice(i, 1);
-      this.updateMark(updatedAt);
-      this.dispatchEvent(new Event("chunksChange"));
+      const { updatedAt, seq } = await chunkDelete(manager, ps);
+      const mutator = makeDeleteMutator(id);
+      this.apply(mutator, updatedAt, seq);
     };
 
     const move = async (id: string, pos: number) => {
@@ -157,13 +317,9 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
         docUpdatedAt: this.updatedAt,
       };
 
-      const { updatedAt } = await chunkMove(manager, ps);
-      const i = chunks.findIndex((c) => c.id === id);
-      const chunk = chunks[i];
-      this.chunks.splice(i, 1);
-      this.chunks.splice((pos <= i) ? pos : pos - 1, 0, chunk);
-      this.updateMark(updatedAt);
-      this.dispatchEvent(new Event("chunksChange"));
+      const { updatedAt, seq } = await chunkMove(manager, ps);
+      const mutator = makeMoveMutator(id, pos);
+      this.apply(mutator, updatedAt, seq);
     };
 
     return [chunks, {
@@ -174,6 +330,7 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
       move,
     }];
   }
+
   useTags(): [string[], (tags: string[]) => Promise<void>] {
     const [tags, set] = useState(this.tags);
 
@@ -200,17 +357,19 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
   useChunk(chunk_arg: Chunk): [Chunk, ChunkMutator] {
     const [chunk, setChunk] = useState(chunk_arg);
 
-    // useEffect(() => {
-    //    const onChange = () => {
-    //        setChunk(chunk);
-    //    };
-    //    this.addEventListener("chunkChange"+chunk.id, onChange);
-    //    return () => {
-    //        this.removeEventListener("chunkChange"+chunk.id, onChange);
-    //    }
-    // }, [chunk]);
+    useEffect(() => {
+      const onChange = () => {
+        // TODO: update chunk efficiently. this is O(n^2)
+        setChunk(this.chunks.find(chunk => chunk.id === chunk_arg.id) ?? chunk_arg);
+      };
+      this.addEventListener("chunksChange", onChange);
+      return () => {
+        this.removeEventListener("chunksChange", onChange);
+      };
+    }, [chunk]);
 
     const updateChunk = async (nchunk: Chunk) => {
+      if (nchunk.type === chunk.type && nchunk.content === chunk.content) return;
       const ps = {
         docPath: this.docPath,
         chunkId: chunk.id,
@@ -221,10 +380,9 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
         docUpdatedAt: this.updatedAt,
       };
 
-      const { updatedAt } = await chunkModify(manager, ps);
-      this.updateMark(updatedAt);
-      const index = this.chunks.findIndex((c) => c.id === chunk.id);
-      this.chunks[index] = nchunk;
+      const { updatedAt, seq } = await chunkModify(manager, ps);
+      const mutator = makeModifyMutator(chunk.id, nchunk);
+      this.apply(mutator, updatedAt, seq, false);
       setChunk(nchunk);
     };
 

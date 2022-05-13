@@ -42,7 +42,6 @@ export function Divider(props: {
       ref={drop}
       sx={isOver ? { background: "grey" } : {}}
     >
-      <p>{position}</p>
       <Button fullWidth={true} onClick={() => newChunk(position)}>
         <AddIcon />
       </Button>

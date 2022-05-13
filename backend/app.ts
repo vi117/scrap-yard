@@ -1,6 +1,5 @@
 import { serverRun } from "./src/server.ts";
 import * as log from "std/log";
-import * as setting from "./src/setting.ts";
 
 if (import.meta.main) {
   await log.setup({

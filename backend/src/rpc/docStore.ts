@@ -1,6 +1,6 @@
 import { FileDocumentObject } from "../document/filedoc.ts";
 import { Participant } from "./connection.ts";
-import { ChunkMethod } from "model";
+import { ChunkMethod, ChunkNotificationParam } from "model";
 import * as RPC from "model";
 import * as log from "std/log";
 import { ChunkMethodHistory } from "./chunk.ts";
@@ -61,7 +61,7 @@ export class ActiveDocumentObject extends FileDocumentObject {
       this.leave(conn);
     });
   }
-
+  //TODO(vi117): release the handler
   leave(conn: Participant) {
     this.conns.delete(conn);
   }
@@ -75,6 +75,7 @@ export class ActiveDocumentObject extends FileDocumentObject {
     if (this.history.length > this.maxHistory) {
       this.history.shift();
     }
+    this.seq++;
     this.updatedAt = now;
   }
   /**
@@ -84,7 +85,7 @@ export class ActiveDocumentObject extends FileDocumentObject {
    * @param exclude the connection that should not be notified. e.g. the connection that executed the method
    */
   broadcastMethod(
-    method: ChunkMethod,
+    method: ChunkNotificationParam,
     updatedAt: number,
     exclude?: Participant,
   ) {
@@ -96,6 +97,8 @@ export class ActiveDocumentObject extends FileDocumentObject {
           params: {
             method,
             updatedAt,
+            docPath: this.docPath,
+            seq: this.seq,
           },
         };
         conn.send(JSON.stringify(notification));

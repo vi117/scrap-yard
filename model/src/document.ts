@@ -8,6 +8,7 @@ export interface DocumentObject {
   docPath: string;
   chunks: Chunk[];
   updatedAt: number;
+  seq: number;
   tags: string[];
   tagsUpdatedAt: number;
 }
