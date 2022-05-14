@@ -36,10 +36,11 @@ const TypeDialog = (props: {
   onClose: (t: string) => void;
   value: string;
 }) => {
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const update = () => {
-    props.onClose(inputRef.current.value);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    props.onClose(inputRef.current!.value);
   };
 
   return (
