@@ -3,7 +3,7 @@ import {
   makeJsonResponse,
   makeResponse,
   MatchContext,
-  MethodRouterBuilber,
+  MethodHandlerBuilber,
   Router,
   Status,
 } from "./router/mod.ts";
@@ -17,7 +17,7 @@ import * as log from "std/log";
 export class FileServeRouter implements Router<Handler> {
   fn: Handler;
   constructor() {
-    this.fn = new MethodRouterBuilber()
+    this.fn = new MethodHandlerBuilber()
       .get(getHandler)
       .put(putHandler)
       .delete(deleteHandler)
@@ -32,7 +32,10 @@ export class FileServeRouter implements Router<Handler> {
 
       if (!user.permissionSet.canRead(path)) {
         log.warning(`${user.id} try to read ${path}`);
-        return makeResponse(Status.Forbidden);
+        return makeJsonResponse(Status.Forbidden, {
+          ok: false,
+          msg: "Forbidden",
+        });
       }
 
       const stat = await Deno.stat(path);
@@ -50,7 +53,10 @@ export class FileServeRouter implements Router<Handler> {
         }
       } else {
         if (stat.isDirectory) {
-          return makeResponse(Status.BadRequest, "Not file");
+          return makeJsonResponse(Status.BadRequest, {
+            ok: false,
+            msg: "Not file",
+          });
         }
 
         return await serveFile(req, path, { fileInfo: stat });
@@ -60,9 +66,19 @@ export class FileServeRouter implements Router<Handler> {
     async function putHandler(req: Request, ctx: MatchContext) {
       const path = ctx["path"];
       const user = getSessionUser(req);
+      const url = new URL(req.url);
       if (!user.permissionSet.canWrite(path)) {
         log.warning(`${user.id} try to write ${path}`);
-        return makeResponse(Status.Forbidden);
+        return makeJsonResponse(Status.Forbidden, {
+          ok: false,
+          error: "Forbidden",
+        });
+      }
+      if (url.searchParams.get("makeDir") === "true") {
+        await Deno.mkdir(path, { recursive: true });
+        return makeJsonResponse(Status.OK, {
+          ok: true,
+        });
       }
       const body = req.body;
       let file: Deno.FsFile | null = null;
@@ -77,11 +93,11 @@ export class FileServeRouter implements Router<Handler> {
           const src = readerFromStreamReader(body.getReader());
           await copy(src, file);
         }
-        return makeResponse(
+        return makeJsonResponse(
           Status.OK,
-          JSON.stringify({
+          {
             ok: true,
-          }),
+          },
         );
       } catch (error) {
         throw error;
@@ -97,15 +113,32 @@ export class FileServeRouter implements Router<Handler> {
       const user = getSessionUser(req);
       if (!user.permissionSet.canWrite(path)) {
         log.warning(`${user.id} try to delete ${path}`);
-        return makeResponse(Status.Forbidden);
+        return makeJsonResponse(Status.Forbidden, {
+          ok: false,
+          msg: "Forbidden",
+        });
       }
-      await Deno.remove(path, { recursive: true });
-      return makeResponse(
-        Status.OK,
-        JSON.stringify({
-          ok: true,
-        }),
-      );
+      try {
+        await Deno.remove(path, { recursive: true });
+        return makeResponse(
+          Status.OK,
+          JSON.stringify({
+            ok: true,
+          }),
+        );
+      } catch (error) {
+        if (error instanceof Deno.errors.NotFound) {
+          return makeJsonResponse(Status.NotFound, {
+            ok: false,
+            msg: "Not found",
+          });
+        } else if (error instanceof Deno.errors.PermissionDenied) {
+          return makeJsonResponse(Status.Forbidden, {
+            ok: false,
+            msg: "Permission denied",
+          });
+        } else throw error;
+      }
     }
   }
 
@@ -116,14 +149,20 @@ export class FileServeRouter implements Router<Handler> {
         path = path.substring(1);
       }
       if (path.startsWith("..")) {
-        return makeResponse(Status.BadRequest);
+        return makeJsonResponse(Status.BadRequest, {
+          ok: false,
+          msg: "Bad request",
+        });
       }
       ctx["path"] = path;
       try {
         return await this.fn(req, ctx);
       } catch (e) {
         if (e instanceof Deno.errors.NotFound) {
-          return makeResponse(Status.NotFound);
+          return makeJsonResponse(Status.NotFound, {
+            ok: false,
+            msg: "Not found",
+          });
         }
         throw e;
       }

@@ -1,10 +1,11 @@
 import { marked } from "marked";
 
-const markdownRenderer = (text: string | undefined) => {
+const MarkdownRenderer = (props: { text: string | undefined }) => {
+  let text = props.text;
   if (text === undefined) {
     text = "";
   }
   return <div dangerouslySetInnerHTML={{ __html: marked.parse(text) }} />;
 };
 
-export default markdownRenderer;
+export default MarkdownRenderer;

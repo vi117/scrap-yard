@@ -70,6 +70,7 @@ function Doc(props: { doc: DocumentViewModel }) {
           newChunk={mutation.create}
           moveChunk={mutation.move}
           addFromText={mutation.addFromText}
+          add={mutation.add}
         />
 
         <Chunk
@@ -92,6 +93,7 @@ function Doc(props: { doc: DocumentViewModel }) {
           newChunk={mutation.create}
           moveChunk={mutation.move}
           addFromText={mutation.addFromText}
+          add={mutation.add}
         />
       </Stack>
     </>

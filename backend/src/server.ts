@@ -9,6 +9,8 @@ import {
 import { FileServeRouter } from "./fileServe.ts";
 import { rpc } from "./rpc.ts";
 import * as log from "std/log";
+import * as setting from "./setting.ts";
+import { getServerInformationHandler } from "./infoHandle.ts";
 
 const router = new TreeRouter<Handler>();
 
@@ -37,8 +39,29 @@ function app() {
   });
 }
 
+setting.register("server", {
+  type: "object",
+  properties: {
+    port: { type: "number", default: 8000 },
+    host: { type: "string", default: "localhost" },
+  },
+});
+
+type ServerSetting = {
+  port: number;
+  host: string;
+};
+
+export function getServerSetting(): ServerSetting {
+  const s = setting.get<ServerSetting>("server");
+  return s;
+}
+
 export function serverRun() {
-  log.info("host is http://localhost:8000");
+  const s = getServerSetting();
+  log.info(`host is http://${s.host}:${s.port}`);
+  const sih = getServerInformationHandler();
+  router.register("info", sih);
   serve((req: Request) => {
     try {
       return serveRequest(req);
@@ -46,7 +69,7 @@ export function serverRun() {
       console.error(e);
       return makeResponse(Status.InternalServerError);
     }
-  }, { port: 8000 });
+  }, { port: s.port, hostname: s.host });
 
   function serveRequest(req: Request) {
     const ctx = {};

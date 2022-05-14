@@ -11,6 +11,10 @@ export type DocHistory = {
   method: ChunkMethodHistory;
 };
 
+type DocStoreSetting = {
+  docHistoryLength: number;
+};
+
 setting.register("docStore", {
   type: "object",
   properties: {
@@ -31,7 +35,7 @@ setting.register("docStore", {
  * @returns The number of historys to keep
  */
 export function getSettingDocHistoryMaximum(): number {
-  return setting.get<number>("docHistory");
+  return setting.get<DocStoreSetting>("docStore").docHistoryLength;
 }
 
 /**
@@ -116,9 +120,9 @@ export class DocumentStore {
   async open(conn: Participant, docPath: string) {
     const docGroup = this.documents[docPath];
     if (!docGroup) {
+      const maxHistoryLimit = getSettingDocHistoryMaximum();
       //TODO(vi117): use a factory to create docGroup
-      // remove magic number
-      const doc = new ActiveDocumentObject(docPath, 10);
+      const doc = new ActiveDocumentObject(docPath, maxHistoryLimit);
       await doc.open();
       doc.conns.add(conn);
       this.documents[docPath] = doc;

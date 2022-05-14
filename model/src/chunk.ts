@@ -16,16 +16,104 @@ export interface MarkdownChunk {
   content: string;
 }
 
+/**
+ * CSV Chunk
+ * it is a chunk of csv data
+ */
 export interface CSVChunk {
   type: "csv";
   content: string;
 }
 
 /**
+ * HTML Chunk
+ */
+export interface RawHTMLChunk {
+  type: "rawhtml";
+  content: string;
+}
+
+/**
+ * Image Chunk
+ */
+export interface ImageChunk {
+  type: "image";
+  /**
+   * image url
+   */
+  content: string;
+}
+
+/**
+ * Video Chunk
+ */
+export interface VideoChunk {
+  type: "video";
+  /**
+   * video url
+   */
+  content: string;
+}
+
+/**
+ * Audio Chunk
+ */
+export interface AudioChunk {
+  type: "audio";
+  /**
+   * audio url
+   */
+  content: string;
+}
+
+//TODO(vi117): add more chunk types
+//  "link", "code", "math",
+
+/**
  * Chunk Content
  */
-export type ChunkContent = TextChunk | MarkdownChunk | CSVChunk;
+export type ChunkContent =
+  | TextChunk
+  | MarkdownChunk
+  | CSVChunk
+  | RawHTMLChunk
+  | ImageChunk
+  | VideoChunk
+  | AudioChunk;
 export type ChunkContentKind = ChunkContent["type"];
+
+/**
+ * helper function to check if obj is ChunkContent
+ * @param obj object to check
+ * @returns obj is ChunkContent
+ */
+export function isChunkContent(
+  obj: unknown,
+): obj is ChunkContent {
+  if (typeof obj !== "object" || obj === null) {
+    return false;
+  }
+  if ("type" in obj) {
+    return typeof (obj as ChunkContent).type === "string";
+  }
+  return false;
+}
+
+/**
+ * helper function to compare ChunkContent
+ * @param obj1 object to compare
+ * @param obj2 object to compare
+ * @returns obj1 is equal to obj2
+ */
+export function compareChunkContent(
+  obj1: ChunkContent,
+  obj2: ChunkContent,
+): boolean {
+  if (obj1.type !== obj2.type) {
+    return false;
+  }
+  return obj1.content === obj2.content;
+}
 
 export type Chunk = {
   id: string;
