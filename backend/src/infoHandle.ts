@@ -7,6 +7,8 @@ import { getServerSetting } from "./server.ts";
 export function getServerInformationHandler() {
   return (new MethodHandlerBuilber()).get(() => {
     const { host, port } = getServerSetting();
+    // if you want to change the response, you should
+    // change `ServerInfo` in `frontend/model/serverInfo.ts`.
     return makeJsonResponse(Status.OK, {
       "name": "scrap-yard-server",
       "version": VERSION,
