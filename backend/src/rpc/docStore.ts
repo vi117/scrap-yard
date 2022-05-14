@@ -116,9 +116,9 @@ export class DocumentStore {
   async open(conn: Participant, docPath: string) {
     const docGroup = this.documents[docPath];
     if (!docGroup) {
+      const maxHistoryLimit = getSettingDocHistoryMaximum();
       //TODO(vi117): use a factory to create docGroup
-      // remove magic number
-      const doc = new ActiveDocumentObject(docPath, 10);
+      const doc = new ActiveDocumentObject(docPath, maxHistoryLimit);
       await doc.open();
       doc.conns.add(conn);
       this.documents[docPath] = doc;
