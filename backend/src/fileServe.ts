@@ -60,9 +60,14 @@ export class FileServeRouter implements Router<Handler> {
     async function putHandler(req: Request, ctx: MatchContext) {
       const path = ctx["path"];
       const user = getSessionUser(req);
+      const url = new URL(req.url);
       if (!user.permissionSet.canWrite(path)) {
         log.warning(`${user.id} try to write ${path}`);
         return makeResponse(Status.Forbidden);
+      }
+      if (url.searchParams.get("makeDir") === "true") {
+        await Deno.mkdir(path, { recursive: true });
+        return makeResponse(Status.OK);
       }
       const body = req.body;
       let file: Deno.FsFile | null = null;
