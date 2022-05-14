@@ -9,8 +9,8 @@ import React, { ChangeEventHandler, createRef, FormEventHandler, useEffect, useR
 import { useDrag } from "react-dnd";
 import { RecoilState, useRecoilState } from "recoil";
 import { DocumentViewModel } from "../ViewModel/doc";
-import csvRenderer from "./Chunk/csvRenderer";
-import markdownRenderer from "./Chunk/markdownRenderer";
+import CsvRenderer from "./Chunk/CsvRenderer";
+import MarkdownRenderer from "./Chunk/MarkdownRenderer";
 
 const types = [
   "text",
@@ -23,9 +23,17 @@ function render_view(t: string, content: string) {
     case "text":
       return <>{content}</>;
     case "csv":
-      return csvRenderer(content);
+      return <CsvRenderer content={content} />;
     case "md":
-      return markdownRenderer(content);
+      return <MarkdownRenderer text={content} />;
+    case "image":
+      return <img src={content} />;
+    case "video":
+      return <video src={content} />;
+    case "audio":
+      return <audio src={content} />;
+    case "rawhtml":
+      return <div dangerouslySetInnerHTML={{ __html: content }} />;
     default:
       return <>error: invalid type: {t} content: {content}</>;
   }
