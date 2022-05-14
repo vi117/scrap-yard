@@ -113,10 +113,14 @@ setting.register("session", {
   },
 });
 
+export function getAllowAnonymous(): boolean {
+  return setting.get<SessionSetting>("session").allowAnonymous;
+}
+
 export function getSessionUser(req: Request): UserSession {
   const session = getSession(req);
   if (!session) {
-    if (!setting.get<SessionSetting>("session").allowAnonymous) {
+    if (!getAllowAnonymous()) {
       throw new Error("no session");
     }
     //TODO(vi117): create anonymous user. not admin user
