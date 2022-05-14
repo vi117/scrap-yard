@@ -193,6 +193,7 @@ const Chunk = (props: {
 
   return (
     <Paper
+      id={"chunk-" + id}
       key={id}
       ref={(mode == "Read") ? drag : null}
       style={{

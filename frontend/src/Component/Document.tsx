@@ -9,6 +9,7 @@ import { createTestDocViewModel, DocumentViewModel } from "../ViewModel/doc";
 import { DocumentObject } from "model";
 import Chunk from "./Chunk";
 import Divider from "./Divider";
+import Search from "./Search";
 
 /*
 const uuidList: RecoilState<string[]> = atom({
@@ -84,6 +85,7 @@ function Doc(props: { doc: DocumentViewModel }) {
 
   return (
     <>
+      <Search chunks={chunks} />
       <TagBar doc={doc} />
       <Stack className="document" spacing={2}>
         {chunklist}
