@@ -9,6 +9,7 @@ export interface IViewModel extends ViewModelBase {
 export class BlankPage implements IPageViewModel {
   type = "blank";
   constructor() {
+    // do nothing
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateAsSource(_path: string, _updatedAt: number): void {

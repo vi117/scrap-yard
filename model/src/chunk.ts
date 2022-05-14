@@ -66,6 +66,9 @@ export interface AudioChunk {
   content: string;
 }
 
+//TODO(vi117): add more chunk types
+//  "link", "code", "math",
+
 /**
  * Chunk Content
  */
