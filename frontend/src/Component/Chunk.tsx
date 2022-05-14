@@ -16,6 +16,10 @@ const types = [
   "text",
   "csv",
   "md",
+  "rawhtml",
+  "image",
+  "video",
+  "audio",
 ];
 
 function render_view(t: string, content: string) {
