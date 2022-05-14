@@ -2,19 +2,23 @@
 
 import AddIcon from "@mui/icons-material/Add";
 import { Box, Button } from "@mui/material";
+import { ChunkContent } from "model";
 import { useDrop } from "react-dnd";
 import { NativeTypes } from "react-dnd-html5-backend";
-import * as ReactDOMServer from "react-dom/server";
+
+type CollectedProps = {
+  isOver: boolean;
+};
 
 export function Divider(props: {
   position: number;
   newChunk: (pos: number) => void;
   moveChunk: (id: string, pos: number) => void;
   addFromText: (pos: number, content: string) => void;
+  add: (pos: number, content: ChunkContent) => void;
 }) {
-  const { position, newChunk, moveChunk, addFromText } = props;
-  // TODO(vi117): add proper type
-  const [{ isOver }, drop] = useDrop<{ id: string } & { text: string } & { html: string }>(
+  const { position, newChunk, moveChunk, addFromText, add } = props;
+  const [{ isOver }, drop] = useDrop<{ id: string } & { text: string } & { html: string }, void, CollectedProps>(
     () => ({
       accept: ["chunk", NativeTypes.TEXT, NativeTypes.HTML],
       drop: (item, monitor) => {
@@ -24,10 +28,10 @@ export function Divider(props: {
         } else if (t == NativeTypes.TEXT) {
           addFromText(position, item.text);
         } else if (t == NativeTypes.HTML) {
-          // TODO: add proper html to text processing.
-          const stripped = item.html.replace(/<[^>]+>/g, "");
-          const text = ReactDOMServer.renderToString(stripped);
-          addFromText(position, text);
+          add(position, {
+            type: "rawhtml",
+            content: item.html,
+          });
         }
       },
       collect: (monitor) => ({
