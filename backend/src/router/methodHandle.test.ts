@@ -1,10 +1,10 @@
 import { assertEquals } from "std/assert";
-import { MethodRouterBuilber } from "./methodRoute.ts";
+import { MethodHandlerBuilber } from "./methodHandle.ts";
 
 Deno.test({
-  name: "methodRoute: basic methods",
+  name: "methodHandle: basic methods",
   fn: async () => {
-    const r = new MethodRouterBuilber();
+    const r = new MethodHandlerBuilber();
     const fn = (i: number) =>
       (_req: Request, _ctx: unknown) => {
         return new Response(i.toString(), {});

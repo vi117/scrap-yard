@@ -1,11 +1,11 @@
 import { Handler } from "./handler.ts";
 import { serveFile } from "std/file_server";
 import { join } from "std/path";
-import { MethodRouterBuilber } from "./methodRoute.ts";
+import { MethodHandlerBuilber } from "./methodHandle.ts";
 import { Router } from "./route.ts";
 
 export function getStaticHandler(path: string): Handler {
-  return new MethodRouterBuilber().get(
+  return new MethodHandlerBuilber().get(
     async (req: Request) => {
       return await serveFile(req, path);
     },

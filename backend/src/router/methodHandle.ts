@@ -1,10 +1,10 @@
 import { Handler } from "./handler.ts";
 import { makeResponse, Status } from "./util.ts";
 
-type MethodRouter = Record<string, Handler>;
+type MethodHandler = Record<string, Handler>;
 
-export class MethodRouterBuilber {
-  handlers: MethodRouter;
+export class MethodHandlerBuilber {
+  handlers: MethodHandler;
   constructor() {
     this.handlers = {};
   }

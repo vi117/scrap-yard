@@ -3,7 +3,7 @@ import {
   makeJsonResponse,
   makeResponse,
   MatchContext,
-  MethodRouterBuilber,
+  MethodHandlerBuilber,
   Router,
   Status,
 } from "./router/mod.ts";
@@ -17,7 +17,7 @@ import * as log from "std/log";
 export class FileServeRouter implements Router<Handler> {
   fn: Handler;
   constructor() {
-    this.fn = new MethodRouterBuilber()
+    this.fn = new MethodHandlerBuilber()
       .get(getHandler)
       .put(putHandler)
       .delete(deleteHandler)
