@@ -11,6 +11,10 @@ export type DocHistory = {
   method: ChunkMethodHistory;
 };
 
+type DocStoreSetting = {
+  docHistoryLength: number;
+};
+
 setting.register("docStore", {
   type: "object",
   properties: {
@@ -31,7 +35,7 @@ setting.register("docStore", {
  * @returns The number of historys to keep
  */
 export function getSettingDocHistoryMaximum(): number {
-  return setting.get<number>("docHistory");
+  return setting.get<DocStoreSetting>("docStore").docHistoryLength;
 }
 
 /**
