@@ -1,3 +1,4 @@
+import CloseIcon from "@mui/icons-material/Close";
 import {
   Autocomplete,
   Button,
@@ -16,10 +17,13 @@ import React, { useState } from "react";
 const languages = ["korean", "english"];
 const themes = ["light", "dark"];
 
+// TODO: use real context
 const context = {
   language: "korean",
   theme: "light",
 };
+
+const rightAlign = { marginLeft: "auto" };
 
 export function Settings(props: {
   open: boolean;
@@ -32,6 +36,7 @@ export function Settings(props: {
         labelId="settings-language-select-label"
         value={context.language}
         onChange={() => {}} // TODO: fill here
+        style={{ ...rightAlign }}
       >
         {languages.map((l) => <MenuItem key={l} value={l}>{l}</MenuItem>)}
       </Select>
@@ -45,6 +50,7 @@ export function Settings(props: {
         labelId="settings-theme-select-label"
         value={context.theme}
         onChange={() => {}} // TODO: fill here
+        style={{ ...rightAlign }}
       >
         {themes.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
       </Select>
@@ -55,10 +61,16 @@ export function Settings(props: {
     <Dialog
       open={props.open}
       onClose={props.onClose}
+      fullWidth={true}
     >
       <DialogTitle>
         Settings
-        <Button onClick={props.onClose}>X</Button>
+        <Button
+          onClick={props.onClose}
+          style={{ position: "absolute", right: 8, ...rightAlign }}
+        >
+          <CloseIcon />
+        </Button>
       </DialogTitle>
 
       <List>
