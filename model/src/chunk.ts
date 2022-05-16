@@ -66,8 +66,31 @@ export interface AudioChunk {
   content: string;
 }
 
-//TODO(vi117): add more chunk types
-//  "link", "code", "math",
+export interface LinkChunk {
+  type: "link";
+  /**
+   * link url
+   */
+  content: string;
+}
+
+export interface CodeChunk {
+  type: "code";
+  /**
+   * code content
+   */
+  content: string;
+
+  language: string;
+}
+
+export interface KatexChunk {
+  type: "katex";
+  /**
+   * katex expression
+   */
+  content: string;
+}
 
 /**
  * Chunk Content
@@ -79,7 +102,11 @@ export type ChunkContent =
   | RawHTMLChunk
   | ImageChunk
   | VideoChunk
-  | AudioChunk;
+  | AudioChunk
+  | LinkChunk
+  | CodeChunk
+  | KatexChunk;
+
 export type ChunkContentKind = ChunkContent["type"];
 
 /**
@@ -111,6 +138,10 @@ export function compareChunkContent(
 ): boolean {
   if (obj1.type !== obj2.type) {
     return false;
+  }
+  if (obj1.type === "code") {
+    return obj1.content === obj2.content &&
+      obj1.language === (obj2 as CodeChunk).language;
   }
   return obj1.content === obj2.content;
 }
