@@ -46,7 +46,7 @@ const TypeSelector = (props: {
   update: (t: string) => void;
   value: string;
 }) => {
-  const update = (event) => {
+  const update = (event: { target: { value: string } }) => {
     props.update(event.target.value as string);
   };
 
