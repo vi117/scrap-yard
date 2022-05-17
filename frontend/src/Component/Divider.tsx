@@ -1,42 +1,49 @@
 // Divider sits inbetween chunks, and is a place for a new chunk to spawn or old to drop on.
 
 import AddIcon from "@mui/icons-material/Add";
-import { Box, Button } from "@mui/material";
-import { ChunkContent } from "model";
-import { useDrop } from "react-dnd";
-import { NativeTypes } from "react-dnd-html5-backend";
+import { Box, IconButton } from "@mui/material";
+import * as ReactDOMServer from "react-dom/server";
+import { RecoilState, useRecoilState } from "recoil";
+import { useDrop } from "./dnd";
 
-type CollectedProps = {
-  isOver: boolean;
-};
+import { ChunkType } from "./model";
 
 export function Divider(props: {
+  doc: string;
   position: number;
   newChunk: (pos: number) => void;
+  insertChunk: (pos: number, chunk: ChunkType) => void;
   moveChunk: (id: string, pos: number) => void;
   addFromText: (pos: number, content: string) => void;
   add: (pos: number, content: ChunkContent) => void;
 }) {
-  const { position, newChunk, moveChunk, addFromText, add } = props;
-  const [{ isOver }, drop] = useDrop<{ id: string } & { text: string } & { html: string }, void, CollectedProps>(
+  const { position, newChunk, insertChunk, moveChunk, addFromText } = props;
+
+  const [{ isOver }, drop] = useDrop<
+    { chunk: ChunkType; doc: string; cur: number } & { text: string } & { html: string }
+  >(
     () => ({
-      accept: ["chunk", NativeTypes.TEXT, NativeTypes.HTML],
-      drop: (item, monitor) => {
-        const t = monitor.getItemType();
+      accept: ["chunk", "text/html", "text/plain"],
+      drop: (t, item) => {
         if (t == "chunk") {
-          moveChunk(item.id, position);
-        } else if (t == NativeTypes.TEXT) {
-          addFromText(position, item.text);
-        } else if (t == NativeTypes.HTML) {
+          if (item.doc == props.doc) { // in-document move
+            // prevent unnecessary move
+            if (!(item.cur == position - 1 || item.cur == position)) {
+              moveChunk(item.chunk.id, position);
+            }
+          } else { // document-by-document move
+            // TODO: need to test this (dnd doc-by-doc).
+            insertChunk(position, { type: item.chunk.type, content: item.chunk.content });
+          }
+        } else if (t == "text/plain") {
+          addFromText(position, item);
+        } else if (t == "text/html") {
           add(position, {
             type: "rawhtml",
             content: item.html,
           });
         }
       },
-      collect: (monitor) => ({
-        isOver: !!monitor.isOver(),
-      }),
     }),
     [position],
   );
@@ -44,11 +51,14 @@ export function Divider(props: {
   return (
     <Box
       ref={drop}
-      sx={isOver ? { background: "grey" } : {}}
+      sx={{
+        display: "flex",
+        ...(isOver ? { background: "grey" } : {}), // TODO: change color & move this outside
+      }}
     >
-      <Button fullWidth={true} onClick={() => newChunk(position)}>
+      <IconButton style={{ margin: "0 auto" }} onClick={() => newChunk(position)}>
         <AddIcon />
-      </Button>
+      </IconButton>
     </Box>
   );
 }

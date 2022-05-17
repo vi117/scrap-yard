@@ -1,16 +1,15 @@
 import DeleteIcon from "@mui/icons-material/Delete";
-import DragHandleIcon from "@mui/icons-material/DragHandle";
 import EditIcon from "@mui/icons-material/Edit";
-import MenuIcon from "@mui/icons-material/Menu";
 import SaveIcon from "@mui/icons-material/Save";
-import { Autocomplete, Button, Dialog, DialogTitle, Grid, Input, Paper, TextField, Tooltip } from "@mui/material";
+import { Button, Grid, InputLabel, MenuItem, Paper, Select, TextField, Tooltip } from "@mui/material";
 import { Chunk as ChunkType } from "model";
-import React, { ChangeEventHandler, createRef, FormEventHandler, useEffect, useRef, useState } from "react";
-import { useDrag } from "react-dnd";
+import React, { ChangeEventHandler, createRef, useEffect, useState } from "react";
 import { RecoilState, useRecoilState } from "recoil";
 import { DocumentViewModel } from "../ViewModel/doc";
+
 import CsvRenderer from "./Chunk/CsvRenderer";
 import MarkdownRenderer from "./Chunk/MarkdownRenderer";
+import { useDrag } from "./dnd";
 
 const types = [
   "text",
@@ -22,7 +21,7 @@ const types = [
   "audio",
 ];
 
-function render_view(t: string, content: string) {
+export function render_view(t: string, content: string) {
   switch (t) {
     case "text":
       return <>{content}</>;
@@ -43,38 +42,34 @@ function render_view(t: string, content: string) {
   }
 }
 
-const TypeDialog = (props: {
-  open: boolean;
-  onClose: (t: string) => void;
+const TypeSelector = (props: {
+  update: (t: string) => void;
   value: string;
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const update = () => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    props.onClose(inputRef.current!.value);
+  const update = (event) => {
+    props.update(event.target.value as string);
   };
 
   return (
-    <Dialog
-      style={{ padding: "1em" }}
-      open={props.open}
-      onClose={update}
-    >
-      <DialogTitle>Set chunk type</DialogTitle>
-      <Autocomplete
-        options={types}
-        sx={{ width: 300 }}
-        renderInput={(param) => <TextField {...param} inputRef={inputRef} type="text" label="type" />}
-      />
-      <Input type="button" value="change" onClick={update} />
-    </Dialog>
+    <>
+      <InputLabel id="typeselector-label">Type</InputLabel>
+      <Select
+        labelId="typeselector-label"
+        id="typeselector"
+        value={props.value}
+        label="Type"
+        onChange={update}
+      >
+        {types.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+      </Select>
+    </>
   );
 };
 
 const Chunk = (props: {
   doc: DocumentViewModel;
   chunk: ChunkType;
+  position: number;
   focusedChunk: RecoilState<string>;
   deleteThis: () => void;
 }) => {
@@ -91,20 +86,19 @@ const Chunk = (props: {
   const [mode, setMode] = useState("Read");
   const [onDelete, setOnDelete] = useState(false);
 
-  // Tag Dialog States
-  const [tOpen, setTOpen] = useState(false);
-
   // drag
-  const [, drag, preview] = useDrag(() => ({
+  const [, drag] = useDrag(() => ({
     type: "chunk", // TODO: make this constant
-    item: { id: id },
+    item: { chunk: chunk, doc: props.doc.docPath, cur: props.position },
+    end: (e) => {
+      // TODO: need to fill dragend.
+    },
   }));
 
   // reference of textfield
   const inputRef = createRef<null | HTMLTextAreaElement>();
 
   // Effects
-
   // set read mode when other chunk gets focused.
   useEffect(() => {
     if (fc != id) setMode("Read");
@@ -127,11 +121,10 @@ const Chunk = (props: {
   const changeMode = () => setMode(mode == "Read" ? "Write" : "Read");
 
   const updateType = (t: string) => {
-    console.log("updateType", t);
-    // TODO: update chunk type here.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setType(t as any);
-    setTOpen(false);
+    if (t != "") {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setType(t as any);
+    }
   };
 
   const onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement> = (e) => setBuffer(e.target.value);
@@ -195,17 +188,11 @@ const Chunk = (props: {
     </Tooltip>
   );
 
-  const typeDialogButton = (
-    <>
-      <Tooltip title="chunk type">
-        <Button onClick={() => setTOpen(true)}>{type}</Button>
-      </Tooltip>
-      <TypeDialog open={tOpen} onClose={updateType} value={type} />
-    </>
-  );
+  const typeSelector = <TypeSelector update={updateType} value={type} />;
 
   return (
     <Paper
+      id={"chunk-" + id}
       key={id}
       ref={(mode == "Read") ? drag : null}
       style={{
@@ -223,7 +210,7 @@ const Chunk = (props: {
         <Grid item xs={1}>
           {editButton}
           {deleteButton}
-          {typeDialogButton}
+          {typeSelector}
         </Grid>
       </Grid>
     </Paper>
