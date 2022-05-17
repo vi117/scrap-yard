@@ -14,7 +14,7 @@ export type ReadDocFileOptions = {
  * open a file document with `path`
  * @returns Promise<DocumentObject>
  * @throws Deno.errors.NotFound if the file does not exist
- * @throws Error if the file is not a valid file document
+ * @throws DocFormatError if the file is not a valid file document
  */
 export async function readDocFile(
   path: string,
@@ -24,11 +24,11 @@ export async function readDocFile(
   const rawText = await Deno.readTextFile(path, { signal: options.signal });
   const data = JSON.parse(rawText);
   if (!("chunks" in data) || !("tags" in data)) {
-    throw new Error("Invalid document file");
+    throw new DocFormatError(path, "Invalid document file");
   }
 
   if (!(data.chunks instanceof Array)) {
-    throw new Error("Invalid file format");
+    throw new DocFormatError(path, "Invalid file format");
   }
   const content = data.chunks;
   for (const item of content) {

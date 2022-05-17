@@ -28,7 +28,11 @@ export async function handleDocumentMethod(
         const d = await DocStore.open(conn, docPath);
         const result: DocumentOpenResult = {
           doc: {
-            ...d,
+            chunks: d.chunks,
+            updatedAt: d.updatedAt,
+            seq: d.seq,
+            tags: d.tags,
+            tagsUpdatedAt: d.tagsUpdatedAt,
             docPath: method.params.docPath,
           },
         };
