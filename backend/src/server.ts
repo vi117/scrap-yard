@@ -60,6 +60,7 @@ export function getServerSetting(): ServerSetting {
 export function serverRun() {
   console.log(`Server Start`);
   const s = getServerSetting();
+
   const sih = getServerInformationHandler();
   router.register("info", sih);
   serve((req: Request) => {

@@ -1,4 +1,4 @@
-import { Chunk, DocumentObject } from "model";
+import { DocumentObject } from "model";
 
 export class DocFormatError extends Error {
   constructor(public docPath: string, public message: string) {

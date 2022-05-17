@@ -1,8 +1,4 @@
-import {
-  JsonRPCMethod,
-  JsonRPCMethodHeader,
-  JsonRPCNotificationHeader,
-} from "./rpc.ts";
+import { JsonRPCMethodHeader, JsonRPCNotificationHeader } from "./rpc.ts";
 
 export type ShareDocDescription = {
   basePath: string;
