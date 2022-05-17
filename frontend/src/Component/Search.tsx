@@ -11,7 +11,7 @@ type searchResult = {
 
 // simple function that searches word in chunks.
 function search_word(chunks: Chunk[], target: string): searchResult[] {
-  const result: [string, number][] = [];
+  const result: searchResult[] = [];
 
   for (const chunk of chunks) {
     const matched = chunk.content.matchAll(new RegExp(target, "g"));
@@ -86,7 +86,7 @@ function SearchDialog(props: {
     <Dialog open={props.open} onClose={props.onClose}>
       <Input inputRef={inputRef} id="searchbox" type="search" />
       <Input type="button" value="Search" onClick={onClick} />
-      {results == null || results == []
+      {input == ""
         ? null
         : (
           <SearchResult
