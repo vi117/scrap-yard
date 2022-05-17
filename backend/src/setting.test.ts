@@ -1,11 +1,18 @@
 import * as setting from "./setting.ts";
 import { assertEquals, assertRejects } from "std/assert";
 import { stub } from "std/mock";
+import { getCurrentScriptDir } from "./util.ts";
+import { join as pathJoin } from "std/path";
+
+const docPath = pathJoin(
+  getCurrentScriptDir(import.meta),
+  "testdata/test1_setting.json",
+);
 
 Deno.test({
   name: "setting: basic",
   fn: async () => {
-    setting.setPath("src/testdata/test1_setting.json");
+    setting.setPath(docPath);
     setting.register("test", {
       type: "object",
       properties: {
@@ -25,7 +32,7 @@ Deno.test({
 Deno.test({
   name: "setting: default value",
   fn: async () => {
-    setting.setPath("src/testdata/test1_setting.json");
+    setting.setPath(docPath);
     setting.register("test", {
       type: "object",
       properties: {
@@ -48,7 +55,7 @@ Deno.test({
       Deno,
       "readTextFile",
       async (path: string, options?: Deno.ReadFileOptions) => {
-        if (path === "src/testdata/test1_setting.json") {
+        if (path === docPath) {
           return JSON.stringify({
             test: {
               a: "a",
@@ -67,7 +74,7 @@ Deno.test({
       },
     );
     try {
-      setting.setPath("src/testdata/test1_setting.json");
+      setting.setPath(docPath);
       setting.register("test", {
         type: "object",
         properties: {
