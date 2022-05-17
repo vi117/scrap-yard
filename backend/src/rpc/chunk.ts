@@ -8,7 +8,6 @@ import {
   ChunkModifyNotificationParam,
   ChunkMoveMethod,
   ChunkMoveNotificationParam,
-  ChunkNotificationParam,
   makeRPCError,
   makeRPCResult,
 } from "model";
@@ -21,8 +20,8 @@ import {
   PermissionDeniedError,
   RPCErrorBase,
 } from "model";
-import { crypto } from "https://deno.land/std@0.137.0/crypto/mod.ts";
-import { returnRequest } from "./rpc.ts";
+import { saveDoc } from "../document/delayed.ts";
+import { crypto } from "std/crypto";
 import * as log from "std/log";
 
 function makeChunkId(): string {
@@ -268,12 +267,14 @@ export async function handleChunkMethod(
   conn: Participant,
   p: ChunkMethod,
 ): Promise<void> {
-  const docPath = p.params.docPath;
+  const docPath = conn.user.joinPath(p.params.docPath);
   const updateAt = p.params.docUpdatedAt;
   const doc = await DocStore.open(conn, docPath);
   const action = getAction(p);
-  if (!conn.user.permissionSet.canWrite(docPath)) {
-    returnRequest(conn, makeRPCError(p.id, new PermissionDeniedError(docPath)));
+  if (!conn.user.canWrite(docPath)) {
+    conn.responseWith(
+      makeRPCError(p.id, new PermissionDeniedError(p.params.docPath)),
+    );
     return;
   }
 
@@ -283,8 +284,7 @@ export async function handleChunkMethod(
       (m) => m.time === updateAt,
     );
     if (lastSeenIndex < 0) {
-      returnRequest(
-        conn,
+      conn.responseWith(
         makeRPCError(
           p.id,
           new ChunkConflictError(doc.chunks, doc.updatedAt),
@@ -296,8 +296,7 @@ export async function handleChunkMethod(
       const m = doc.history[i];
       if (action.checkConflict(m.method)) {
         if (!action.trySolveConflict(m.method)) {
-          returnRequest(
-            conn,
+          conn.responseWith(
             makeRPCError(
               p.id,
               new ChunkConflictError(doc.chunks, doc.updatedAt),
@@ -312,19 +311,19 @@ export async function handleChunkMethod(
   try {
     const hist = action.action(doc);
     doc.updateDocHistory(hist);
-    doc.broadcastMethod(hist, doc.updatedAt, conn);
-    returnRequest(
-      conn,
+    doc.broadcastChunkMethod(hist, doc.updatedAt, conn);
+    conn.responseWith(
       makeRPCResult(p.id, {
         chunkId: hist.chunkId,
         updatedAt: doc.updatedAt,
         seq: doc.seq,
       }),
     );
+    await saveDoc(docPath, doc);
     return;
   } catch (e) {
     if (e instanceof RPCErrorBase) {
-      returnRequest(conn, makeRPCError(p.id, e));
+      conn.responseWith(makeRPCError(p.id, e));
       return;
     } else throw e;
   }

@@ -1,5 +1,5 @@
 import { Chunk } from "./chunk.ts";
-import { JsonRPCMethod, JsonRPCMethodHeader } from "./rpc.ts";
+import { JsonRPCMethodHeader } from "./rpc.ts";
 
 export interface DocumentObject {
   /**

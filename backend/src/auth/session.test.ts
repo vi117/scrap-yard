@@ -4,13 +4,13 @@ import {
   makeSessionId,
   SessionStore,
 } from "./session.ts";
-import { createAdminUser, UserSession } from "./user.ts";
+import { createAdminUser, IUser } from "./user.ts";
 import { assertEquals, assertNotEquals } from "std/assert";
 
 Deno.test({
   name: "Session",
   fn: async (t) => {
-    const session = new SessionStore<UserSession>();
+    const session = new SessionStore<IUser>();
     const id = makeSessionId();
 
     await t.step("set", () => {

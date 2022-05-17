@@ -10,9 +10,9 @@ export function rpc(req: Request, _ctx: unknown): Response {
   if (req.headers.get("Upgrade") !== "websocket") {
     return makeResponse(Status.BadRequest, "Not websocket request");
   }
-  const userSession = getSessionUser(req);
+  const user = getSessionUser(req);
   const { socket, response } = Deno.upgradeWebSocket(req);
-  const conn = new Connection(idGen.next().toString(), userSession, socket);
+  const conn = new Connection(idGen.next().toString(), user, socket);
   registerParticipant(conn);
   // debug
 

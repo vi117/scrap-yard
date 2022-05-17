@@ -1,8 +1,13 @@
-import { JsonRPCMethod, JsonRPCMethodHeader } from "./rpc.ts";
+import { JsonRPCMethodHeader, JsonRPCNotificationHeader } from "./rpc.ts";
 
 export type ShareDocDescription = {
   basePath: string;
   write: boolean;
+  /**
+   * expire time:
+   * if you want to revoke the share, set this value to `0`
+   * if you want to share the document forever, set this value to `Infinity`
+   */
   expired: number;
 };
 
@@ -33,8 +38,18 @@ export interface ShareGetInfoResult {
   desc: ShareDocDescription;
 }
 
+export interface ShareNotification extends JsonRPCNotificationHeader {
+  method: "share.docUpdate";
+  params: {
+    shareToken: string;
+    desc: ShareDocDescription;
+  };
+}
+
 export type ShareMethod =
   | ShareDocMethod
   | ShareGetInfoMethod;
+
+export type ShareMethodResult = ShareDocResult | ShareGetInfoResult;
 
 export type ShareMethodKind = ShareMethod["method"];

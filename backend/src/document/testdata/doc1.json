@@ -1,0 +1,23 @@
+{
+  "chunks": [
+    {
+      "id": "1",
+      "type": "text",
+      "content": "This is a test"
+    },
+    {
+      "id": "2",
+      "type": "image",
+      "content": "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
+    },
+    {
+      "id": "3",
+      "type": "text",
+      "content": "This is a test"
+    }
+  ],
+  "tags": [
+    "test",
+    "test2"
+  ]
+}

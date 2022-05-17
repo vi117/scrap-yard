@@ -1,8 +1,4 @@
-import {
-  JsonRPCMethod,
-  JsonRPCMethodHeader,
-  JsonRPCNotificationHeader,
-} from "./rpc.ts";
+import { JsonRPCMethodHeader, JsonRPCNotificationHeader } from "./rpc.ts";
 
 export interface DocumentTagGetMethod extends JsonRPCMethodHeader {
   method: "document.getTag";
@@ -18,9 +14,11 @@ export interface DocumentTagGetResult {
 
 export interface DocumentTagNotification extends JsonRPCNotificationHeader {
   method: "document.tags";
-  docPath: string;
-  tags: string[];
-  updatedAt: number;
+  params: {
+    docPath: string;
+    tags: string[];
+    updatedAt: number;
+  };
 }
 
 export interface DocumentTagSetMethod extends JsonRPCMethodHeader {
@@ -30,6 +28,11 @@ export interface DocumentTagSetMethod extends JsonRPCMethodHeader {
     tags: string[];
     updatedAt: number;
   };
+}
+
+export interface DocumentTagSetResult {
+  tags: string[];
+  updatedAt: number;
 }
 
 export interface DocumentTagSetResult {

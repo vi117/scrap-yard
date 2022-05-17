@@ -1,5 +1,5 @@
 import { makeResponse } from "../router/util.ts";
-import { createAdminUser, UserSession } from "./user.ts";
+import { createAdminUser, IUser } from "./user.ts";
 import * as setting from "../setting.ts";
 
 export class SessionStore<T> {
@@ -26,7 +26,7 @@ export class SessionStore<T> {
 }
 
 const password = Deno.env.get("SESSION_PASSWORD") || "secret";
-export const sessionStore = new SessionStore<UserSession>();
+export const sessionStore = new SessionStore<IUser>();
 
 export function makeSessionId(): string {
   return crypto.randomUUID();
@@ -94,7 +94,7 @@ export function getSessionId(req: Request): string | undefined {
   return id;
 }
 
-export function getSession(req: Request): UserSession | undefined {
+export function getSession(req: Request): IUser | undefined {
   const id = getSessionId(req);
   if (!id) {
     return undefined;
@@ -117,7 +117,7 @@ export function getAllowAnonymous(): boolean {
   return setting.get<SessionSetting>("session").allowAnonymous;
 }
 
-export function getSessionUser(req: Request): UserSession {
+export function getSessionUser(req: Request): IUser {
   const session = getSession(req);
   if (!session) {
     if (!getAllowAnonymous()) {

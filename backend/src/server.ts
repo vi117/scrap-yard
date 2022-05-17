@@ -58,8 +58,9 @@ export function getServerSetting(): ServerSetting {
 }
 
 export function serverRun() {
+  console.log(`Server Start`);
   const s = getServerSetting();
-  log.info(`host is http://${s.host}:${s.port}`);
+
   const sih = getServerInformationHandler();
   router.register("info", sih);
   serve((req: Request) => {
@@ -81,4 +82,5 @@ export function serverRun() {
     }
     return makeResponse(Status.NotFound);
   }
+  log.info(`listening on http://${s.host}:${s.port}`);
 }
