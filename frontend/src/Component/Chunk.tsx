@@ -7,8 +7,8 @@ import React, { ChangeEventHandler, createRef, useEffect, useState } from "react
 import { RecoilState, useRecoilState } from "recoil";
 import { DocumentViewModel } from "../ViewModel/doc";
 
-import CsvRenderer from "./Chunk/CsvRenderer";
-import MarkdownRenderer from "./Chunk/MarkdownRenderer";
+import CsvRenderer from "./Chunk/csvRenderer";
+import MarkdownRenderer from "./Chunk/markdownRenderer";
 import { useDrag } from "./dnd";
 
 const types = [
@@ -93,7 +93,7 @@ const Chunk = (props: {
     end: (e) => {
       // TODO: need to fill dragend.
     },
-  }));
+  }), [props.position]);
 
   // reference of textfield
   const inputRef = createRef<null | HTMLTextAreaElement>();
