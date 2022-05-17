@@ -33,6 +33,11 @@ export interface DocumentTagSetMethod extends JsonRPCMethodHeader {
 }
 
 export interface DocumentTagSetResult {
+  tags: string[];
+  updatedAt: number;
+}
+
+export interface DocumentTagSetResult {
   updatedAt: number;
 }
 

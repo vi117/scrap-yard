@@ -1,12 +1,18 @@
-import { UserSession } from "../auth/user.ts";
+import { IUser } from "../auth/user.ts";
 import { handleMethodOnMessage } from "./rpc.ts";
+import * as RPC from "model";
+import * as log from "std/log";
 
 export interface Participant {
   readonly id: string;
-  readonly user: UserSession;
+  readonly user: IUser;
 
-  // TODO(vi117): replace `send` to `sendNotification` and `respondWith`
+  // TODO(vi117): remove `send` and replace to `sendNotification` and `respondWith`
   send(data: string): void;
+
+  sendNotification(notification: RPC.RPCNotification): void;
+
+  responseWith(data: RPC.RPCResponse): void;
 
   addEventListener<T extends keyof WebSocketEventMap>(
     type: T,
@@ -21,12 +27,22 @@ export interface Participant {
 
 export class Connection implements Participant {
   id: string;
-  user: UserSession;
+  user: IUser;
   socket: WebSocket;
-  constructor(id: string, user: UserSession, socket: WebSocket) {
+  constructor(id: string, user: IUser, socket: WebSocket) {
     this.id = id;
     this.user = user;
     this.socket = socket;
+  }
+
+  sendNotification(notification: RPC.RPCNotification): void {
+    this.send(JSON.stringify(notification));
+  }
+
+  responseWith(res: RPC.RPCResponse): void {
+    const json = JSON.stringify(res);
+    log.debug(`Sending response: ${json}`);
+    this.send(json);
   }
 
   send(data: string): void {
@@ -72,9 +88,15 @@ export class ParticipantList {
       connection.send(message);
     }
   }
-  broadcast(message: string) {
+  unicastNotification(id: string, notification: RPC.RPCNotification) {
+    const connection = this.get(id);
+    if (connection) {
+      connection.sendNotification(notification);
+    }
+  }
+  broadcastNotification(notification: RPC.RPCNotification) {
     for (const connection of this.connections.values()) {
-      connection.send(message);
+      connection.sendNotification(notification);
     }
   }
 }

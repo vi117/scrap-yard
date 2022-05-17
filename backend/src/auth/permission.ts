@@ -1,6 +1,6 @@
 import { normalize as normalizePath, relative } from "std/path";
 
-export interface PermissionDescriptor {
+export interface IPermissionDescriptor {
   /**
    * ability to read the document
    * @param path the path to check
@@ -23,7 +23,7 @@ type createPermissionOption = {
   writable?: boolean;
 };
 
-class PermissionImpl implements PermissionDescriptor {
+class PermissionImpl implements IPermissionDescriptor {
   basePath: string;
   writable: boolean;
   constructor(basePath: string, options?: createPermissionOption) {
@@ -57,7 +57,7 @@ class PermissionImpl implements PermissionDescriptor {
 export function createPermission(
   basePath: string,
   options?: createPermissionOption,
-): PermissionDescriptor {
+): IPermissionDescriptor {
   //TODO(vi117): permission abs path is not correct
   return new PermissionImpl(basePath, options);
 }

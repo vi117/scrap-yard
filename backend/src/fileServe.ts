@@ -19,18 +19,19 @@ export class FileServeRouter implements Router<Handler> {
   constructor() {
     this.fn = new MethodHandlerBuilber()
       .get(getHandler)
+      .post(postHandler)
       .put(putHandler)
       .delete(deleteHandler)
       .build();
     //TODO(vi117): file diff propergate to other clients
 
     async function getHandler(req: Request, ctx: MatchContext) {
-      const path = ctx["path"];
       const user = getSessionUser(req);
+      const path = user.joinPath(ctx["path"]);
       const url = new URL(req.url);
       const isStat = url.searchParams.get("stat") === "true";
 
-      if (!user.permissionSet.canRead(path)) {
+      if (!user.canRead(path)) {
         log.warning(`${user.id} try to read ${path}`);
         return makeJsonResponse(Status.Forbidden, {
           ok: false,
@@ -63,11 +64,46 @@ export class FileServeRouter implements Router<Handler> {
       }
     }
 
-    async function putHandler(req: Request, ctx: MatchContext) {
-      const path = ctx["path"];
+    async function postHandler(req: Request, ctx: MatchContext) {
       const user = getSessionUser(req);
+      const path = user.joinPath(ctx["path"]);
       const url = new URL(req.url);
-      if (!user.permissionSet.canWrite(path)) {
+
+      if (!user.canWrite(path)) {
+        log.warning(`${user.id} try to write ${path}`);
+        return makeJsonResponse(Status.Forbidden, {
+          ok: false,
+          msg: "Forbidden",
+        });
+      }
+
+      const p = url.searchParams.get("renameTo");
+
+      if (p) {
+        const newPath = user.joinPath(p);
+        if (!user.canWrite(newPath)) {
+          log.warning(`${user.id} try to write ${newPath}`);
+          return makeJsonResponse(Status.Forbidden, {
+            ok: false,
+            msg: "Forbidden",
+          });
+        }
+        await Deno.rename(path, newPath);
+        return makeJsonResponse(Status.OK, {
+          ok: true,
+        });
+      }
+      return makeJsonResponse(Status.BadRequest, {
+        ok: false,
+        msg: "Bad request",
+      });
+    }
+
+    async function putHandler(req: Request, ctx: MatchContext) {
+      const user = getSessionUser(req);
+      const path = user.joinPath(ctx["path"]);
+      const url = new URL(req.url);
+      if (!user.canWrite(path)) {
         log.warning(`${user.id} try to write ${path}`);
         return makeJsonResponse(Status.Forbidden, {
           ok: false,
@@ -109,9 +145,9 @@ export class FileServeRouter implements Router<Handler> {
     }
 
     async function deleteHandler(req: Request, ctx: MatchContext) {
-      const path = ctx["path"];
       const user = getSessionUser(req);
-      if (!user.permissionSet.canWrite(path)) {
+      const path = user.joinPath(ctx["path"]);
+      if (!user.canWrite(path)) {
         log.warning(`${user.id} try to delete ${path}`);
         return makeJsonResponse(Status.Forbidden, {
           ok: false,

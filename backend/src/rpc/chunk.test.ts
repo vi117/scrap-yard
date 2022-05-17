@@ -1,10 +1,11 @@
 import { ChunkCreateHistory, handleChunkMethod } from "./chunk.ts";
-import { assertEquals, assertObjectMatch } from "std/assert";
+import { assertEquals } from "std/assert";
 import { stub } from "std/mock";
 import { ActiveDocumentObject, DocStore } from "./docStore.ts";
 import { Participant } from "./connection.ts";
 import { createAdminUser } from "../auth/user.ts";
 import * as RPC from "model";
+import { RPCNotification, RPCResponse } from "model";
 
 Deno.test({
   name: "basic chunk operation",
@@ -19,6 +20,13 @@ Deno.test({
       addEventListener() {},
       removeEventListener() {},
       user: createAdminUser("admin"),
+      sendNotification(notification: RPCNotification): void {
+        this.send(JSON.stringify(notification));
+      },
+      responseWith(data: RPCResponse): void {
+        const json = JSON.stringify(data);
+        this.send(json);
+      },
     };
     const popObject = () => {
       const ret = messageBuffer.shift();
@@ -184,7 +192,15 @@ Deno.test({
       close() {},
       addEventListener() {},
       removeEventListener() {},
+
       user: createAdminUser("alice"),
+      sendNotification(notification: RPCNotification): void {
+        this.send(JSON.stringify(notification));
+      },
+      responseWith(data: RPCResponse): void {
+        const json = JSON.stringify(data);
+        this.send(json);
+      },
     };
     const popAliceObject = () => {
       const ret = aliceMessageBuffer.shift();
@@ -203,11 +219,18 @@ Deno.test({
       addEventListener() {},
       removeEventListener() {},
       user: createAdminUser("bob"),
+      sendNotification(notification: RPCNotification): void {
+        this.send(JSON.stringify(notification));
+      },
+      responseWith: function (data: RPCResponse): void {
+        const json = JSON.stringify(data);
+        this.send(json);
+      },
     };
     const docObj = new ActiveDocumentObject("docPath", 10);
     docObj.chunks = [];
-    docObj.conns.add(connAlice);
-    docObj.conns.add(connBob);
+    docObj.join(connAlice);
+    docObj.join(connBob);
     docObj.updatedAt = 1000;
     const docStore = stub(DocStore, "open", () => {
       return docObj;

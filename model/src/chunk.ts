@@ -365,6 +365,10 @@ export interface ChunkUpdateNotification extends JsonRPCNotificationHeader {
   };
 }
 
+/**
+ * Chunk Refresh Notification
+ * @deprecated
+ */
 export interface ChunkRefreshNotification extends JsonRPCNotificationHeader {
   method: "chunk.refresh";
   params: {

@@ -1,12 +1,19 @@
 import { ChunkMethod, ChunkMethodResult, ChunkNotification } from "./chunk.ts";
 import { DocumentMethod, DocumentMethodResult } from "./document.ts";
+import { ShareNotification } from "./share.ts";
+import { DocumentTagNotification } from "./tags.ts";
 import { RPCError } from "./error.ts";
+import { FileNotification } from "./file.ts";
 
 export type MethodResult = ChunkMethodResult | DocumentMethodResult;
 
 export type RPCMethod = ChunkMethod | DocumentMethod;
 
-export type RPCNotification = ChunkNotification;
+export type RPCNotification =
+  | ChunkNotification
+  | ShareNotification
+  | DocumentTagNotification
+  | FileNotification;
 
 /**
  * RPC Response

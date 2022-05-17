@@ -1,10 +1,10 @@
-import { FileDocumentObject } from "../document/filedoc.ts";
 import { Participant } from "./connection.ts";
-import { ChunkMethod, ChunkNotificationParam } from "model";
+import { ChunkNotificationParam } from "model";
 import * as RPC from "model";
 import * as log from "std/log";
 import { ChunkMethodHistory } from "./chunk.ts";
 import * as setting from "../setting.ts";
+import { readDocFile } from "../document/filedoc.ts";
 
 export type DocHistory = {
   time: number;
@@ -38,24 +38,54 @@ export function getSettingDocHistoryMaximum(): number {
   return setting.get<DocStoreSetting>("docStore").docHistoryLength;
 }
 
+export interface ISubscriptable {
+  join(participant: Participant): void;
+  leave(participant: Participant): void;
+  broadcastMethod(
+    method: ChunkNotificationParam,
+    updatedAt: number,
+    exclude?: Participant,
+  ): void;
+  readonly participantsCount: number;
+  readonly participants: Participant[];
+}
+
 /**
  * A active document.
  *  each `conn` manages a staleness of the document.
  */
 //TODO(vi117)
 //Optimize this class.
-//Inheriting FileDocumentObject is not a good idea.
-//Consider to compose FileDocumentObject.
-export class ActiveDocumentObject extends FileDocumentObject {
-  conns: Set<Participant>;
+export class ActiveDocumentObject
+  implements RPC.DocumentObject, ISubscriptable {
+  private conns: Set<Participant>;
+
   history: DocHistory[];
   readonly maxHistory: number;
+  readonly docPath: string;
+  chunks: RPC.Chunk[];
+  updatedAt: number;
+  seq: number;
+  tags: string[];
+  tagsUpdatedAt: number;
 
   constructor(docPath: string, maxHistory: number) {
-    super(docPath);
+    this.docPath = docPath;
     this.conns = new Set();
     this.history = [];
     this.maxHistory = maxHistory;
+    this.chunks = [];
+    this.updatedAt = 0;
+    this.seq = 0;
+    this.tags = [];
+    this.tagsUpdatedAt = 0;
+  }
+
+  get participantsCount() {
+    return this.conns.size;
+  }
+  get participants(): Participant[] {
+    return [...this.conns.values()];
   }
 
   join(conn: Participant) {
@@ -65,9 +95,19 @@ export class ActiveDocumentObject extends FileDocumentObject {
       this.leave(conn);
     });
   }
+
   //TODO(vi117): release the handler
   leave(conn: Participant) {
     this.conns.delete(conn);
+  }
+
+  async open(): Promise<void> {
+    const doc = await readDocFile(this.docPath);
+    this.chunks = doc.chunks;
+    this.updatedAt = doc.updatedAt;
+    this.seq = doc.seq;
+    this.tags = doc.tags;
+    this.tagsUpdatedAt = doc.tagsUpdatedAt;
   }
 
   updateDocHistory(method: ChunkMethodHistory) {
@@ -101,7 +141,7 @@ export class ActiveDocumentObject extends FileDocumentObject {
           params: {
             method,
             updatedAt,
-            docPath: this.docPath,
+            docPath: conn.user.relativePath(this.docPath),
             seq: this.seq,
           },
         };
@@ -124,7 +164,7 @@ export class DocumentStore {
       //TODO(vi117): use a factory to create docGroup
       const doc = new ActiveDocumentObject(docPath, maxHistoryLimit);
       await doc.open();
-      doc.conns.add(conn);
+      doc.join(conn);
       this.documents[docPath] = doc;
       return doc;
     }
@@ -137,7 +177,7 @@ export class DocumentStore {
       return;
     }
     docGroup.leave(conn);
-    if (docGroup.conns.size === 0) {
+    if (docGroup.participantsCount === 0) {
       delete this.documents[docPath];
     }
   }
