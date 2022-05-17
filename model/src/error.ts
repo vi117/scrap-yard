@@ -20,6 +20,8 @@ export enum RPCErrorCode {
   InvalidTimestamp = -20005, // timestamp is invalid, e.g. timestamp is negative or timestamp is future.
   PermissionDenied = -20006, // permission denied.
   ChunkConflict = -20007, // conflict with another method.
+  TagsConflict = -20008, // conflict with tags.
+  ShareTokenConflict = -20009, // conflict with share token.
 }
 
 /**
@@ -151,6 +153,20 @@ export class ChunkConflictError extends RPCErrorBy(RPCErrorCode.ChunkConflict) {
   }
   declare data: {
     chunks: Chunk[];
+    updatedAt: number;
+  };
+}
+
+export class TagsConflictError extends RPCErrorBy(RPCErrorCode.TagsConflict) {
+  constructor(tags: string[], updatedAt: number) {
+    super(`conflict`);
+    this.data = {
+      tags,
+      updatedAt,
+    };
+  }
+  declare data: {
+    tags: string[];
     updatedAt: number;
   };
 }

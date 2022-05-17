@@ -2,10 +2,13 @@ import {
   DocumentCloseResult,
   DocumentMethod,
   DocumentOpenResult,
+  DocumentTagGetResult,
+  DocumentTagMethod,
   InvalidDocPathError,
   makeRPCError,
   makeRPCResult,
   PermissionDeniedError,
+  TagsConflictError,
 } from "model";
 import { DocStore } from "./docStore.ts";
 import { Participant } from "./connection.ts";
@@ -60,6 +63,57 @@ export async function handleDocumentMethod(
     }
     default: {
       const _exhaustiveCheck: never = methodKind;
+    }
+  }
+}
+
+export async function handleTagMethod(
+  conn: Participant,
+  method: DocumentTagMethod,
+): Promise<void> {
+  const path = conn.user.joinPath(method.params.docPath);
+  const methodKind = method.method;
+  switch (methodKind) {
+    case "document.getTag": {
+      if (!conn.user.canRead(path)) {
+        conn.responseWith(
+          makeRPCError(method.id, new PermissionDeniedError(path)),
+        );
+        return;
+      }
+      const doc = await DocStore.open(conn, path);
+      const result: DocumentTagGetResult = {
+        tags: doc.tags,
+        updatedAt: doc.tagsUpdatedAt,
+      };
+      conn.responseWith(makeRPCResult(method.id, result));
+      return;
+    }
+    case "document.setTag": {
+      if (!conn.user.canWrite(path)) {
+        conn.responseWith(
+          makeRPCError(method.id, new PermissionDeniedError(path)),
+        );
+        return;
+      }
+      const doc = await DocStore.open(conn, path);
+      if (method.params.updatedAt < doc.tagsUpdatedAt) {
+        conn.responseWith(
+          makeRPCError(
+            method.id,
+            new TagsConflictError(doc.tags, doc.tagsUpdatedAt),
+          ),
+        );
+        return;
+      }
+      doc.setTags(method.params.tags);
+      const result: DocumentTagGetResult = {
+        tags: doc.tags,
+        updatedAt: doc.tagsUpdatedAt,
+      };
+      doc.broadcastTagsNotification(conn);
+      conn.responseWith(makeRPCResult(method.id, result));
+      return;
     }
   }
 }

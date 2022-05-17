@@ -14,9 +14,11 @@ export interface DocumentTagGetResult {
 
 export interface DocumentTagNotification extends JsonRPCNotificationHeader {
   method: "document.tags";
-  docPath: string;
-  tags: string[];
-  updatedAt: number;
+  params: {
+    docPath: string;
+    tags: string[];
+    updatedAt: number;
+  };
 }
 
 export interface DocumentTagSetMethod extends JsonRPCMethodHeader {

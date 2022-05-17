@@ -40,12 +40,16 @@ export interface ShareGetInfoResult {
 
 export interface ShareNotification extends JsonRPCNotificationHeader {
   method: "share.docUpdate";
-  shareToken: string;
-  desc: ShareDocDescription;
+  params: {
+    shareToken: string;
+    desc: ShareDocDescription;
+  };
 }
 
 export type ShareMethod =
   | ShareDocMethod
   | ShareGetInfoMethod;
+
+export type ShareMethodResult = ShareDocResult | ShareGetInfoResult;
 
 export type ShareMethodKind = ShareMethod["method"];

@@ -1,4 +1,4 @@
-import { handleDocumentMethod } from "./doc.ts";
+import { handleDocumentMethod, handleTagMethod } from "./doc.ts";
 import { handleChunkMethod } from "./chunk.ts";
 import { MethodNotFoundError } from "model";
 import * as RPC from "model";
@@ -35,6 +35,9 @@ async function handleMethods(
     case "chunk.modify":
     case "chunk.move":
       return await handleChunkMethod(conn, p);
+    case "document.getTag":
+    case "document.setTag":
+      return await handleTagMethod(conn, p);
     default:
   }
   throw new MethodNotFoundError("");

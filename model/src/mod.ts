@@ -1,13 +1,25 @@
 import { ChunkMethod, ChunkMethodResult, ChunkNotification } from "./chunk.ts";
 import { DocumentMethod, DocumentMethodResult } from "./document.ts";
-import { ShareNotification } from "./share.ts";
-import { DocumentTagNotification } from "./tags.ts";
+import { ShareMethod, ShareMethodResult, ShareNotification } from "./share.ts";
+import {
+  DocumentTagMethod,
+  DocumentTagMethodResult,
+  DocumentTagNotification,
+} from "./tags.ts";
 import { RPCError } from "./error.ts";
 import { FileNotification } from "./file.ts";
 
-export type MethodResult = ChunkMethodResult | DocumentMethodResult;
+export type MethodResult =
+  | ChunkMethodResult
+  | DocumentMethodResult
+  | ShareMethodResult
+  | DocumentTagMethodResult;
 
-export type RPCMethod = ChunkMethod | DocumentMethod;
+export type RPCMethod =
+  | ChunkMethod
+  | DocumentMethod
+  | ShareMethod
+  | DocumentTagMethod;
 
 export type RPCNotification =
   | ChunkNotification
@@ -31,7 +43,7 @@ export interface RPCResponse {
  * @param result result of the request
  * @returns response
  */
-export function makeRPCResult(id: number, result?: MethodResult): RPCResponse {
+export function makeRPCResult(id: number, result: MethodResult): RPCResponse {
   return {
     jsonrpc: "2.0",
     id,

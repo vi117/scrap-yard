@@ -41,7 +41,7 @@ export function getSettingDocHistoryMaximum(): number {
 export interface ISubscriptable {
   join(participant: Participant): void;
   leave(participant: Participant): void;
-  broadcastMethod(
+  broadcastChunkMethod(
     method: ChunkNotificationParam,
     updatedAt: number,
     exclude?: Participant,
@@ -66,7 +66,7 @@ export class ActiveDocumentObject
   chunks: RPC.Chunk[];
   updatedAt: number;
   seq: number;
-  tags: string[];
+  #tags: string[];
   tagsUpdatedAt: number;
 
   constructor(docPath: string, maxHistory: number) {
@@ -77,8 +77,20 @@ export class ActiveDocumentObject
     this.chunks = [];
     this.updatedAt = 0;
     this.seq = 0;
-    this.tags = [];
+    this.#tags = [];
     this.tagsUpdatedAt = 0;
+  }
+
+  /**
+   * set tags of the document
+   * @param tags tags to be applied
+   */
+  setTags(tags: string[]) {
+    this.#tags = tags;
+    this.tagsUpdatedAt = Date.now();
+  }
+  get tags(): string[] {
+    return this.#tags;
   }
 
   get participantsCount() {
@@ -106,7 +118,7 @@ export class ActiveDocumentObject
     this.chunks = doc.chunks;
     this.updatedAt = doc.updatedAt;
     this.seq = doc.seq;
-    this.tags = doc.tags;
+    this.#tags = doc.tags;
     this.tagsUpdatedAt = doc.tagsUpdatedAt;
   }
 
@@ -128,7 +140,7 @@ export class ActiveDocumentObject
    * @param updatedAt the time when method executed
    * @param exclude the connection that should not be notified. e.g. the connection that executed the method
    */
-  broadcastMethod(
+  broadcastChunkMethod(
     method: ChunkNotificationParam,
     updatedAt: number,
     exclude?: Participant,
@@ -146,6 +158,24 @@ export class ActiveDocumentObject
           },
         };
         conn.send(JSON.stringify(notification));
+      }
+    }
+  }
+  broadcastTagsNotification(
+    exclude?: Participant,
+  ) {
+    for (const conn of this.conns) {
+      if (conn !== exclude) {
+        const notify: RPC.DocumentTagNotification = {
+          jsonrpc: "2.0",
+          method: "document.tags",
+          params: {
+            tags: this.tags,
+            updatedAt: this.tagsUpdatedAt,
+            docPath: conn.user.relativePath(this.docPath),
+          },
+        };
+        conn.send(JSON.stringify(notify));
       }
     }
   }

@@ -20,6 +20,7 @@ import {
   PermissionDeniedError,
   RPCErrorBase,
 } from "model";
+import { saveDoc } from "../document/delayed.ts";
 import { crypto } from "std/crypto";
 import * as log from "std/log";
 
@@ -310,7 +311,7 @@ export async function handleChunkMethod(
   try {
     const hist = action.action(doc);
     doc.updateDocHistory(hist);
-    doc.broadcastMethod(hist, doc.updatedAt, conn);
+    doc.broadcastChunkMethod(hist, doc.updatedAt, conn);
     conn.responseWith(
       makeRPCResult(p.id, {
         chunkId: hist.chunkId,
@@ -318,6 +319,7 @@ export async function handleChunkMethod(
         seq: doc.seq,
       }),
     );
+    await saveDoc(docPath, doc);
     return;
   } catch (e) {
     if (e instanceof RPCErrorBase) {
