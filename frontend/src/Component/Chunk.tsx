@@ -4,11 +4,11 @@ import SaveIcon from "@mui/icons-material/Save";
 import { Button, Grid, InputLabel, MenuItem, Paper, Select, TextField, Tooltip } from "@mui/material";
 import { Chunk as ChunkType } from "model";
 import React, { ChangeEventHandler, createRef, useEffect, useState } from "react";
-import { useDrag } from "react-dnd";
 import { RecoilState, useRecoilState } from "recoil";
 import { DocumentViewModel } from "../ViewModel/doc";
 import csvRenderer from "./Chunk/csvRenderer";
 import markdownRenderer from "./Chunk/markdownRenderer";
+import { useDrag } from "./dnd";
 
 const types = [
   "text",
@@ -56,6 +56,7 @@ const TypeSelector = (props: {
 const Chunk = (props: {
   doc: DocumentViewModel;
   chunk: ChunkType;
+  position: number;
   focusedChunk: RecoilState<string>;
   deleteThis: () => void;
 }) => {
@@ -73,16 +74,18 @@ const Chunk = (props: {
   const [onDelete, setOnDelete] = useState(false);
 
   // drag
-  const [, drag, preview] = useDrag(() => ({
+  const [, drag] = useDrag(() => ({
     type: "chunk", // TODO: make this constant
-    item: { id: id },
+    item: { chunk: chunk, doc: props.doc.docPath, cur: props.position },
+    end: (e) => {
+      // TODO: need to fill dragend.
+    },
   }));
 
   // reference of textfield
   const inputRef = createRef<null | HTMLTextAreaElement>();
 
   // Effects
-
   // set read mode when other chunk gets focused.
   useEffect(() => {
     if (fc != id) setMode("Read");

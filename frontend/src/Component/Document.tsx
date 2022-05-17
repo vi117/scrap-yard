@@ -67,8 +67,10 @@ function Doc(props: { doc: DocumentViewModel }) {
     return (
       <Fragment key={id}>
         <Divider
+          doc={doc.docPath}
           position={i}
           newChunk={mutation.create}
+          insertChunk={mutation.add}
           moveChunk={mutation.move}
           addFromText={mutation.addFromText}
         />
@@ -76,6 +78,7 @@ function Doc(props: { doc: DocumentViewModel }) {
         <Chunk
           doc={doc}
           chunk={chunk}
+          position={i}
           focusedChunk={focusedChunk}
           deleteThis={() => mutation.del(id)}
         />
@@ -87,11 +90,13 @@ function Doc(props: { doc: DocumentViewModel }) {
     <>
       <Search chunks={chunks} />
       <TagBar doc={doc} />
-      <Stack className="document" spacing={2}>
+      <Stack className="document">
         {chunklist}
         <Divider
+          doc={doc.docPath}
           position={chunks.length}
           newChunk={mutation.create}
+          insertChunk={mutation.add}
           moveChunk={mutation.move}
           addFromText={mutation.addFromText}
         />

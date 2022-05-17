@@ -2,37 +2,48 @@
 
 import AddIcon from "@mui/icons-material/Add";
 import { Box, IconButton } from "@mui/material";
-import { useDrop } from "react-dnd";
-import { NativeTypes } from "react-dnd-html5-backend";
 import * as ReactDOMServer from "react-dom/server";
+import { RecoilState, useRecoilState } from "recoil";
+import { useDrop } from "./dnd";
+
+import { ChunkType } from "./model";
 
 export function Divider(props: {
+  doc: string;
   position: number;
   newChunk: (pos: number) => void;
+  insertChunk: (pos: number, chunk: ChunkType) => void;
   moveChunk: (id: string, pos: number) => void;
   addFromText: (pos: number, content: string) => void;
 }) {
-  const { position, newChunk, moveChunk, addFromText } = props;
+  const { position, newChunk, insertChunk, moveChunk, addFromText } = props;
+
   // TODO(vi117): add proper type
-  const [{ isOver }, drop] = useDrop<{ id: string } & { text: string } & { html: string }>(
+  const [{ isOver }, drop] = useDrop<
+    { chunk: ChunkType; doc: string; cur: number } & { text: string } & { html: string }
+  >(
     () => ({
-      accept: ["chunk", NativeTypes.TEXT, NativeTypes.HTML],
-      drop: (item, monitor) => {
-        const t = monitor.getItemType();
+      accept: ["chunk", "text/html", "text/plain"],
+      drop: (t, item) => {
         if (t == "chunk") {
-          moveChunk(item.id, position);
-        } else if (t == NativeTypes.TEXT) {
-          addFromText(position, item.text);
-        } else if (t == NativeTypes.HTML) {
+          if (item.doc == props.doc) { // in-document move
+            // prevent unnecessary move
+            if (!(item.cur == position - 1 || item.cur == position)) {
+              moveChunk(item.chunk.id, position);
+            }
+          } else { // document-by-document move
+            // TODO: need to test this (dnd doc-by-doc).
+            insertChunk(position, { type: item.chunk.type, content: item.chunk.content });
+          }
+        } else if (t == "text/plain") {
+          addFromText(position, item);
+        } else if (t == "text/html") {
           // TODO: add proper html to text processing.
-          const stripped = item.html.replace(/<[^>]+>/g, "");
+          const stripped = item.replace(/<[^>]+>/g, "");
           const text = ReactDOMServer.renderToString(stripped);
           addFromText(position, text);
         }
       },
-      collect: (monitor) => ({
-        isOver: !!monitor.isOver(),
-      }),
     }),
     [position],
   );
