@@ -16,7 +16,7 @@ const types = [
   "md",
 ];
 
-function render_view(t: string, content: string) {
+export function render_view(t: string, content: string) {
   switch (t) {
     case "text":
       return <>{content}</>;
