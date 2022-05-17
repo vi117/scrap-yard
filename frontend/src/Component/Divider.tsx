@@ -15,10 +15,10 @@ export function Divider(props: {
   insertChunk: (pos: number, chunk: ChunkType) => void;
   moveChunk: (id: string, pos: number) => void;
   addFromText: (pos: number, content: string) => void;
+  add: (pos: number, content: ChunkContent) => void;
 }) {
   const { position, newChunk, insertChunk, moveChunk, addFromText } = props;
 
-  // TODO(vi117): add proper type
   const [{ isOver }, drop] = useDrop<
     { chunk: ChunkType; doc: string; cur: number } & { text: string } & { html: string }
   >(
@@ -38,10 +38,10 @@ export function Divider(props: {
         } else if (t == "text/plain") {
           addFromText(position, item);
         } else if (t == "text/html") {
-          // TODO: add proper html to text processing.
-          const stripped = item.replace(/<[^>]+>/g, "");
-          const text = ReactDOMServer.renderToString(stripped);
-          addFromText(position, text);
+          add(position, {
+            type: "rawhtml",
+            content: item.html,
+          });
         }
       },
     }),

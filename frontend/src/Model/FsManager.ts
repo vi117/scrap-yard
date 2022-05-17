@@ -54,9 +54,10 @@ export interface IFsEventMap {
 
 export interface IFsManager extends EventTarget {
   get(path: string): Promise<Response>;
-  getInfo(path: string): Promise<FsGetResult>;
-  putFs(filePath: string, data: BodyInit): Promise<void>;
-  deleteFS(filePath: string): Promise<void>;
+  getStat(path: string): Promise<FsGetResult>;
+  upload(filePath: string, data: BodyInit): Promise<number>;
+  delete(filePath: string): Promise<number>;
+  mkdir(path: string): Promise<number>;
 
   addEventListener(
     name: string,
@@ -79,21 +80,51 @@ export class FsManager extends EventTarget implements IFsManager {
     this.manager = manager;
     this.prefix = "/fs/";
   }
+  /**
+   * fetch file
+   * @param path path to file
+   * @returns content of file
+   */
   async get(path: string): Promise<Response> {
     const url = new URL(this.prefix + path);
     const res = await fetch(url);
     return res;
   }
 
-  async getInfo(filePath: string): Promise<FsGetResult> {
+  /**
+   * get file info. directory too.
+   * @param path
+   * @returns file info
+   * @throws Error if not found
+   * @example
+   * ```
+   * const info = await fs.getInfo("test.txt");
+   * console.log(info.isFile);
+   * ```
+   * @example
+   * ```
+   * const info = await fs.getInfo("directory");
+   * console.log(info.isDirectory);
+   * console.log(info.entries);
+   * ```
+   */
+  async getStat(filePath: string): Promise<FsGetResult> {
     const url = new URL(this.prefix + filePath);
     url.searchParams.set("stat", "true");
     const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(res.statusText);
+    }
     const info = await res.json() as FsGetResult;
     return info;
   }
-
-  async putFs(filePath: string, data: BodyInit): Promise<void> {
+  /**
+   * upload file to server
+   * @param filePath upload file path
+   * @param data upload data
+   * @returns status code
+   */
+  async upload(filePath: string, data: BodyInit): Promise<number> {
     const url = new URL(this.prefix + filePath);
     const res = await fetch(url, {
       method: "PUT",
@@ -102,10 +133,35 @@ export class FsManager extends EventTarget implements IFsManager {
     if (!res.ok) {
       throw new Error(res.statusText);
     }
-    await res.json();
+    return res.status;
   }
-
-  async deleteFS(filePath: string): Promise<void> {
+  /**
+   * make directory
+   * @param filePath
+   * @returns status code
+   */
+  async mkdir(filePath: string): Promise<number> {
+    const url = new URL(this.prefix + filePath);
+    url.searchParams.set("makeDir", "true");
+    const res = await fetch(url, {
+      method: "PUT",
+    });
+    if (!res.ok) {
+      throw new Error(res.statusText);
+    }
+    return res.status;
+  }
+  /**
+   * delete file or directory
+   * @param filePath file path
+   * @returns status code
+   * @throws Error if not found
+   * @example
+   * ```
+   * await fs.delete("test.txt");
+   * ```
+   */
+  async delete(filePath: string): Promise<number> {
     const url = new URL(this.prefix + filePath);
     const res = await fetch(url, {
       method: "DELETE",
@@ -114,5 +170,6 @@ export class FsManager extends EventTarget implements IFsManager {
       throw new Error(res.statusText);
     }
     await res.json();
+    return res.status;
   }
 }

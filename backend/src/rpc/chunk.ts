@@ -79,7 +79,7 @@ class ChunkCreateAction implements ChunkMethodAction {
     doc.chunks.splice(this.params.position, 0, chunk);
     return {
       method: "chunk.create",
-      chunkContent: chunk,
+      chunkContent: this.params.chunkContent,
       position: this.params.position,
       chunkId: chunk.id,
     };
@@ -272,7 +272,6 @@ export async function handleChunkMethod(
   const updateAt = p.params.docUpdatedAt;
   const doc = await DocStore.open(conn, docPath);
   const action = getAction(p);
-  //TODO(vi117): permission check
   if (!conn.user.permissionSet.canWrite(docPath)) {
     returnRequest(conn, makeRPCError(p.id, new PermissionDeniedError(docPath)));
     return;

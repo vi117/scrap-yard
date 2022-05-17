@@ -2,8 +2,8 @@
 // TODO: should be replaced to proper library
 import { Table, TableBody, TableCell, TableRow } from "@mui/material";
 
-const renderCsv = (content: string) => {
-  const table = content.split("\n").map((s) => s.split(","));
+const CsvRenderer = (props: { content: string }) => {
+  const table = props.content.split("\n").map((s) => s.split(","));
   return (
     <Table>
       <TableBody>
@@ -17,4 +17,4 @@ const renderCsv = (content: string) => {
   );
 };
 
-export default renderCsv;
+export default CsvRenderer;

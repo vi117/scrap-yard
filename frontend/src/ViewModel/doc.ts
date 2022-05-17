@@ -1,4 +1,4 @@
-import { Chunk, ChunkContent, ChunkContentKind, ChunkNotification, DocumentObject } from "model";
+import { Chunk, ChunkContent, ChunkContentKind, ChunkNotification, DocumentObject, RPCNotification } from "model";
 import { useEffect, useState } from "react";
 import * as stl from "tstl";
 import { v4 as uuidv4 } from "uuid";
@@ -183,7 +183,7 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
     return this.seq + 1;
   }
 
-  updateOnNotification(notification: ChunkNotification): void {
+  updateOnNotification(notification: RPCNotification): void {
     if (notification.method === "chunk.refresh") {
       // TODO(vi117): implement refreshing document.
     } else if (notification.method === "chunk.update") {
@@ -191,12 +191,11 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
       if (docPath !== this.docPath) {
         return;
       }
+      // TODO(vi117): extract as factory.
       let mutator: ChunkListStateMutator;
       const kind = method.method;
       switch (kind) {
         case "chunk.create":
-          // TODO(vi117): I assume that chunkId is not undefined.
-          // make notification class that have chunkId.
           mutator = makeCreateMutator(method.chunkId, method.position, method.chunkContent);
           break;
         case "chunk.delete":
@@ -208,9 +207,11 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
         case "chunk.modify":
           mutator = makeModifyMutator(method.chunkId, method.chunkContent);
           break;
-        default:
+        default: {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const _: never = kind; // exhaustiveCheck
           throw new Error(`unknown method: ${method}`);
+        }
       }
       this.apply(mutator, updatedAt, seq);
     }
@@ -222,7 +223,7 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
     }
   }
 
-  apply(mutator: ChunkListStateMutator, updatedAt: number, seq: number, refresh: boolean = true): void {
+  apply(mutator: ChunkListStateMutator, updatedAt: number, seq: number, refresh = true): void {
     if (this.nextSeq !== seq) {
       this.buffer.push({ seq, mutate: mutator, updatedAt });
       return;
@@ -268,7 +269,7 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
     }, [chunks]);
 
     const add = async (i?: number, chunkContent?: ChunkContent) => {
-      i = i ?? chunks.length;
+      i = i ?? this.chunks.length;
 
       chunkContent = chunkContent ?? {
         type: "text",
@@ -356,7 +357,6 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
   // TODO(vi117): extract and make chunk view model.
   useChunk(chunk_arg: Chunk): [Chunk, ChunkMutator] {
     const [chunk, setChunk] = useState(chunk_arg);
-
     useEffect(() => {
       const onChange = () => {
         // TODO: update chunk efficiently. this is O(n^2)

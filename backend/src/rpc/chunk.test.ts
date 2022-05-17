@@ -1,5 +1,5 @@
-import { handleChunkMethod } from "./chunk.ts";
-import { assertEquals } from "std/assert";
+import { ChunkCreateHistory, handleChunkMethod } from "./chunk.ts";
+import { assertEquals, assertObjectMatch } from "std/assert";
 import { stub } from "std/mock";
 import { ActiveDocumentObject, DocStore } from "./docStore.ts";
 import { Participant } from "./connection.ts";
@@ -50,13 +50,15 @@ Deno.test({
           id: 1,
         });
         const result = popObject();
+        const expectedResult: RPC.ChunkCreateResult = {
+          chunkId: "chunkId",
+          updatedAt: docObj.updatedAt,
+          seq: 1,
+        };
         assertEquals(result, {
           jsonrpc: "2.0",
           id: 1,
-          result: {
-            chunkId: "chunkId",
-            updatedAt: docObj.updatedAt,
-          },
+          result: expectedResult,
         });
         assertEquals(docObj.chunks, [{
           id: "chunkId",
@@ -82,6 +84,7 @@ Deno.test({
           result: {
             chunkId: "chunkId",
             updatedAt: docObj.updatedAt,
+            seq: 2,
           },
         });
         assertEquals(docObj.chunks, []);
@@ -117,6 +120,7 @@ Deno.test({
           result: {
             chunkId: "chunkId1",
             updatedAt: docObj.updatedAt,
+            seq: 3,
           },
         });
         assertEquals(docObj.chunks, [{
@@ -225,35 +229,34 @@ Deno.test({
         id: 1,
       });
       const result = popAliceObject();
+      const m: ChunkCreateHistory = {
+        chunkId: "chunkId",
+        chunkContent: {
+          type: "text",
+          content: "content",
+        },
+        position: 0,
+        method: "chunk.create",
+      };
       const expected: RPC.ChunkNotification = {
         jsonrpc: "2.0",
         method: "chunk.update",
         params: {
-          method: {
-            id: 1,
-            jsonrpc: "2.0",
-            method: "chunk.create",
-            params: {
-              docPath: "docPath",
-              docUpdatedAt: 2000,
-              chunkContent: {
-                type: "text",
-                content: "content",
-              },
-              position: 0,
-              chunkId: "chunkId",
-            },
-          },
+          docPath: "docPath",
+          seq: 1,
+          method: m,
           updatedAt: docObj.updatedAt,
         },
       };
-      assertEquals(JSON.parse(bobMessageBuffer[0]), expected);
+      const bobs = JSON.parse(bobMessageBuffer[0]);
+      assertEquals(bobs, expected);
       assertEquals(result, {
         jsonrpc: "2.0",
         id: 1,
         result: {
           chunkId: "chunkId",
           updatedAt: docObj.updatedAt,
+          seq: 1,
         },
       });
     } finally {
