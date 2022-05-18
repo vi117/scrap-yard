@@ -109,7 +109,7 @@ export class FsManager extends EventTarget implements IFsManager {
    * ```
    */
   async getStat(filePath: string): Promise<FsGetResult> {
-    const url = new URL(this.prefix + filePath);
+    const url = new URL("http://localhost:8000" + this.prefix + filePath);
     url.searchParams.set("stat", "true");
     const res = await fetch(url);
     if (!res.ok) {
