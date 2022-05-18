@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import "../../App.css";
 import DocumentEditor from "../../Component/Document";
-import FileList from "../../Component/FileList";
+import FileTree from "../../Component/FileTree";
 import Settings from "../../Component/Settings";
 
 const drawerWidth = 240;
@@ -23,11 +23,12 @@ export function UI() {
       </Button>
       <Settings open={sopen} onClose={() => setSopen(false)} />
 
-      <FileList
+      <FileTree
         width={drawerWidth}
         open={open}
         onClick={(f) => console.log(f)}
         onClose={() => setOpen(false)}
+        root={""}
       />
 
       <DocumentEditor />
