@@ -16,6 +16,7 @@ specifiers:
   '@typescript-eslint/eslint-plugin': ^5.18.0
   '@typescript-eslint/parser': ^5.18.0
   '@vitejs/plugin-react': ^1.0.7
+  clsx: ^1.1.1
   dprint: ^0.24.3
   eslint: ^8.12.0
   eslint-plugin-react: ^7.29.4
@@ -40,6 +41,7 @@ dependencies:
   '@mui/icons-material': 5.6.2_cg6zmfbylrcehph66o5ietgzqe
   '@mui/lab': 5.0.0-alpha.82_lwhpoglgyov67kvntvjgqyapsy
   '@mui/material': 5.6.0_zanmx6zi7rhzhubzy2o5yfbjjq
+  clsx: 1.1.1
   marked: 4.0.14
   react: 17.0.2
   react-dnd: 16.0.1_clhzkhfwhu7wh6kls7xt5pecva
