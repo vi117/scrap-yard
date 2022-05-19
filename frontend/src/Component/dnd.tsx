@@ -1,14 +1,14 @@
 // poor man's dnd library
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 const nativeTypes = [
   "text/plain",
   "text/html",
 ];
 
-export function useDrag(source) {
-  const data = source();
+export function useDrag(source, deps?) {
+  const data = useMemo(source, deps ?? []);
 
   const handleDragStart = (e: DragEvent) => {
     e.dataTransfer.setData(data.type, JSON.stringify(data.item));
@@ -30,18 +30,25 @@ export function useDrag(source) {
     elem.removeEventListener("dragend", handleDragEnd);
   };
 
+  const ref = useRef(null);
+
   const setDrag = useCallback((elem: HTMLElement) => {
-    if (elem == null) return;
+    if (elem == null) {
+      clearDrag(ref.current);
+      return;
+    }
+    ref.current = elem;
+
     elem.draggable = true;
     elem.addEventListener("dragstart", handleDragStart);
     elem.addEventListener("dragend", handleDragEnd);
-  }, []);
+  }, deps);
 
   return [null, setDrag];
 }
 
-export function useDrop(source, deps) {
-  const data = source();
+export function useDrop(source, deps?) {
+  const data = useMemo(source, deps ?? []);
   const [isOver, setIsOver] = useState(false);
 
   const handleDragOver = (e: DragEvent) => {
@@ -87,8 +94,15 @@ export function useDrop(source, deps) {
     elem.removeEventListener("drop", handleDrop);
   };
 
+  const ref = useRef(null);
+
   const setDrop = useCallback((elem: HTMLElement) => {
-    if (elem == null) return;
+    if (elem == null) {
+      clearDrop(ref.current);
+      return;
+    }
+    ref.current = elem;
+
     elem.addEventListener("dragover", handleDragOver);
     elem.addEventListener("dragenter", handleDragEnter);
     elem.addEventListener("dragleave", handleDragLeave);
