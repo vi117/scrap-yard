@@ -3,14 +3,20 @@ import FolderIcon from "@mui/icons-material/Folder";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import TreeItem, { TreeItemContentProps, TreeItemProps, useTreeItem } from "@mui/lab/TreeItem";
 import TreeView from "@mui/lab/TreeView";
-import { Button, Drawer, IconButton, Typography } from "@mui/material";
+import { Button, Drawer, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import clsx from "clsx";
 import React, { forwardRef, useEffect, useState } from "react";
 
 import { DirTree, useDirTree } from "./dirTree";
 
+interface DirHandleProp {
+  type: string;
+  handleOpen: () => void;
+  handleMenu: (event: MouseEvent) => void;
+}
+
 const DirContent = forwardRef(function DirContent(
-  props: TreeItemContentProps & { onClick: () => void },
+  props: TreeItemContentProps & DirHandleProp,
   ref,
 ) {
   const {
@@ -19,7 +25,9 @@ const DirContent = forwardRef(function DirContent(
     label,
     nodeId,
     icon,
-    onClick,
+    type,
+    handleOpen,
+    handleMenu,
   } = props;
 
   const {
@@ -39,7 +47,7 @@ const DirContent = forwardRef(function DirContent(
   const handleClick = (event) => {
     handleExpansion(event);
     handleSelection(event);
-    onClick();
+    handleOpen();
   };
 
   return (
@@ -51,7 +59,6 @@ const DirContent = forwardRef(function DirContent(
         [classes.disabled]: disabled,
       })}
       ref={ref as React.Ref<HTMLDivElement>}
-      onClick={handleClick}
       onMouseDown={handleMouseDown}
       style={{
         display: "flex",
@@ -64,12 +71,13 @@ const DirContent = forwardRef(function DirContent(
       <Typography
         component="div"
         className={classes.label}
+        onClick={handleClick}
       >
         {label}
       </Typography>
 
       <IconButton
-        onClick={() => console.log("not implemented")}
+        onClick={handleMenu}
         sx={{ marginLeft: "auto" }}
       >
         <MoreVertIcon fontSize="small" />
@@ -78,19 +86,32 @@ const DirContent = forwardRef(function DirContent(
   );
 });
 
-const DirItem = (props: TreeItemProps & { onClick: () => void }) => (
-  <TreeItem ContentComponent={DirContent} {...props} />
+const DirItem = (props: TreeItemProps & { handle: DirHandleProp }) => (
+  <TreeItem
+    ContentComponent={DirContent}
+    ContentProps={props.handle}
+    {...props}
+  />
 );
 
 export function FileTreeInner(props: {
   dirTree: DirTree;
   width: number;
   open: boolean;
-  onClick: (f: string) => void;
+  handleOpen: (f: string) => void;
   onClose: () => void;
   root: string;
 }) {
   const dirTree = props.dirTree;
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const menuOpen = Boolean(anchorEl);
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   const renderTree = (node: DirTree) => {
     return (
@@ -98,8 +119,11 @@ export function FileTreeInner(props: {
         key={node.name}
         nodeId={node.name}
         label={node.name}
-        onClick={() => props.onClick(node.name)}
         icon={node.type == "dir" ? <FolderIcon /> : <ArticleIcon />}
+        handle={{
+          handleOpen: () => props.handleOpen(node.name),
+          handleMenu: handleMenuClick,
+        }}
       >
         {Array.isArray(node.children)
           ? node.children.map(renderTree)
@@ -113,6 +137,16 @@ export function FileTreeInner(props: {
       open={props.open}
       onClose={props.onClose}
     >
+      <Menu
+        id="filemenu"
+        anchorEl={anchorEl}
+        open={menuOpen}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleMenuClose}>Rename</MenuItem>
+        <MenuItem onClick={handleMenuClose}>Move</MenuItem>
+        <MenuItem onClick={handleMenuClose}>Delete</MenuItem>
+      </Menu>
       <TreeView
         sx={{ width: props.width }}
         defaultExpanded={["/"]}
