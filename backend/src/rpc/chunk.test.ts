@@ -2,10 +2,7 @@ import { ChunkCreateHistory, handleChunkMethod } from "./chunk.ts";
 import { assertEquals } from "std/assert";
 import { stub } from "std/mock";
 import { ActiveDocumentObject, DocStore } from "./docStore.ts";
-import { Participant } from "./connection.ts";
-import { createAdminUser } from "../auth/user.ts";
 import * as RPC from "model";
-import { RPCNotification, RPCResponse } from "model";
 import { MockUser } from "./mockuser.ts";
 
 Deno.test({
@@ -161,7 +158,6 @@ Deno.test({
   name: "test chunk notification operation",
   fn: async () => {
     const connAlice = new MockUser("connIdAlice");
-    const bobMessageBuffer: string[] = [];
     const connBob = new MockUser("connIdBob");
 
     const docObj = new ActiveDocumentObject("docPath", 10);

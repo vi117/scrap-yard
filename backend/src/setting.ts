@@ -13,7 +13,7 @@ const settingSchemas: Record<string, {
 const setting: Record<string, any> = {};
 
 function getDefaultPath(): string {
-  return Deno.env.get("SETTING_PATH") || "./setting.json";
+  return Deno.env.get("SETTING_PATH") ?? "./setting.json";
 }
 
 let settingPath = getDefaultPath();
@@ -55,7 +55,8 @@ export function register(name: string, schema: Schema) {
   }
 }
 
-export async function load(load_file = true) {
+export async function load(load_file?: boolean) {
+  load_file ??= true;
   let data;
   if (load_file) {
     try {
@@ -87,7 +88,7 @@ export async function load(load_file = true) {
     }
   }
 }
-await load(false);
+
 /**
  * get setting
  * @param name key of setting

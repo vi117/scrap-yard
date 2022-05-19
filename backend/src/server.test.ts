@@ -1,5 +1,5 @@
 import { join as pathJoin } from "std/path";
-import { assert, assertEquals, assertNotEquals } from "std/assert";
+import { assert, assertEquals } from "std/assert";
 import { getCurrentScriptDir } from "./util.ts";
 import * as RPC from "model";
 import { BufReader } from "https://deno.land/std@0.139.0/io/buffer.ts";
@@ -9,13 +9,16 @@ import { readAll } from "https://deno.land/std@0.139.0/streams/conversion.ts";
 let serverHandle: Deno.Process<Deno.RunOptions & { stdout: "piped" }>;
 async function startServer() {
   const currentDir = getCurrentScriptDir(import.meta);
+  const cwd = pathJoin(Deno.cwd(), currentDir, "testdata");
   serverHandle = Deno.run({
     cmd: [Deno.execPath(), "run", "-A", "server_run.ts"],
-    cwd: pathJoin(currentDir, "testdata"),
+    cwd: cwd,
     stdout: "piped",
     stderr: "null",
     env: {
       "SETTING_PATH": "test_setting.json",
+      "PORT": "4567",
+      "HOST": "localhost",
     },
   });
   assert(serverHandle.stdout !== null);
@@ -111,9 +114,24 @@ Deno.test({
           "docUpdatedAt": updatedAt,
         },
       });
+
       const chunkCreate = res as unknown as RPC.ChunkCreateResult;
       assertEquals(chunkCreate.chunkId, "2");
       assertEquals(chunkCreate.seq, seq + 1);
+
+      res = await conn.send({
+        "jsonrpc": "2.0",
+        "id": 4,
+        "method": "chunk.delete",
+        "params": {
+          "docPath": "test.syd",
+          "chunkId": "2",
+          "docUpdatedAt": chunkCreate.updatedAt,
+        },
+      });
+      const chunkDelete = res as unknown as RPC.ChunkDeleteResult;
+      assertEquals(chunkDelete.chunkId, "2");
+      assertEquals(chunkDelete.seq, seq + 2);
     } finally {
       await stopServer();
     }

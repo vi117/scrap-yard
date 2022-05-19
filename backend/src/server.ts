@@ -9,7 +9,6 @@ import {
 import { FileServeRouter } from "./fileServe.ts";
 import { rpc } from "./rpc.ts";
 import * as log from "std/log";
-import * as setting from "./setting.ts";
 import { getServerInformationHandler } from "./infoHandle.ts";
 
 const router = new TreeRouter<Handler>();
@@ -39,29 +38,20 @@ function app() {
   });
 }
 
-setting.register("server", {
-  type: "object",
-  properties: {
-    port: { type: "number", default: 8000 },
-    host: { type: "string", default: "localhost" },
-  },
-});
-
 type ServerSetting = {
   port: number;
   host: string;
 };
 
-export function getServerSetting(): ServerSetting {
-  const s = setting.get<ServerSetting>("server");
-  return s;
-}
+const serverSetting = {
+  port: parseInt(Deno.env.get("PORT") ?? "8000"),
+  host: Deno.env.get("HOST") ?? "localhost",
+};
 
 export function serverRun() {
   console.log(`Server Start`);
-  const s = getServerSetting();
-
-  const sih = getServerInformationHandler();
+  const s = serverSetting;
+  const sih = getServerInformationHandler(s.port, s.host);
   router.register("info", sih);
   serve((req: Request) => {
     try {
