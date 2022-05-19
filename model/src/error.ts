@@ -21,7 +21,6 @@ export enum RPCErrorCode {
   PermissionDenied = -20006, // permission denied.
   ChunkConflict = -20007, // conflict with another method.
   TagsConflict = -20008, // conflict with tags.
-  ShareTokenConflict = -20009, // conflict with share token.
 }
 
 /**

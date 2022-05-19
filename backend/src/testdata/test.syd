@@ -1,10 +1,1 @@
-{
-"tags":["A","B"],
-"chunks":[
-{
-    "id": "1",
-    "type": "text",
-    "content": "content"
-}
-]
-}
+{"chunks":[{"id":"1","type":"text","content":"content"}],"tags":["A","B"],"version":1}

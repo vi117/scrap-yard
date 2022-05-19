@@ -5,6 +5,7 @@ import * as log from "std/log";
 import { ChunkMethodHistory } from "./chunk.ts";
 import * as setting from "../setting.ts";
 import { readDocFile } from "../document/filedoc.ts";
+import { DocFileReadWriter, DocReadWriter } from "../document/mod.ts";
 
 export type DocHistory = {
   time: number;
@@ -69,7 +70,9 @@ export class ActiveDocumentObject
   #tags: string[];
   tagsUpdatedAt: number;
 
-  constructor(docPath: string, maxHistory: number) {
+  readWriter: DocReadWriter;
+
+  constructor(docPath: string, maxHistory: number, readWriter?: DocReadWriter) {
     this.docPath = docPath;
     this.conns = new Set();
     this.history = [];
@@ -79,6 +82,15 @@ export class ActiveDocumentObject
     this.seq = 0;
     this.#tags = [];
     this.tagsUpdatedAt = 0;
+    this.readWriter = readWriter ?? DocFileReadWriter;
+  }
+
+  async save() {
+    await this.readWriter.save(this.docPath, {
+      chunks: this.chunks,
+      tags: this.tags,
+      version: 1,
+    });
   }
 
   /**
@@ -116,10 +128,11 @@ export class ActiveDocumentObject
   async open(): Promise<void> {
     const doc = await readDocFile(this.docPath);
     this.chunks = doc.chunks;
-    this.updatedAt = doc.updatedAt;
-    this.seq = doc.seq;
+    const updatedAt = Date.now();
+    this.updatedAt = updatedAt;
+    this.seq = 0;
     this.#tags = doc.tags;
-    this.tagsUpdatedAt = doc.tagsUpdatedAt;
+    this.tagsUpdatedAt = updatedAt;
   }
 
   updateDocHistory(method: ChunkMethodHistory) {

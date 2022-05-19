@@ -20,7 +20,6 @@ import {
   PermissionDeniedError,
   RPCErrorBase,
 } from "model";
-import { saveDoc } from "../document/delayed.ts";
 import { crypto } from "std/crypto";
 import * as log from "std/log";
 
@@ -319,7 +318,7 @@ export async function handleChunkMethod(
         seq: doc.seq,
       }),
     );
-    await saveDoc(docPath, doc);
+    await doc.save();
     return;
   } catch (e) {
     if (e instanceof RPCErrorBase) {

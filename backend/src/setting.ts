@@ -13,7 +13,7 @@ const settingSchemas: Record<string, {
 const setting: Record<string, any> = {};
 
 function getDefaultPath(): string {
-  return Deno.env.get("SETTING_PATH") || "./setting.json";
+  return Deno.env.get("SETTING_PATH") ?? "./setting.json";
 }
 
 let settingPath = getDefaultPath();
@@ -55,15 +55,20 @@ export function register(name: string, schema: Schema) {
   }
 }
 
-export async function load() {
+export async function load(load_file?: boolean) {
+  load_file ??= true;
   let data;
-  try {
-    data = await Deno.readTextFile(settingPath);
-  } catch (e) {
-    if (e instanceof Deno.errors.NotFound) {
-      logger.info(`setting file not found: ${settingPath}`);
-      data = "{}";
-    } else throw e;
+  if (load_file) {
+    try {
+      data = await Deno.readTextFile(settingPath);
+    } catch (e) {
+      if (e instanceof Deno.errors.NotFound) {
+        logger.info(`setting file not found: ${settingPath}`);
+        data = "{}";
+      } else throw e;
+    }
+  } else {
+    data = "{}";
   }
   const json = JSON.parse(data);
   for (const key in json) {
@@ -83,7 +88,7 @@ export async function load() {
     }
   }
 }
-await load();
+
 /**
  * get setting
  * @param name key of setting
