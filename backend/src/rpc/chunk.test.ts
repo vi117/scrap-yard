@@ -6,35 +6,12 @@ import { Participant } from "./connection.ts";
 import { createAdminUser } from "../auth/user.ts";
 import * as RPC from "model";
 import { RPCNotification, RPCResponse } from "model";
+import { MockUser } from "./mockuser.ts";
 
 Deno.test({
   name: "basic chunk operation",
   fn: async (t) => {
-    const messageBuffer: string[] = [];
-    const conn: Participant = {
-      id: "connId",
-      send(s: string) {
-        messageBuffer.push(s);
-      },
-      close() {},
-      addEventListener() {},
-      removeEventListener() {},
-      user: createAdminUser("admin"),
-      sendNotification(notification: RPCNotification): void {
-        this.send(JSON.stringify(notification));
-      },
-      responseWith(data: RPCResponse): void {
-        const json = JSON.stringify(data);
-        this.send(json);
-      },
-    };
-    const popObject = () => {
-      const ret = messageBuffer.shift();
-      if (ret === undefined) {
-        throw new Error("no message");
-      }
-      return JSON.parse(ret);
-    };
+    const conn = new MockUser("connId");
     const docObj = new ActiveDocumentObject("docPath", 10);
     docObj.chunks = [];
     const docStore = stub(DocStore, "open", () => {
@@ -57,7 +34,7 @@ Deno.test({
           jsonrpc: "2.0",
           id: 1,
         });
-        const result = popObject();
+        const result = conn.popObject();
         const expectedResult: RPC.ChunkCreateResult = {
           chunkId: "chunkId",
           updatedAt: docObj.updatedAt,
@@ -85,7 +62,7 @@ Deno.test({
           jsonrpc: "2.0",
           id: 2,
         });
-        const result = popObject();
+        const result = conn.popObject();
         assertEquals(result, {
           jsonrpc: "2.0",
           id: 2,
@@ -121,7 +98,7 @@ Deno.test({
           jsonrpc: "2.0",
           id: 3,
         });
-        const result = popObject();
+        const result = conn.popObject();
         assertEquals(result, {
           jsonrpc: "2.0",
           id: 3,
@@ -159,7 +136,7 @@ Deno.test({
           jsonrpc: "2.0",
           id: 1,
         });
-        const result = popObject();
+        const result = conn.popObject();
         assertEquals(
           result.error?.code,
           RPC.RPCErrorCode.InvalidPosition,
@@ -183,50 +160,10 @@ Deno.test({
 Deno.test({
   name: "test chunk notification operation",
   fn: async () => {
-    const aliceMessageBuffer: string[] = [];
-    const connAlice: Participant = {
-      id: "connId",
-      send(s) {
-        aliceMessageBuffer.push(s);
-      },
-      close() {},
-      addEventListener() {},
-      removeEventListener() {},
-
-      user: createAdminUser("alice"),
-      sendNotification(notification: RPCNotification): void {
-        this.send(JSON.stringify(notification));
-      },
-      responseWith(data: RPCResponse): void {
-        const json = JSON.stringify(data);
-        this.send(json);
-      },
-    };
-    const popAliceObject = () => {
-      const ret = aliceMessageBuffer.shift();
-      if (ret === undefined) {
-        throw new Error("no message");
-      }
-      return JSON.parse(ret);
-    };
+    const connAlice = new MockUser("connIdAlice");
     const bobMessageBuffer: string[] = [];
-    const connBob: Participant = {
-      id: "connId",
-      send(msg: string) {
-        bobMessageBuffer.push(msg);
-      },
-      close() {},
-      addEventListener() {},
-      removeEventListener() {},
-      user: createAdminUser("bob"),
-      sendNotification(notification: RPCNotification): void {
-        this.send(JSON.stringify(notification));
-      },
-      responseWith: function (data: RPCResponse): void {
-        const json = JSON.stringify(data);
-        this.send(json);
-      },
-    };
+    const connBob = new MockUser("connIdBob");
+
     const docObj = new ActiveDocumentObject("docPath", 10);
     docObj.chunks = [];
     docObj.join(connAlice);
@@ -251,7 +188,7 @@ Deno.test({
         jsonrpc: "2.0",
         id: 1,
       });
-      const result = popAliceObject();
+      const result = connAlice.popObject();
       const m: ChunkCreateHistory = {
         chunkId: "chunkId",
         chunkContent: {
@@ -271,7 +208,7 @@ Deno.test({
           updatedAt: docObj.updatedAt,
         },
       };
-      const bobs = JSON.parse(bobMessageBuffer[0]);
+      const bobs = connBob.popObject();
       assertEquals(bobs, expected);
       assertEquals(result, {
         jsonrpc: "2.0",
