@@ -6,6 +6,7 @@ import { RPCManager as rpcman } from "../Model/RPCManager";
 export type DirTree = {
   type: string;
   name: string;
+  path: string;
   children?: DirTree[];
 };
 
@@ -21,9 +22,9 @@ async function collectDirTree(path: string, name: string): Promise<DirTree> {
 
     const children = await Promise.all(proms);
 
-    return { type: "dir", name: name, children };
+    return { type: "dir", name: name, path: path, children };
   } else {
-    return { type: "file", name: name };
+    return { type: "file", name: name, path: path };
   }
 }
 
@@ -31,7 +32,7 @@ export function useDirTree(path: string): DirTree | null {
   const [dirtree, setDirtree] = useState<DirTree | null>(null);
 
   const getDirTree = async () => {
-    const d = await collectDirTree(path, "/");
+    const d = await collectDirTree(path + "/", "/");
     setDirtree(d);
   };
 

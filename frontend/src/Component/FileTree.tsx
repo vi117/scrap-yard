@@ -121,7 +121,7 @@ export function FileTreeInner(props: {
         label={node.name}
         icon={node.type == "dir" ? <FolderIcon /> : <ArticleIcon />}
         handle={{
-          handleOpen: () => props.handleOpen(node.name),
+          handleOpen: () => props.handleOpen(node.path),
           handleMenu: handleMenuClick,
         }}
       >
