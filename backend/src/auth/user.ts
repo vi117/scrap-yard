@@ -8,7 +8,7 @@ export interface IUser extends IPermissionDescriptor {
   joinPath(path: string): string;
   relativePath(path: string): string;
 
-  expiredAfter(seconds: number): void;
+  setExpired(seconds: number): void;
   isExpired(): boolean;
 }
 
@@ -17,7 +17,6 @@ class UserSessionImpl implements IUser {
   expiredAt: number;
   permissionSet: IPermissionDescriptor;
   basepath: string;
-
   constructor(
     id: string,
     permissionSet: IPermissionDescriptor,
@@ -36,7 +35,7 @@ class UserSessionImpl implements IUser {
     return relative(this.basepath, path);
   }
 
-  expiredAfter(seconds: number): void {
+  setExpired(seconds: number): void {
     this.expiredAt = Date.now() + 1000 * seconds;
   }
 
@@ -62,4 +61,26 @@ export function createAdminUser(tokenKey: string): IUser {
     canWrite: (_path) => true,
     canCustom: (_path, _options) => true,
   }, "");
+}
+
+export type createUserOptions = {
+  basepath: string;
+  write: boolean;
+  expiredAt: number;
+};
+
+export function createUser(
+  tokenKey: string,
+  options: createUserOptions,
+): IUser {
+  const { basepath, write, expiredAt } = options;
+  const ret = new UserSessionImpl(
+    tokenKey,
+    createPermission(basepath, {
+      writable: write,
+    }),
+    basepath,
+  );
+  ret.setExpired(expiredAt);
+  return ret;
 }

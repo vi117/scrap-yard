@@ -1,7 +1,14 @@
 import { JsonRPCMethodHeader, JsonRPCNotificationHeader } from "./rpc.ts";
 
 export type ShareDocDescription = {
+  /**
+   * The path of document.
+   */
   basePath: string;
+  /**
+   * writable or readonly
+   * @default false
+   */
   write: boolean;
   /**
    * expire time:
@@ -13,23 +20,16 @@ export type ShareDocDescription = {
 
 export interface ShareDocMethod extends JsonRPCMethodHeader {
   method: "share.doc";
-  /**
-   * if shareToken set, modify `shareDocDescription`
-   */
-  params:
-    | ShareDocDescription
-    | ({ shareToken: string } & Partial<ShareDocDescription>);
+  params: ({ docPath: string } & Partial<ShareDocDescription>);
 }
 
 export interface ShareDocResult {
-  shareToken: string;
+  docPath: string;
 }
 
 export interface ShareGetInfoMethod extends JsonRPCMethodHeader {
   method: "share.info";
   params: {
-    shareToken: string;
-  } | {
     docPath: string;
   };
 }
@@ -41,7 +41,7 @@ export interface ShareGetInfoResult {
 export interface ShareNotification extends JsonRPCNotificationHeader {
   method: "share.docUpdate";
   params: {
-    shareToken: string;
+    docPath: string;
     desc: ShareDocDescription;
   };
 }

@@ -4,6 +4,7 @@ import { MethodNotFoundError } from "model";
 import * as RPC from "model";
 import { Connection } from "./connection.ts";
 import * as log from "std/log";
+import { handleShareMethod } from "./share.ts";
 
 function parseAndCheck(msg: string): RPC.RPCMethod {
   const p = JSON.parse(msg);
@@ -38,6 +39,9 @@ async function handleMethods(
     case "document.getTag":
     case "document.setTag":
       return await handleTagMethod(conn, p);
+    case "share.doc":
+    case "share.info":
+      return await handleShareMethod(conn, p);
     default:
   }
   throw new MethodNotFoundError("");
