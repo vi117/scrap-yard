@@ -11,7 +11,6 @@ Deno.test({
       "testdata/doc1.json",
     );
     const doc = await readDocFile(docPath);
-    assertEquals(doc.docPath, docPath);
     assertEquals(doc.chunks.length, 3);
     assertEquals(doc.tags.length, 2);
   },

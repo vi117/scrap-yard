@@ -11,7 +11,7 @@ async function startServer() {
   const currentDir = getCurrentScriptDir(import.meta);
   const cwd = pathJoin(Deno.cwd(), currentDir, "testdata");
   serverHandle = Deno.run({
-    cmd: [Deno.execPath(), "run", "-A", "server_run.ts"],
+    cmd: [Deno.execPath(), "run", "-A", "--no-check", "server_run.ts"],
     cwd: cwd,
     stdout: "piped",
     stderr: "null",
@@ -34,6 +34,7 @@ async function stopServer() {
 
 type MethodResponseCallback = {
   resolve: (value: RPC.RPCResponse) => void;
+  // deno-lint-ignore no-explicit-any
   reject: (reason?: any) => void;
 };
 
@@ -51,10 +52,15 @@ class WebSocketConnection {
         if (data.id) {
           const result = this.idMap.get(data.id);
           if (result) {
-            result.resolve(data.result);
-            this.idMap.delete(data.id);
+            if (data.result) {
+              result.resolve(data.result);
+              this.idMap.delete(data.id);
+            } else {
+              console.log(data.error);
+              result.reject(data.error);
+            }
           } else {
-            reject(data.error);
+            throw new Error("no id found, not request");
           }
         } else {
           const notification = data as RPC.RPCNotification;

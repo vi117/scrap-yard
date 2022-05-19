@@ -1,4 +1,4 @@
-import { DocumentObject } from "model";
+import { DocumentContent } from "./doc.ts";
 
 export class DocFormatError extends Error {
   constructor(public docPath: string, public message: string) {
@@ -12,18 +12,18 @@ export type ReadDocFileOptions = {
 
 /**
  * open a file document with `path`
- * @returns Promise<DocumentObject>
+ * @returns Promise<DocumentContent>
  * @throws Deno.errors.NotFound if the file does not exist
  * @throws DocFormatError if the file is not a valid file document
  */
 export async function readDocFile(
   path: string,
   options?: ReadDocFileOptions,
-): Promise<DocumentObject> {
+): Promise<DocumentContent> {
   options = options ?? {};
   const rawText = await Deno.readTextFile(path, { signal: options.signal });
   const data = JSON.parse(rawText);
-  if (!("chunks" in data) || !("tags" in data)) {
+  if (!("chunks" in data) || !("tags" in data) || !("version" in data)) {
     throw new DocFormatError(path, "Invalid document file");
   }
 
@@ -45,14 +45,16 @@ export async function readDocFile(
       throw new DocFormatError(path, "Invalid file format");
     }
   }
-  const updatedAt = Date.now();
+  if (!(data.tags instanceof Array)) {
+    throw new DocFormatError(path, "Invalid file format");
+  }
+  if (data.version !== 1) {
+    throw new DocFormatError(path, "Unknown version format");
+  }
   return {
-    docPath: path,
     chunks: content,
     tags: data.tags,
-    updatedAt,
-    seq: 0,
-    tagsUpdatedAt: updatedAt,
+    version: data.version,
   };
 }
 
@@ -80,13 +82,14 @@ export type WriteDocFileOptions = {
  */
 export async function saveDocFile(
   path: string,
-  doc: DocumentObject,
+  doc: DocumentContent,
   options?: WriteDocFileOptions,
 ): Promise<void> {
   options ??= {};
   const data = {
     chunks: doc.chunks,
     tags: doc.tags,
+    version: doc.version,
   };
   const rawText = JSON.stringify(data);
   await Deno.writeTextFile(path, rawText, options);

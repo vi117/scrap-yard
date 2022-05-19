@@ -38,7 +38,11 @@ export class SaveDocCollector {
     if (this.queue.length === 0) return;
     await Promise.all(this.queue.map(async (cmd) => {
       try {
-        await saveDocFile(cmd.path, cmd.doc);
+        await saveDocFile(cmd.path, {
+          chunks: cmd.doc.chunks,
+          tags: cmd.doc.tags,
+          version: 1,
+        });
       } catch (e) {
         if (e instanceof Deno.errors.NotFound) {
           // ignore
@@ -50,9 +54,3 @@ export class SaveDocCollector {
   }
 }
 // const collector = new SaveDocCollector(1000);
-
-export async function saveDoc(path: string, doc: DocumentObject) {
-  // Not ready
-  // collector.save(path, doc);
-  await saveDocFile(path, doc);
-}

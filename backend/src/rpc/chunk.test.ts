@@ -4,12 +4,14 @@ import { stub } from "std/mock";
 import { ActiveDocumentObject, DocStore } from "./docStore.ts";
 import * as RPC from "model";
 import { MockUser } from "./mockuser.ts";
+import { MemoryDocReadWriter } from "../document/doc.ts";
 
 Deno.test({
   name: "basic chunk operation",
   fn: async (t) => {
     const conn = new MockUser("connId");
-    const docObj = new ActiveDocumentObject("docPath", 10);
+    const docObj = new ActiveDocumentObject("docPath", 10, MemoryDocReadWriter);
+    MemoryDocReadWriter.save("docPath", { chunks: [], tags: [], version: 1 });
     docObj.chunks = [];
     const docStore = stub(DocStore, "open", () => {
       return docObj;
@@ -150,6 +152,7 @@ Deno.test({
       });
     } finally {
       docStore.restore();
+      MemoryDocReadWriter.clear();
     }
   },
 });
@@ -160,7 +163,8 @@ Deno.test({
     const connAlice = new MockUser("connIdAlice");
     const connBob = new MockUser("connIdBob");
 
-    const docObj = new ActiveDocumentObject("docPath", 10);
+    const docObj = new ActiveDocumentObject("docPath", 10, MemoryDocReadWriter);
+    MemoryDocReadWriter.save("docPath", { chunks: [], tags: [], version: 1 });
     docObj.chunks = [];
     docObj.join(connAlice);
     docObj.join(connBob);
@@ -217,6 +221,7 @@ Deno.test({
       });
     } finally {
       docStore.restore();
+      MemoryDocReadWriter.clear();
     }
   },
 });
