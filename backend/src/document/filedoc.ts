@@ -1,4 +1,4 @@
-import { DocumentContent } from "./doc.ts";
+import { DocReadWriter, DocumentContent } from "./doc.ts";
 
 export class DocFormatError extends Error {
   constructor(public docPath: string, public message: string) {
@@ -94,3 +94,14 @@ export async function saveDocFile(
   const rawText = JSON.stringify(data);
   await Deno.writeTextFile(path, rawText, options);
 }
+
+class DocFileReadWriterType implements DocReadWriter {
+  read(path: string): Promise<DocumentContent> {
+    return readDocFile(path);
+  }
+  save(path: string, doc: DocumentContent): Promise<void> {
+    return saveDocFile(path, doc);
+  }
+}
+
+export const DocFileReadWriter = new DocFileReadWriterType();

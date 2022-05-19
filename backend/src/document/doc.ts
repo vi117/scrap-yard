@@ -12,17 +12,6 @@ export interface DocReadWriter {
   save(path: string, doc: DocumentContent): Promise<void>;
 }
 
-class DocFileReadWriterType implements DocReadWriter {
-  read(path: string): Promise<DocumentContent> {
-    return readDocFile(path);
-  }
-  save(path: string, doc: DocumentContent): Promise<void> {
-    return saveDocFile(path, doc);
-  }
-}
-
-export const DocFileReadWriter = new DocFileReadWriterType();
-
 class MemoryDocReadWriterType implements DocReadWriter {
   private store: Map<string, DocumentContent>;
   constructor() {

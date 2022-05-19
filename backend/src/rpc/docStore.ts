@@ -5,7 +5,7 @@ import * as log from "std/log";
 import { ChunkMethodHistory } from "./chunk.ts";
 import * as setting from "../setting.ts";
 import { readDocFile } from "../document/filedoc.ts";
-import { DocFileReadWriter, DocReadWriter } from "../document/doc.ts";
+import { DocFileReadWriter, DocReadWriter } from "../document/mod.ts";
 
 export type DocHistory = {
   time: number;

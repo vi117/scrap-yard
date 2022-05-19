@@ -27,6 +27,10 @@ async function startServer() {
   assert(s !== null && s.includes("Server Start"));
 }
 async function stopServer() {
+  // wait 100 ms for graceful shutdown
+  await new Promise((resolve) => {
+    setTimeout(resolve, 100);
+  });
   serverHandle.close();
   await readAll(serverHandle.stdout!);
   serverHandle.stdout!.close();
