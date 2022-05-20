@@ -3,16 +3,69 @@ import FolderIcon from "@mui/icons-material/Folder";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import TreeItem, { TreeItemContentProps, TreeItemProps, useTreeItem } from "@mui/lab/TreeItem";
 import TreeView from "@mui/lab/TreeView";
-import { Button, Drawer, IconButton, Menu, MenuItem, Typography } from "@mui/material";
+import {
+  Button,
+  ClickAwayListener,
+  Drawer,
+  Grow,
+  IconButton,
+  Menu,
+  MenuItem,
+  MenuList,
+  Paper,
+  Popper,
+  Typography,
+} from "@mui/material";
 import clsx from "clsx";
-import React, { forwardRef, useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useRef, useState } from "react";
 
 import { DirTree, useDirTree } from "./dirTree";
 
 interface DirHandleProp {
   type: string;
   handleOpen: () => void;
-  handleMenu: (event: MouseEvent) => void;
+}
+
+function FileMenu(props: {
+  anchorEl: HTMLElement;
+  open: boolean;
+  handleClose: () => void;
+}) {
+  const { anchorEl, open, handleClose } = props;
+
+  return (
+    <Popper
+      id="filemenu"
+      anchorEl={anchorEl}
+      open={open}
+      placement="bottom-start"
+      transition
+      disablePortal
+      sx={{ zIndex: 1000 }} // use sufficiently big number
+    >
+      {({ TransitionProps, placement }) => (
+        <Grow
+          {...TransitionProps}
+          style={{
+            transformOrigin: placement === "botton-start" ? "left top" : "left bottom",
+          }}
+        >
+          <Paper>
+            <ClickAwayListener onClickAway={handleClose}>
+              <MenuList
+                autoFocusItem={open}
+                id="filemenu-list"
+              >
+                <MenuItem onClick={handleClose}>Rename</MenuItem>
+                <MenuItem onClick={handleClose}>Move</MenuItem>
+                <MenuItem onClick={handleClose}>Delete</MenuItem>
+              </MenuList>
+            </ClickAwayListener>
+          </Paper>
+        </Grow>
+      )}
+    </Popper>
+  );
 }
 
 const DirContent = forwardRef(function DirContent(
@@ -39,6 +92,16 @@ const DirContent = forwardRef(function DirContent(
     handleSelection,
     preventSelection,
   } = useTreeItem(nodeId);
+
+  const anchorRef = useRef<HTMLElement | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleMenuClick = () => {
+    setMenuOpen(true);
+  };
+  const handleMenuClose = () => {
+    setMenuOpen(false);
+  };
 
   const handleMouseDown = (event) => {
     preventSelection(event);
@@ -77,11 +140,18 @@ const DirContent = forwardRef(function DirContent(
       </Typography>
 
       <IconButton
-        onClick={handleMenu}
+        ref={anchorRef}
+        onClick={handleMenuClick}
         sx={{ marginLeft: "auto" }}
       >
         <MoreVertIcon fontSize="small" />
       </IconButton>
+
+      <FileMenu
+        anchorEl={anchorRef.current}
+        open={menuOpen}
+        handleClose={handleMenuClose}
+      />
     </div>
   );
 });
@@ -103,15 +173,6 @@ export function FileTreeInner(props: {
   root: string;
 }) {
   const dirTree = props.dirTree;
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const menuOpen = Boolean(anchorEl);
-
-  const handleMenuClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
 
   const renderTree = (node: DirTree) => {
     return (
@@ -122,7 +183,6 @@ export function FileTreeInner(props: {
         icon={node.type == "dir" ? <FolderIcon /> : <ArticleIcon />}
         handle={{
           handleOpen: () => props.handleOpen(node.path),
-          handleMenu: handleMenuClick,
         }}
       >
         {Array.isArray(node.children)
@@ -137,16 +197,6 @@ export function FileTreeInner(props: {
       open={props.open}
       onClose={props.onClose}
     >
-      <Menu
-        id="filemenu"
-        anchorEl={anchorEl}
-        open={menuOpen}
-        onClose={handleMenuClose}
-      >
-        <MenuItem onClick={handleMenuClose}>Rename</MenuItem>
-        <MenuItem onClick={handleMenuClose}>Move</MenuItem>
-        <MenuItem onClick={handleMenuClose}>Delete</MenuItem>
-      </Menu>
       <TreeView
         sx={{ width: props.width }}
         defaultExpanded={["/"]}
