@@ -22,16 +22,23 @@ import React, { forwardRef, useEffect, useRef, useState } from "react";
 import { DirTree, useDirTree } from "./dirTree";
 
 interface DirHandleProp {
-  type: string;
   handleOpen: () => void;
+  handleFile: (command: string) => void;
 }
 
 function FileMenu(props: {
   anchorEl: HTMLElement;
   open: boolean;
   handleClose: () => void;
+  handleFile: (command: string) => void;
 }) {
   const { anchorEl, open, handleClose } = props;
+
+  const handleFile = (com: string) =>
+    () => {
+      props.handleFile(com);
+      handleClose();
+    };
 
   return (
     <Popper
@@ -56,9 +63,9 @@ function FileMenu(props: {
                 autoFocusItem={open}
                 id="filemenu-list"
               >
-                <MenuItem onClick={handleClose}>Rename</MenuItem>
-                <MenuItem onClick={handleClose}>Move</MenuItem>
-                <MenuItem onClick={handleClose}>Delete</MenuItem>
+                <MenuItem onClick={handleFile("rename")}>Rename</MenuItem>
+                <MenuItem onClick={handleFile("move")}>Move</MenuItem>
+                <MenuItem onClick={handleFile("delete")}>Delete</MenuItem>
               </MenuList>
             </ClickAwayListener>
           </Paper>
@@ -78,9 +85,8 @@ const DirContent = forwardRef(function DirContent(
     label,
     nodeId,
     icon,
-    type,
     handleOpen,
-    handleMenu,
+    handleFile,
   } = props;
 
   const {
@@ -151,6 +157,7 @@ const DirContent = forwardRef(function DirContent(
         anchorEl={anchorRef.current}
         open={menuOpen}
         handleClose={handleMenuClose}
+        handleFile={handleFile}
       />
     </div>
   );
@@ -169,6 +176,7 @@ export function FileTreeInner(props: {
   width: number;
   open: boolean;
   handleOpen: (f: string) => void;
+  handleFile: (com: string, file: string) => void;
   onClose: () => void;
   root: string;
 }) {
@@ -183,6 +191,9 @@ export function FileTreeInner(props: {
         icon={node.type == "dir" ? <FolderIcon /> : <ArticleIcon />}
         handle={{
           handleOpen: () => props.handleOpen(node.path),
+          handleFile: (com) => {
+            props.handleFile(com, node.path);
+          },
         }}
       >
         {Array.isArray(node.children)

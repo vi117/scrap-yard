@@ -29,6 +29,7 @@ export function UI() {
       <FileTree
         width={drawerWidth}
         handleOpen={(f: string) => console.log(f)}
+        handleFile={(com: string, f: string) => console.log(`${com} ${f}`)}
         open={open}
         onClose={() => setOpen(false)}
         root={""}
