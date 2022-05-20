@@ -96,21 +96,22 @@ class LocalDocument implements IDocumentViewModel {
   }
 
   useChunk(orig_chunk) {
-    const [chunk, setChunk] = useState(orig_chunk);
+    const [updateAt, setUpdateAt] = useState(0);
+    const chunk = useMemo(() => orig_chunk, [updateAt]);
 
-    const updateChunk = (c) => {
-      setChunk(c);
+    const updateChunk = () => {
+      setUpdateAt(updateAt + 1);
       save(this.chunks);
     };
 
     const setType = (t) => {
-      const c = { ...chunk, type: t };
-      updateChunk(c);
+      orig_chunk.type = t;
+      updateChunk();
     };
 
     const setContent = (content: string) => {
-      const c = { ...chunk, content: content };
-      updateChunk(c);
+      orig_chunk.content = content;
+      updateChunk();
     };
 
     return [chunk, { setType, setContent }];
