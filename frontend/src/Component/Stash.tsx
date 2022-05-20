@@ -130,7 +130,7 @@ export function Stash() {
         onClick={() => setOpen(!open)}
         ref={anchorRef}
         sx={{
-          position: "sticky",
+          position: "fixed",
           right: "1em",
           bottom: "1em",
         }}
@@ -149,6 +149,8 @@ export function Stash() {
             <Paper
               sx={{
                 width: 600,
+                maxHeight: "80vh",
+                overflow: "scroll",
               }}
             >
               <ChunkList doc={doc} />
