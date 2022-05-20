@@ -5,7 +5,7 @@ import { Button, Grid, InputLabel, MenuItem, Paper, Select, TextField, Tooltip }
 import { Chunk as ChunkType } from "model";
 import React, { ChangeEventHandler, createRef, useEffect, useState } from "react";
 import { RecoilState, useRecoilState } from "recoil";
-import { DocumentViewModel } from "../ViewModel/doc";
+import { IDocumentViewModel } from "../ViewModel/doc";
 
 import CsvRenderer from "./Chunk/csvRenderer";
 import MarkdownRenderer from "./Chunk/markdownRenderer";
@@ -67,7 +67,7 @@ const TypeSelector = (props: {
 };
 
 const Chunk = (props: {
-  doc: DocumentViewModel;
+  doc: IDocumentViewModel;
   chunk: ChunkType;
   position: number;
   focusedChunk: RecoilState<string>;
