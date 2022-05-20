@@ -56,7 +56,11 @@ export function Divider(props: {
         ...(isOver ? { background: "grey" } : {}), // TODO: change color & move this outside
       }}
     >
-      <IconButton style={{ margin: "0 auto" }} onClick={() => newChunk(position)}>
+      <IconButton
+        size="small"
+        style={{ margin: "0 auto" }}
+        onClick={() => newChunk(position)}
+      >
         <AddIcon />
       </IconButton>
     </Box>
