@@ -7,8 +7,9 @@ const nativeTypes = [
   "text/html",
 ];
 
-export function useDrag(source, deps?) {
-  const data = useMemo(source, deps ?? []);
+export function useDrag(source, deps?: unknown[]) {
+  deps = deps ?? [];
+  const data = useMemo(source, deps);
 
   const handleDragStart = (e: DragEvent) => {
     e.dataTransfer.setData(data.type, JSON.stringify(data.item));
@@ -30,10 +31,10 @@ export function useDrag(source, deps?) {
     elem.removeEventListener("dragend", handleDragEnd);
   };
 
-  const ref = useRef(null);
+  const ref = useRef<HTMLElement | null>(null);
 
   const setDrag = useCallback((elem: HTMLElement) => {
-    if (elem == null) {
+    if (elem == null && ref.current != null) {
       clearDrag(ref.current);
       return;
     }
@@ -48,7 +49,8 @@ export function useDrag(source, deps?) {
 }
 
 export function useDrop(source, deps?) {
-  const data = useMemo(source, deps ?? []);
+  deps = deps ?? [];
+  const data = useMemo(source, deps);
   const [isOver, setIsOver] = useState(false);
 
   const handleDragOver = (e: DragEvent) => {
@@ -94,10 +96,10 @@ export function useDrop(source, deps?) {
     elem.removeEventListener("drop", handleDrop);
   };
 
-  const ref = useRef(null);
+  const ref = useRef<HTMLElement | null>(null);
 
   const setDrop = useCallback((elem: HTMLElement) => {
-    if (elem == null) {
+    if (elem == null && ref.current != null) {
       clearDrop(ref.current);
       return;
     }

@@ -4,20 +4,9 @@ import { atom, RecoilState, useRecoilState } from "recoil";
 import { v4 as uuidv4 } from "uuid";
 import { createTestDocViewModel, IDocumentViewModel } from "../ViewModel/doc";
 
-// import '../App.css';
-import { DocumentObject } from "model";
 import Chunk from "./Chunk";
 import Divider from "./Divider";
 import Search from "./Search";
-
-/*
-const uuidList: RecoilState<string[]> = atom({
-  key: "uuid List",
-  default: [] as string[],
-});
-
-const chunkMap = new Map();
- */
 
 // TODO(vi117): remove this and make chunk view model.
 const focusedChunk = atom({
