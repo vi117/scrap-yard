@@ -53,15 +53,20 @@ export function useDrop(source, deps?) {
   const data = useMemo(source, deps);
   const [isOver, setIsOver] = useState(false);
 
+  const isAcceptable = (dt: DataTransfer) => {
+    return dt.types.some((t) => data.accept.includes(t))
+      || (data.acceptFile && [...dt.items].some((i) => i.kind === "file")); /* dropping file */
+  };
+
   const handleDragOver = (e: DragEvent) => {
-    if (e.dataTransfer.types.some((t) => data.accept.includes(t))) {
+    if (isAcceptable(e.dataTransfer)) {
       setIsOver(true);
     }
     e.preventDefault();
   };
 
   const handleDragEnter = (e: DragEvent) => {
-    if (e.dataTransfer.types.some((t) => data.accept.includes(t))) {
+    if (isAcceptable(e.dataTransfer)) {
       setIsOver(true);
     }
     e.preventDefault();
@@ -72,16 +77,25 @@ export function useDrop(source, deps?) {
   };
 
   const handleDrop = (e: DragEvent) => {
-    for (const type of data.accept) {
-      const item = e.dataTransfer.getData(type);
-      if (item != "") {
-        if (nativeTypes.includes(type)) {
-          data.drop(type, item);
-        } else {
-          data.drop(type, JSON.parse(item));
+    if (e.dataTransfer.files.length !== 0) { // file drop
+      for (const item of e.dataTransfer.items) {
+        if (item.kind === "file") {
+          data.filedrop(item.type, item.getAsFile());
+          break; // TODO: support multiple file drop
         }
+      }
+    } else {
+      for (const type of data.accept) {
+        const item = e.dataTransfer.getData(type);
+        if (item != "") {
+          if (nativeTypes.includes(type)) {
+            data.drop(type, item);
+          } else {
+            data.drop(type, JSON.parse(item));
+          }
 
-        break; // use first matched item
+          break; // use first matched item
+        }
       }
     }
 
