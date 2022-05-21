@@ -9,7 +9,12 @@ import { IPageViewModel } from "./page";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IDocumentViewModel extends IPageViewModel {
+  docPath: string;
+
   updateOnNotification(notification: ChunkNotification): void;
+  useChunks(): [Chunk[], ChunkListMutator];
+  useTags(): [string[], (tags: string[]) => Promise<void>];
+  useChunk(chunk_arg: Chunk): [Chunk, ChunkMutator];
 }
 
 interface ChunkListMutator {

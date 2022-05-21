@@ -6,7 +6,7 @@ import * as ReactDOMServer from "react-dom/server";
 import { RecoilState, useRecoilState } from "recoil";
 import { useDrop } from "./dnd";
 
-import { ChunkType } from "./model";
+import { Chunk as ChunkType, ChunkContent } from "./model";
 
 export function Divider(props: {
   doc: string;
@@ -17,7 +17,7 @@ export function Divider(props: {
   addFromText: (pos: number, content: string) => void;
   add: (pos: number, content: ChunkContent) => void;
 }) {
-  const { position, newChunk, insertChunk, moveChunk, addFromText } = props;
+  const { position, newChunk, insertChunk, moveChunk, addFromText, add } = props;
 
   const [{ isOver }, drop] = useDrop<
     { chunk: ChunkType; doc: string; cur: number } & { text: string } & { html: string }
@@ -56,7 +56,11 @@ export function Divider(props: {
         ...(isOver ? { background: "grey" } : {}), // TODO: change color & move this outside
       }}
     >
-      <IconButton style={{ margin: "0 auto" }} onClick={() => newChunk(position)}>
+      <IconButton
+        size="small"
+        style={{ margin: "0 auto" }}
+        onClick={() => newChunk(position)}
+      >
         <AddIcon />
       </IconButton>
     </Box>

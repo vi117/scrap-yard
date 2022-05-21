@@ -2,23 +2,11 @@ import { Button, Chip, Input, Stack } from "@mui/material";
 import { FormEventHandler, Fragment, useState } from "react";
 import { atom, RecoilState, useRecoilState } from "recoil";
 import { v4 as uuidv4 } from "uuid";
-// import { newDocument, useChunks } from "./LocalDocument";
-import { createTestDocViewModel, DocumentViewModel } from "../ViewModel/doc";
+import { createTestDocViewModel, IDocumentViewModel } from "../ViewModel/doc";
 
-// import '../App.css';
-import { DocumentObject } from "model";
 import Chunk from "./Chunk";
 import Divider from "./Divider";
 import Search from "./Search";
-
-/*
-const uuidList: RecoilState<string[]> = atom({
-  key: "uuid List",
-  default: [] as string[],
-});
-
-const chunkMap = new Map();
- */
 
 // TODO(vi117): remove this and make chunk view model.
 const focusedChunk = atom({
@@ -26,7 +14,7 @@ const focusedChunk = atom({
   default: "",
 });
 
-function TagBar(props: { doc: DocumentViewModel }) {
+function TagBar(props: { doc: IDocumentViewModel }) {
   const [tags, setTags] = props.doc.useTags();
   const [taglist, setTaglist] = useState(tags.join(" "));
   const [editable, setEditable] = useState(false);
@@ -58,7 +46,7 @@ function TagBar(props: { doc: DocumentViewModel }) {
   }
 }
 
-function Doc(props: { doc: DocumentViewModel }) {
+export function ChunkList(props: { doc: IDocumentViewModel }) {
   const doc = props.doc;
   const [chunks, mutation] = doc.useChunks();
 
@@ -88,21 +76,26 @@ function Doc(props: { doc: DocumentViewModel }) {
   });
 
   return (
+    <Stack className="document">
+      {chunklist}
+      <Divider
+        doc={doc.docPath}
+        position={chunks.length}
+        newChunk={mutation.create}
+        insertChunk={mutation.add}
+        moveChunk={mutation.move}
+        addFromText={mutation.addFromText}
+        add={mutation.add}
+      />
+    </Stack>
+  );
+}
+
+function InnerDocumentEditor(props: { doc: IDocumentViewModel }) {
+  return (
     <>
-      <Search chunks={chunks} />
-      <TagBar doc={doc} />
-      <Stack className="document">
-        {chunklist}
-        <Divider
-          doc={doc.docPath}
-          position={chunks.length}
-          newChunk={mutation.create}
-          insertChunk={mutation.add}
-          moveChunk={mutation.move}
-          addFromText={mutation.addFromText}
-          add={mutation.add}
-        />
-      </Stack>
+      <TagBar doc={props.doc} />
+      <ChunkList doc={props.doc} />
     </>
   );
 }
@@ -111,7 +104,7 @@ export function DocumentEditor() {
   const doc = createTestDocViewModel("ws://localhost:8000/ws", "test.syd");
 
   if (doc != null) {
-    return <Doc doc={doc} />;
+    return <InnerDocumentEditor doc={doc} />;
   } else {
     return <div>please wait...</div>;
   }

@@ -5,7 +5,7 @@ import { Button, Grid, InputLabel, MenuItem, Paper, Select, TextField, Tooltip }
 import { Chunk as ChunkType } from "model";
 import React, { ChangeEventHandler, createRef, useEffect, useState } from "react";
 import { RecoilState, useRecoilState } from "recoil";
-import { DocumentViewModel } from "../ViewModel/doc";
+import { IDocumentViewModel } from "../ViewModel/doc";
 
 import CsvRenderer from "./Chunk/csvRenderer";
 import MarkdownRenderer from "./Chunk/markdownRenderer";
@@ -67,7 +67,7 @@ const TypeSelector = (props: {
 };
 
 const Chunk = (props: {
-  doc: DocumentViewModel;
+  doc: IDocumentViewModel;
   chunk: ChunkType;
   position: number;
   focusedChunk: RecoilState<string>;
@@ -148,7 +148,7 @@ const Chunk = (props: {
   const renderContent = () => {
     if (mode == "Read") {
       return (
-        <div id="content" className="content" style={{ minHeight: "8em" }}>
+        <div id="content" className="content" style={{ height: "100%" }}>
           {render_view(type, content)}
         </div>
       );
@@ -160,13 +160,14 @@ const Chunk = (props: {
           autoFocus={true}
           multiline
           fullWidth={true}
-          minRows={4}
+          minRows="5"
           className="content"
           inputRef={inputRef}
           onChange={onChange}
           onKeyDown={onKeyDown}
           onKeyUp={onKeyUp}
           value={buffer}
+          sx={{ height: "100%" }}
         />
       );
     }
@@ -200,19 +201,19 @@ const Chunk = (props: {
         padding: "0.5em",
       }}
     >
-      <Grid container direction="row" spacing={1} onFocus={onFocus}>
+      <div style={{ display: "flex", flexDirection: "row", gap: "0.5em" }} onFocus={onFocus}>
         {/* content */}
-        <Grid item xs={11} onClick={() => setMode("Write")}>
+        <div style={{ width: "100%" }} onClick={() => setMode("Write")}>
           {renderContent()}
-        </Grid>
+        </div>
 
         {/* sidebar */}
-        <Grid item xs={1}>
+        <div>
           {editButton}
           {deleteButton}
           {typeSelector}
-        </Grid>
-      </Grid>
+        </div>
+      </div>
     </Paper>
   );
 };
