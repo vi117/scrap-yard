@@ -4,6 +4,7 @@ import {
   DocumentOpenResult,
   DocumentTagGetResult,
   DocumentTagMethod,
+  DocumentTagSetResult,
   InvalidDocPathError,
   makeRPCError,
   makeRPCResult,
@@ -107,8 +108,7 @@ export async function handleTagMethod(
         return;
       }
       doc.setTags(method.params.tags);
-      const result: DocumentTagGetResult = {
-        tags: doc.tags,
+      const result: DocumentTagSetResult = {
         updatedAt: doc.tagsUpdatedAt,
       };
       doc.broadcastTagsNotification(conn);
