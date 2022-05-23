@@ -53,6 +53,9 @@ export class RPCMessageManager extends EventTarget implements IRPCMessageManager
   get opened() {
     return this.ws?.readyState === WebSocket.OPEN;
   }
+  get openedURL(): string | undefined {
+    return this.ws?.url;
+  }
 
   open(url: string | URL, protocals?: string | string) {
     return new Promise<void>((resolve, reject) => {

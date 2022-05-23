@@ -8,12 +8,6 @@ import Chunk from "./Chunk";
 import Divider from "./Divider";
 import Search from "./Search";
 
-// TODO(vi117): remove this and make chunk view model.
-const focusedChunk = atom({
-  key: "Focused Chunk",
-  default: "",
-});
-
 function TagBar(props: { doc: IDocumentViewModel }) {
   const [tags, setTags] = props.doc.useTags();
   const [taglist, setTaglist] = useState(tags.join(" "));
@@ -65,10 +59,8 @@ export function ChunkList(props: { doc: IDocumentViewModel }) {
         />
 
         <Chunk
-          doc={doc}
           chunk={chunk}
           position={i}
-          focusedChunk={focusedChunk}
           deleteThis={() => mutation.del(id)}
         />
       </Fragment>

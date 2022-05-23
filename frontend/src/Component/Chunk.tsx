@@ -5,6 +5,7 @@ import { Button, Grid, InputLabel, MenuItem, Paper, Select, TextField, Tooltip }
 import { Chunk as ChunkType } from "model";
 import React, { ChangeEventHandler, createRef, useEffect, useState } from "react";
 import { RecoilState, useRecoilState } from "recoil";
+import { ChunkViewModel } from "../ViewModel/chunklist";
 import { IDocumentViewModel } from "../ViewModel/doc";
 
 import CsvRenderer from "./Chunk/csvRenderer";
@@ -67,41 +68,41 @@ const TypeSelector = (props: {
 };
 
 const Chunk = (props: {
-  doc: IDocumentViewModel;
-  chunk: ChunkType;
+  chunk: ChunkViewModel;
   position: number;
-  focusedChunk: RecoilState<string>;
   deleteThis: () => void;
 }) => {
   const chunk = props.chunk;
   const id = chunk.id;
   const deleteThis = props.deleteThis;
 
-  // Inherited States
-  const [fc, setFc] = useRecoilState(props.focusedChunk);
-  const [{ type, content }, { setType, setContent }] = props.doc.useChunk(chunk);
+  const [{ type, content }, { setType, setContent }] = props.chunk.useChunk();
   const [buffer, setBuffer] = useState(content);
 
   // Internal States
-  const [mode, setMode] = useState("Read");
+  const [mode, setMode] = useState<"Read" | "Write">("Read");
   const [onDelete, setOnDelete] = useState(false);
 
   // drag
   const [, drag] = useDrag(() => ({
     type: "chunk", // TODO: make this constant
-    item: { chunk: chunk, doc: props.doc.docPath, cur: props.position },
-    end: (e) => {
+    item: { chunk: chunk.chunk, doc: props.chunk.parent.docPath, cur: props.position },
+    end: () => {
       // TODO: need to fill dragend.
     },
   }), [props.position]);
 
   // reference of textfield
   const inputRef = createRef<null | HTMLTextAreaElement>();
-
+  const fc = chunk.useFocus();
   // Effects
   // set read mode when other chunk gets focused.
   useEffect(() => {
-    if (fc != id) setMode("Read");
+    if (!fc) {
+      setMode("Read");
+    } else {
+      setMode("Write");
+    }
   }, [fc]);
 
   useEffect(() => {
@@ -118,7 +119,9 @@ const Chunk = (props: {
 
   // Callbacks
 
-  const changeMode = () => setMode(mode == "Read" ? "Write" : "Read");
+  const changeMode = () => {
+    setMode(mode == "Read" ? "Write" : "Read");
+  };
 
   const updateType = (t: string) => {
     if (t != "") {
@@ -129,7 +132,7 @@ const Chunk = (props: {
 
   const onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement> = (e) => setBuffer(e.target.value);
 
-  const onFocus = () => setFc(id);
+  const onFocus = () => chunk.focus();
 
   const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
     if (e.key == "Backspace") {
@@ -200,6 +203,7 @@ const Chunk = (props: {
         margin: "0.5em",
         padding: "0.5em",
       }}
+      component={"div"}
     >
       <div style={{ display: "flex", flexDirection: "row", gap: "0.5em" }} onFocus={onFocus}>
         {/* content */}

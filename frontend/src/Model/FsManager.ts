@@ -75,10 +75,12 @@ export interface IFsManager extends EventTarget {
 export class FsManager extends EventTarget implements IFsManager {
   private manager: RPCMessageManager;
   private prefix: string;
+  private url: string;
   constructor(manager: RPCMessageManager) {
     super();
     this.manager = manager;
     this.prefix = "/fs/";
+    this.url = window.location.origin + this.prefix;
   }
   /**
    * fetch file
@@ -86,7 +88,7 @@ export class FsManager extends EventTarget implements IFsManager {
    * @returns content of file
    */
   async get(path: string): Promise<Response> {
-    const url = new URL(this.prefix + path);
+    const url = new URL(path, this.url);
     const res = await fetch(url);
     return res;
   }
@@ -109,7 +111,7 @@ export class FsManager extends EventTarget implements IFsManager {
    * ```
    */
   async getStat(filePath: string): Promise<FsGetResult> {
-    const url = new URL("http://localhost:8000" + this.prefix + filePath);
+    const url = new URL(filePath, this.url);
     url.searchParams.set("stat", "true");
     const res = await fetch(url);
     if (!res.ok) {
@@ -125,7 +127,7 @@ export class FsManager extends EventTarget implements IFsManager {
    * @returns status code
    */
   async upload(filePath: string, data: BodyInit): Promise<number> {
-    const url = new URL(this.prefix + filePath);
+    const url = new URL(filePath, this.url);
     const res = await fetch(url, {
       method: "PUT",
       body: data,
@@ -141,7 +143,7 @@ export class FsManager extends EventTarget implements IFsManager {
    * @returns status code
    */
   async mkdir(filePath: string): Promise<number> {
-    const url = new URL(this.prefix + filePath);
+    const url = new URL(filePath, this.url);
     url.searchParams.set("makeDir", "true");
     const res = await fetch(url, {
       method: "PUT",
@@ -162,7 +164,7 @@ export class FsManager extends EventTarget implements IFsManager {
    * ```
    */
   async delete(filePath: string): Promise<number> {
-    const url = new URL(this.prefix + filePath);
+    const url = new URL(filePath, this.url);
     const res = await fetch(url, {
       method: "DELETE",
     });
