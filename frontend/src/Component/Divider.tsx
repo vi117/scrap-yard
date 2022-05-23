@@ -44,6 +44,10 @@ export function Divider(props: {
           });
         }
       },
+
+      filedrop: (t: string, file: File) => {
+        console.log(file);
+      },
     }),
     [position],
   );

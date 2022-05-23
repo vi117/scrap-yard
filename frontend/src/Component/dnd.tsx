@@ -7,7 +7,24 @@ const nativeTypes = [
   "text/html",
 ];
 
-export function useDrag(source, deps?: unknown[]) {
+export type DragData<T> = {
+  type: string;
+  item: T;
+  end: (e: any) => void; // FIXME: add propriate type
+};
+
+export type DragSource<T> = () => DragData<T>;
+
+export type DropData<T> = {
+  accept: string[];
+  acceptFile: boolean;
+  drop: (type: string, item: string | T) => void;
+  filedrop: (type: string, file: File) => void;
+};
+
+export type DropSource<T> = () => DropData<T>;
+
+export function useDrag<T>(source: DragSource<T>, deps?: unknown[]) {
   deps = deps ?? [];
   const data = useMemo(source, deps);
 
@@ -27,6 +44,7 @@ export function useDrag(source, deps?: unknown[]) {
   };
 
   const clearDrag = (elem: HTMLElement) => {
+    elem.draggable = false;
     elem.removeEventListener("dragstart", handleDragStart);
     elem.removeEventListener("dragend", handleDragEnd);
   };
@@ -48,20 +66,25 @@ export function useDrag(source, deps?: unknown[]) {
   return [null, setDrag];
 }
 
-export function useDrop(source, deps?) {
+export function useDrop<T>(source: DropSource<T>, deps?: unknown[]) {
   deps = deps ?? [];
   const data = useMemo(source, deps);
   const [isOver, setIsOver] = useState(false);
 
+  const isAcceptable = (dt: DataTransfer) => {
+    return dt.types.some((t) => data.accept.includes(t))
+      || (data.acceptFile && [...dt.items].some((i) => i.kind === "file")); /* dropping file */
+  };
+
   const handleDragOver = (e: DragEvent) => {
-    if (e.dataTransfer.types.some((t) => data.accept.includes(t))) {
+    if (isAcceptable(e.dataTransfer)) {
       setIsOver(true);
     }
     e.preventDefault();
   };
 
   const handleDragEnter = (e: DragEvent) => {
-    if (e.dataTransfer.types.some((t) => data.accept.includes(t))) {
+    if (isAcceptable(e.dataTransfer)) {
       setIsOver(true);
     }
     e.preventDefault();
@@ -72,16 +95,25 @@ export function useDrop(source, deps?) {
   };
 
   const handleDrop = (e: DragEvent) => {
-    for (const type of data.accept) {
-      const item = e.dataTransfer.getData(type);
-      if (item != "") {
-        if (nativeTypes.includes(type)) {
-          data.drop(type, item);
-        } else {
-          data.drop(type, JSON.parse(item));
+    if (e.dataTransfer.files.length !== 0) { // file drop
+      for (const item of e.dataTransfer.items) {
+        if (item.kind === "file") {
+          data.filedrop(item.type, item.getAsFile());
+          break; // TODO: support multiple file drop
         }
+      }
+    } else {
+      for (const type of data.accept) {
+        const item = e.dataTransfer.getData(type);
+        if (item != "") {
+          if (nativeTypes.includes(type)) {
+            data.drop(type, item);
+          } else {
+            data.drop(type, JSON.parse(item));
+          }
 
-        break; // use first matched item
+          break; // use first matched item
+        }
       }
     }
 
