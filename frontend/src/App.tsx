@@ -2,8 +2,8 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { RecoilRoot } from "recoil";
 import "./App.css";
-import DocumentEditor from "./Component/Document";
 import { NotFound } from "./Page/NotFoundPage";
+import { UI } from "./Page/Story/UI";
 import { Storybooks } from "./Page/StoryBooks";
 
 function App() {
@@ -13,7 +13,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to={"app/"} />}>
           </Route>
-          <Route path="app/*" element={<DocumentEditor></DocumentEditor>}>
+          <Route path="app/*" element={<UI></UI>}>
           </Route>
           <Route path="storybook/*" element={<Storybooks></Storybooks>}></Route>
           <Route path="*" element={<NotFound />}>
