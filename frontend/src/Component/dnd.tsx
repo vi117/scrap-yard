@@ -7,7 +7,24 @@ const nativeTypes = [
   "text/html",
 ];
 
-export function useDrag(source, deps?: unknown[]) {
+export type DragData<T> = {
+  type: string;
+  item: T;
+  end: (e: any) => void; // FIXME: add propriate type
+};
+
+export type DragSource<T> = () => DragData<T>;
+
+export type DropData<T> = {
+  accept: string[];
+  acceptFile: boolean;
+  drop: (type: string, item: string | T) => void;
+  filedrop: (type: string, file: File) => void;
+};
+
+export type DropSource<T> = () => DropData<T>;
+
+export function useDrag<T>(source: DragSource<T>, deps?: unknown[]) {
   deps = deps ?? [];
   const data = useMemo(source, deps);
 
@@ -27,6 +44,7 @@ export function useDrag(source, deps?: unknown[]) {
   };
 
   const clearDrag = (elem: HTMLElement) => {
+    elem.draggable = false;
     elem.removeEventListener("dragstart", handleDragStart);
     elem.removeEventListener("dragend", handleDragEnd);
   };
@@ -48,7 +66,7 @@ export function useDrag(source, deps?: unknown[]) {
   return [null, setDrag];
 }
 
-export function useDrop(source, deps?) {
+export function useDrop<T>(source: DropSource<T>, deps?: unknown[]) {
   deps = deps ?? [];
   const data = useMemo(source, deps);
   const [isOver, setIsOver] = useState(false);
