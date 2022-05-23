@@ -12,6 +12,7 @@ import {
 } from "model";
 import { makeSessionId } from "../auth/session.ts";
 import { ShareDocStore } from "../auth/docShare.ts";
+import { dirname } from "std/path";
 
 export function handleShareDocMethod(
   conn: Participant,
@@ -30,7 +31,7 @@ export function handleShareDocMethod(
     //create share token
     const shareToken = makeSessionId();
     ShareDocStore.set(param.docPath, {
-      basePath: param.docPath,
+      basePath: dirname(param.docPath),
       shareToken,
       expired: param.expired ?? Date.now() + 1000 * 60 * 60 * 24 * 7,
       write: param.write ?? false,
@@ -38,7 +39,7 @@ export function handleShareDocMethod(
   } else {
     //update share token info
     ShareDocStore.set(param.docPath, {
-      basePath: param.docPath,
+      basePath: param.basePath ?? shareInfo.basePath,
       shareToken: shareInfo.shareToken,
       expired: param.expired ?? shareInfo.expired,
       write: param.write ?? shareInfo.write,
