@@ -203,6 +203,7 @@ const Chunk = (props: {
         margin: "0.5em",
         padding: "0.5em",
       }}
+      component={"div"}
     >
       <div style={{ display: "flex", flexDirection: "row", gap: "0.5em" }} onFocus={onFocus}>
         {/* content */}
