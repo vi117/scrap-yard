@@ -46,11 +46,11 @@ export function render_view(t: string, content: string) {
         case "md":
             return <MarkdownRenderer text={content} />;
         case "image":
-            return <img src={content} />;
+            return <img style={{ width: "100%" }} src={content} />;
         case "video":
-            return <video controls src={content} />;
+            return <video style={{ width: "100%" }} controls src={content} />;
         case "audio":
-            return <audio controls src={content} />;
+            return <audio style={{ width: "100%" }} controls src={content} />;
         case "rawhtml":
             return <div dangerouslySetInnerHTML={{ __html: content }} />;
         case "katex":
