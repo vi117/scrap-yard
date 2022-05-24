@@ -7,4 +7,8 @@ export default {
     "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}",
   ],
   testEnvironment: "jest-environment-jsdom",
+  moduleDirectories: ["node_modules", "src"],
+  moduleNameMapper: {
+    "\\.(css|sass|scss)$": "identity-obj-proxy",
+  },
 };
