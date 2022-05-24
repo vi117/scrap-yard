@@ -103,8 +103,10 @@ export function useDocViewModel(path: string) {
     const [doc, setDoc] = useState<DocumentViewModel | null>(null);
 
     useEffect(() => {
-        if (!doc) getDoc();
-    });
+        console.log("useDocViewModel: ", path);
+        setDoc(null);
+        getDoc();
+    }, [path]);
 
     const getDoc = async () => {
         const manager = await getOpenedManagerInstance();
