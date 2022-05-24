@@ -1,6 +1,6 @@
 import { DocumentCloseResult, DocumentOpenResult, DocumentTagGetResult, DocumentTagSetResult } from "model";
 import { RPCErrorWrapper } from "./RPCError";
-import { RPCMessageManager } from "./RPCManager";
+import { IRPCMessageManager } from "./RPCManager";
 
 /**
  * open document
@@ -8,7 +8,7 @@ import { RPCMessageManager } from "./RPCManager";
  * @param filePath path of document
  * @returns document
  */
-export async function openDocument(manager: RPCMessageManager, filePath: string) {
+export async function openDocument(manager: IRPCMessageManager, filePath: string) {
   const res = await manager.invokeMethod({
     method: "document.open",
     params: {
@@ -29,7 +29,7 @@ export async function openDocument(manager: RPCMessageManager, filePath: string)
  * @param docPath path of document
  * @returns path of document
  */
-export async function closeDocument(manager: RPCMessageManager, docPath: string) {
+export async function closeDocument(manager: IRPCMessageManager, docPath: string) {
   const res = await manager.invokeMethod({
     method: "document.close",
     params: {
@@ -50,7 +50,7 @@ export async function closeDocument(manager: RPCMessageManager, docPath: string)
  * @param docPath path of document
  * @returns tags and updatedAt
  */
-export async function getDocumentTags(manager: RPCMessageManager, docPath: string): Promise<DocumentTagGetResult> {
+export async function getDocumentTags(manager: IRPCMessageManager, docPath: string): Promise<DocumentTagGetResult> {
   const res = await manager.invokeMethod({
     method: "document.getTag",
     params: {
@@ -72,7 +72,7 @@ export async function getDocumentTags(manager: RPCMessageManager, docPath: strin
  * @returns tags
  */
 export async function setDocumentTags(
-  manager: RPCMessageManager,
+  manager: IRPCMessageManager,
   docPath: string,
   tags: string[],
   updatedAt: number,

@@ -1,4 +1,4 @@
-import { RPCMessageManager } from "./mod";
+import { IRPCMessageManager } from "./mod";
 
 export interface FsDirEntry {
   name: string;
@@ -73,10 +73,10 @@ export interface IFsManager extends EventTarget {
 }
 
 export class FsManager extends EventTarget implements IFsManager {
-  private manager: RPCMessageManager;
+  private manager: IRPCMessageManager;
   private prefix: string;
   private url: string;
-  constructor(manager: RPCMessageManager) {
+  constructor(manager: IRPCMessageManager) {
     super();
     this.manager = manager;
     this.prefix = "/fs/";
