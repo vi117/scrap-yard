@@ -9,157 +9,157 @@ import { ChunkList } from "./Document";
 const stash = "stash";
 
 function save(doc) {
-  window.localStorage.setItem(stash, JSON.stringify(doc));
+    window.localStorage.setItem(stash, JSON.stringify(doc));
 }
 
 function load() {
-  return JSON.parse(window.localStorage.getItem(stash));
+    return JSON.parse(window.localStorage.getItem(stash));
 }
 
 class LocalDocument implements IDocumentViewModel {
-  docPath = stash;
-  chunks = [];
+    docPath = stash;
+    chunks = [];
 
-  constructor() {
-    this.chunks = this.loadChunks();
-  }
-
-  loadChunks() {
-    if (window.localStorage.getItem(stash) == null) {
-      return [];
-    } else {
-      return load();
+    constructor() {
+        this.chunks = this.loadChunks();
     }
-  }
 
-  updateOnNotification() {
-    // nop
-  }
+    loadChunks() {
+        if (window.localStorage.getItem(stash) == null) {
+            return [];
+        } else {
+            return load();
+        }
+    }
 
-  useChunks() {
-    const [updateAt, setUpdateAt] = useState(0);
-    const chunks = useMemo(() => this.chunks, [updateAt]);
+    updateOnNotification() {
+        // nop
+    }
 
-    const add = (i?, chunkContent?) => {
-      i = i ?? chunks.length;
+    useChunks() {
+        const [updateAt, setUpdateAt] = useState(0);
+        const chunks = useMemo(() => this.chunks, [updateAt]);
 
-      const id = uuidv4();
-      const chunk = chunkContent ?? {
-        id: id,
-        type: "text",
-        content: "",
-      };
+        const add = (i?, chunkContent?) => {
+            i = i ?? chunks.length;
 
-      const nc = chunks.slice();
-      nc.splice(i, 0, chunk);
-      this.chunks = nc;
-      setUpdateAt(updateAt + 1);
-      save(this.chunks);
-    };
+            const id = uuidv4();
+            const chunk = chunkContent ?? {
+                id: id,
+                type: "text",
+                content: "",
+            };
 
-    const create = (i?) => {
-      add(i);
-    };
+            const nc = chunks.slice();
+            nc.splice(i, 0, chunk);
+            this.chunks = nc;
+            setUpdateAt(updateAt + 1);
+            save(this.chunks);
+        };
 
-    const addFromText = (i?, text) => {
-      add(i, { type: "text", content: text });
-    };
+        const create = (i?) => {
+            add(i);
+        };
 
-    const del = (id) => {
-      const i = chunks.findIndex((c) => c.id === id);
-      if (i < 0) return "";
+        const addFromText = (i?, text) => {
+            add(i, { type: "text", content: text });
+        };
 
-      const nc = chunks.slice();
-      nc.splice(i, 1);
-      this.chunks = nc;
-      setUpdateAt(updateAt + 1);
-      save(this.chunks);
-    };
+        const del = (id) => {
+            const i = chunks.findIndex((c) => c.id === id);
+            if (i < 0) return "";
 
-    const move = (id, pos) => {
-      const i = chunks.findIndex((c) => c.id === id);
+            const nc = chunks.slice();
+            nc.splice(i, 1);
+            this.chunks = nc;
+            setUpdateAt(updateAt + 1);
+            save(this.chunks);
+        };
 
-      const nc = chunks.slice();
-      const chunk = nc[i];
-      nc.splice(i, 1);
-      nc.splice((pos >= i) ? pos - 1 : pos, 0, chunk);
-      this.chunks = nc;
-      setUpdateAt(updateAt + 1);
-      save(this.chunks);
-    };
+        const move = (id, pos) => {
+            const i = chunks.findIndex((c) => c.id === id);
 
-    return [chunks, { add, create, addFromText, del, move }];
-  }
+            const nc = chunks.slice();
+            const chunk = nc[i];
+            nc.splice(i, 1);
+            nc.splice((pos >= i) ? pos - 1 : pos, 0, chunk);
+            this.chunks = nc;
+            setUpdateAt(updateAt + 1);
+            save(this.chunks);
+        };
 
-  useTags() {
-    return [[], () => Promise.resolve()];
-  }
+        return [chunks, { add, create, addFromText, del, move }];
+    }
 
-  useChunk(orig_chunk) {
-    const [updateAt, setUpdateAt] = useState(0);
-    const chunk = useMemo(() => orig_chunk, [updateAt]);
+    useTags() {
+        return [[], () => Promise.resolve()];
+    }
 
-    const updateChunk = () => {
-      setUpdateAt(updateAt + 1);
-      save(this.chunks);
-    };
+    useChunk(orig_chunk) {
+        const [updateAt, setUpdateAt] = useState(0);
+        const chunk = useMemo(() => orig_chunk, [updateAt]);
 
-    const setType = (t) => {
-      orig_chunk.type = t;
-      updateChunk();
-    };
+        const updateChunk = () => {
+            setUpdateAt(updateAt + 1);
+            save(this.chunks);
+        };
 
-    const setContent = (content: string) => {
-      orig_chunk.content = content;
-      updateChunk();
-    };
+        const setType = (t) => {
+            orig_chunk.type = t;
+            updateChunk();
+        };
 
-    return [chunk, { setType, setContent }];
-  }
+        const setContent = (content: string) => {
+            orig_chunk.content = content;
+            updateChunk();
+        };
+
+        return [chunk, { setType, setContent }];
+    }
 }
 
 export function Stash() {
-  const doc = new LocalDocument();
+    const doc = new LocalDocument();
 
-  const [open, setOpen] = useState(false);
-  const anchorRef = useRef(null);
+    const [open, setOpen] = useState(false);
+    const anchorRef = useRef(null);
 
-  return (
-    <>
-      <Fab
-        onClick={() => setOpen(!open)}
-        ref={anchorRef}
-        sx={{
-          position: "fixed",
-          right: "1em",
-          bottom: "1em",
-        }}
-      >
-        <ContentPasteIcon />
-      </Fab>
-      <Popper
-        open={open}
-        anchorEl={anchorRef.current}
-        placement="top"
-      >
-        <ClickAwayListener
-          onClickAway={() => setOpen(false)}
-        >
-          <Zoom in={open}>
-            <Paper
-              sx={{
-                width: 600,
-                maxHeight: "80vh",
-                overflow: "scroll",
-              }}
+    return (
+        <>
+            <Fab
+                onClick={() => setOpen(!open)}
+                ref={anchorRef}
+                sx={{
+                    position: "fixed",
+                    right: "1em",
+                    bottom: "1em",
+                }}
             >
-              <ChunkList doc={doc} />
-            </Paper>
-          </Zoom>
-        </ClickAwayListener>
-      </Popper>
-    </>
-  );
+                <ContentPasteIcon />
+            </Fab>
+            <Popper
+                open={open}
+                anchorEl={anchorRef.current}
+                placement="top"
+            >
+                <ClickAwayListener
+                    onClickAway={() => setOpen(false)}
+                >
+                    <Zoom in={open}>
+                        <Paper
+                            sx={{
+                                width: 600,
+                                maxHeight: "80vh",
+                                overflow: "scroll",
+                            }}
+                        >
+                            <ChunkList doc={doc} />
+                        </Paper>
+                    </Zoom>
+                </ClickAwayListener>
+            </Popper>
+        </>
+    );
 }
 
 export default Stash;

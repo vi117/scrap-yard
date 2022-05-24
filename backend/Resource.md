@@ -20,14 +20,14 @@ Endpoint:
 - argument:
   ```ts
   type LoginArgument = {
-    password: string;
+      password: string;
   };
   ```
 - return: `LoginReturnType`
   ```ts
   type LoginReturnType = {
-    ok: boolean;
-    reason?: string;
+      ok: boolean;
+      reason?: string;
   };
   ```
 - use only https context
@@ -36,10 +36,10 @@ example:
 
 ```js
 const content = await (await fetch("/auth/login/", {
-  Method: "POST",
-  body: JSON.stringify({
-    password: "********",
-  }),
+    Method: "POST",
+    body: JSON.stringify({
+        password: "********",
+    }),
 }).text());
 console.log(content.ok); // ok
 ```
@@ -50,17 +50,17 @@ console.log(content.ok); // ok
 - return: `LogoutReturnType`
   ```ts
   type LoginReturnType = {
-    ok: true;
+      ok: true;
   };
   ```
 - use only https context
 
 ```js
 const content = await (await fetch("/auth/login/", {
-  Method: "POST",
-  body: JSON.stringify({
-    password: "********",
-  }),
+    Method: "POST",
+    body: JSON.stringify({
+        password: "********",
+    }),
 }).text());
 console.log(content.ok); // ok
 ```
@@ -76,10 +76,10 @@ console.log(content.ok); // ok
 
 ```ts
 interface DirEntry {
-  name: string;
-  isFile: boolean;
-  isDirectory: boolean;
-  isSymlink: boolean;
+    name: string;
+    isFile: boolean;
+    isDirectory: boolean;
+    isSymlink: boolean;
 }
 ```
 
@@ -98,8 +98,8 @@ console.log(content);
 - return: `FilePutReturnType`
   ```ts
   type FilePutReturnType = {
-    ok: boolean;
-    reason?: string;
+      ok: boolean;
+      reason?: string;
   };
   ```
 
@@ -107,8 +107,8 @@ example:
 
 ```js
 const content = await (await fetch("<hostname>/fs/foo.md", {
-  body: "# Foo\nbar",
-  method: "PUT",
+    body: "# Foo\nbar",
+    method: "PUT",
 }).json());
 console.log(content); //201 create
 ```
@@ -122,8 +122,8 @@ console.log(content); //201 create
 - return : `FileDeleteReturnType`
   ```ts
   type FileDeleteReturnType = {
-    ok: boolean;
-    reason?: string;
+      ok: boolean;
+      reason?: string;
   };
   ```
 
@@ -131,8 +131,8 @@ example:
 
 ```js
 const content = await (await fetch("<hostname>/fs/foo.md", {
-  body: "# Foo\nbar",
-  method: "DELETE",
+    body: "# Foo\nbar",
+    method: "DELETE",
 }).json());
 console.log(content.ok); // true if success.
 ```

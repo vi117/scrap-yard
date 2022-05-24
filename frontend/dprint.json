@@ -1,15 +1,15 @@
 {
   "incremental": true,
   "typescript": {
-    "indentWidth": 2
+    "indentWidth": 4,
+    "lineWidth": 80
   },
-  "json": {
-  },
-  "markdown": {
-  },
-  "toml": {
-  },
-  "includes": ["**/*.{ts,tsx,js,jsx,cjs,mjs,json,md,toml}"],
+  "json": {},
+  "markdown": {},
+  "toml": {},
+  "includes": [
+    "**/*.{ts,tsx,js,jsx,cjs,mjs,json,md,toml}"
+  ],
   "excludes": [
     "**/node_modules",
     "**/*-lock.json"

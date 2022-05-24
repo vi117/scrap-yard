@@ -4,16 +4,16 @@ import * as logger from "std/log";
 const ajv = new Ajv({ useDefaults: true });
 
 const settingSchemas: Record<string, {
-  name: string;
-  schema: Schema;
-  validate: ValidateFunction;
+    name: string;
+    schema: Schema;
+    validate: ValidateFunction;
 }> = {};
 
 // deno-lint-ignore no-explicit-any
 const setting: Record<string, any> = {};
 
 function getDefaultPath(): string {
-  return Deno.env.get("SETTING_PATH") ?? "./setting.json";
+    return Deno.env.get("SETTING_PATH") ?? "./setting.json";
 }
 
 let settingPath = getDefaultPath();
@@ -36,57 +36,57 @@ let settingPath = getDefaultPath();
  * ```
  */
 export function register(name: string, schema: Schema) {
-  settingSchemas[name] = {
-    name,
-    schema,
-    validate: ajv.compile(schema),
-  };
-  if (!(name in setting)) {
-    setting[name] = {};
-  }
-  if (settingSchemas[name].validate(setting[name])) {
-    return;
-  } else {
-    logger.warning(
-      `invalid setting: ${name} ${JSON.stringify(setting[name])}`,
-      name,
-    );
-    throw new Error(`invalid setting: ${name}`);
-  }
+    settingSchemas[name] = {
+        name,
+        schema,
+        validate: ajv.compile(schema),
+    };
+    if (!(name in setting)) {
+        setting[name] = {};
+    }
+    if (settingSchemas[name].validate(setting[name])) {
+        return;
+    } else {
+        logger.warning(
+            `invalid setting: ${name} ${JSON.stringify(setting[name])}`,
+            name,
+        );
+        throw new Error(`invalid setting: ${name}`);
+    }
 }
 
 export async function load(load_file?: boolean) {
-  load_file ??= true;
-  let data;
-  if (load_file) {
-    try {
-      data = await Deno.readTextFile(settingPath);
-    } catch (e) {
-      if (e instanceof Deno.errors.NotFound) {
-        logger.info(`setting file not found: ${settingPath}`);
-        data = "{}";
-      } else throw e;
-    }
-  } else {
-    data = "{}";
-  }
-  const json = JSON.parse(data);
-  for (const key in json) {
-    if (key in settingSchemas) {
-      const v = json[key];
-      if (settingSchemas[key].validate(v)) {
-        setting[key] = v;
-      } else {
-        logger.warning(
-          `invalid setting: ${key} ${JSON.stringify(v)}`,
-          v,
-        );
-        throw new Error(`invalid setting: ${key}`);
-      }
+    load_file ??= true;
+    let data;
+    if (load_file) {
+        try {
+            data = await Deno.readTextFile(settingPath);
+        } catch (e) {
+            if (e instanceof Deno.errors.NotFound) {
+                logger.info(`setting file not found: ${settingPath}`);
+                data = "{}";
+            } else throw e;
+        }
     } else {
-      setting[key] = json[key];
+        data = "{}";
     }
-  }
+    const json = JSON.parse(data);
+    for (const key in json) {
+        if (key in settingSchemas) {
+            const v = json[key];
+            if (settingSchemas[key].validate(v)) {
+                setting[key] = v;
+            } else {
+                logger.warning(
+                    `invalid setting: ${key} ${JSON.stringify(v)}`,
+                    v,
+                );
+                throw new Error(`invalid setting: ${key}`);
+            }
+        } else {
+            setting[key] = json[key];
+        }
+    }
 }
 
 /**
@@ -95,15 +95,17 @@ export async function load(load_file?: boolean) {
  * @returns setting value
  */
 export function get<T>(name: string): T {
-  if (!(name in setting)) {
-    logger.error(
-      `key ${name} not found in setting file {${JSON.stringify(setting)}}`,
-      setting,
-    );
-    throw new Error(`key ${name} not found in setting file`);
-  }
-  const v = setting[name];
-  return v as T;
+    if (!(name in setting)) {
+        logger.error(
+            `key ${name} not found in setting file {${
+                JSON.stringify(setting)
+            }}`,
+            setting,
+        );
+        throw new Error(`key ${name} not found in setting file`);
+    }
+    const v = setting[name];
+    return v as T;
 }
 
 /**
@@ -120,15 +122,15 @@ export function get<T>(name: string): T {
  * ```
  */
 export function set<T>(name: string, value: T): T {
-  if (!(name in settingSchemas)) {
-    throw new Error(`key ${name} not found in setting file`);
-  }
-  if (settingSchemas[name].validate(value)) {
-    setting[name] = value;
-  } else {
-    throw new Error(`invalid setting: ${name}`);
-  }
-  return value;
+    if (!(name in settingSchemas)) {
+        throw new Error(`key ${name} not found in setting file`);
+    }
+    if (settingSchemas[name].validate(value)) {
+        setting[name] = value;
+    } else {
+        throw new Error(`invalid setting: ${name}`);
+    }
+    return value;
 }
 
 /**
@@ -140,10 +142,10 @@ export function set<T>(name: string, value: T): T {
  * @throws Error if setting file is not writable
  */
 export async function save(): Promise<void> {
-  await Deno.writeTextFile(
-    settingPath,
-    JSON.stringify(setting, undefined, 2),
-  );
+    await Deno.writeTextFile(
+        settingPath,
+        JSON.stringify(setting, undefined, 2),
+    );
 }
 
 /**
@@ -151,7 +153,7 @@ export async function save(): Promise<void> {
  * @param path path to setting file
  */
 export function setPath(path: string) {
-  settingPath = path;
+    settingPath = path;
 }
 
 /**
@@ -159,5 +161,5 @@ export function setPath(path: string) {
  * @returns path to setting file
  */
 export function getPath(): string {
-  return settingPath;
+    return settingPath;
 }

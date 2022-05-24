@@ -1,4 +1,10 @@
 {
+  "fmt": {
+    "options": {
+      "indentWidth": 4,
+      "lineWidth": 80
+    }
+  },
   "tasks": {
     "test": "deno test --no-check -A ./src",
     "build": "deno run -A --unstable --no-check build.ts",

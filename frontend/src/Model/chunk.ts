@@ -1,12 +1,12 @@
 import {
-  ChunkCreateMethod,
-  ChunkCreateResult,
-  ChunkDeleteMethod,
-  ChunkDeleteResult,
-  ChunkModifyMethod,
-  ChunkModifyResult,
-  ChunkMoveMethod,
-  ChunkMoveResult,
+    ChunkCreateMethod,
+    ChunkCreateResult,
+    ChunkDeleteMethod,
+    ChunkDeleteResult,
+    ChunkModifyMethod,
+    ChunkModifyResult,
+    ChunkMoveMethod,
+    ChunkMoveResult,
 } from "model";
 import { RPCErrorWrapper } from "./RPCError";
 import { IRPCMessageManager } from "./RPCManager";
@@ -32,18 +32,21 @@ import { IRPCMessageManager } from "./RPCManager";
  * console.log(chunkId); // "It's optional"
  * ```
  */
-export async function chunkCreate(manager: IRPCMessageManager, params: ChunkCreateMethod["params"]) {
-  const res = await manager.invokeMethod({
-    method: "chunk.create",
-    params,
-  });
-  if (res.result) {
-    const result = res.result as ChunkCreateResult;
-    return result;
-  } else {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    throw new RPCErrorWrapper(res.error!);
-  }
+export async function chunkCreate(
+    manager: IRPCMessageManager,
+    params: ChunkCreateMethod["params"],
+) {
+    const res = await manager.invokeMethod({
+        method: "chunk.create",
+        params,
+    });
+    if (res.result) {
+        const result = res.result as ChunkCreateResult;
+        return result;
+    } else {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        throw new RPCErrorWrapper(res.error!);
+    }
 }
 
 /**
@@ -61,18 +64,21 @@ export async function chunkCreate(manager: IRPCMessageManager, params: ChunkCrea
  * const {chunkId, updatedAt} = await manager.invokeMethod(manager, params);
  * console.log(chunkId); // "some chunk id"
  */
-export async function chunkDelete(manager: IRPCMessageManager, params: ChunkDeleteMethod["params"]) {
-  const res = await manager.invokeMethod({
-    method: "chunk.delete",
-    params,
-  });
-  if (res.result) {
-    const result = res.result as ChunkDeleteResult;
-    return result;
-  } else {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    throw new RPCErrorWrapper(res.error!);
-  }
+export async function chunkDelete(
+    manager: IRPCMessageManager,
+    params: ChunkDeleteMethod["params"],
+) {
+    const res = await manager.invokeMethod({
+        method: "chunk.delete",
+        params,
+    });
+    if (res.result) {
+        const result = res.result as ChunkDeleteResult;
+        return result;
+    } else {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        throw new RPCErrorWrapper(res.error!);
+    }
 }
 
 /**
@@ -94,18 +100,21 @@ export async function chunkDelete(manager: IRPCMessageManager, params: ChunkDele
  * const {chunkId, updatedAt} = await manager.invokeMethod(manager, params);
  * console.log(chunkId); // "some chunk id"
  */
-export async function chunkModify(manager: IRPCMessageManager, params: ChunkModifyMethod["params"]) {
-  const res = await manager.invokeMethod({
-    method: "chunk.modify",
-    params,
-  });
-  if (res.result) {
-    const result = res.result as ChunkModifyResult;
-    return result;
-  } else {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    throw new RPCErrorWrapper(res.error!);
-  }
+export async function chunkModify(
+    manager: IRPCMessageManager,
+    params: ChunkModifyMethod["params"],
+) {
+    const res = await manager.invokeMethod({
+        method: "chunk.modify",
+        params,
+    });
+    if (res.result) {
+        const result = res.result as ChunkModifyResult;
+        return result;
+    } else {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        throw new RPCErrorWrapper(res.error!);
+    }
 }
 
 /**
@@ -125,16 +134,19 @@ export async function chunkModify(manager: IRPCMessageManager, params: ChunkModi
  * console.log(chunkId); // "some chunk id"
  * ```
  */
-export async function chunkMove(manager: IRPCMessageManager, params: ChunkMoveMethod["params"]) {
-  const res = await manager.invokeMethod({
-    method: "chunk.move",
-    params,
-  });
-  if (res.result) {
-    const result = res.result as ChunkMoveResult;
-    return result;
-  } else {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    throw new RPCErrorWrapper(res.error!);
-  }
+export async function chunkMove(
+    manager: IRPCMessageManager,
+    params: ChunkMoveMethod["params"],
+) {
+    const res = await manager.invokeMethod({
+        method: "chunk.move",
+        params,
+    });
+    if (res.result) {
+        const result = res.result as ChunkMoveResult;
+        return result;
+    } else {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        throw new RPCErrorWrapper(res.error!);
+    }
 }

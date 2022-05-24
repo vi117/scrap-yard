@@ -1,19 +1,19 @@
 {
-  "$schema": "https://cdn.deno.land/deno/versions/v1.21.0/raw/cli/schemas/config-file.v1.json",
-  "importMap": "import_map.json",
-  "fmt": {
-    "options": {
-      "indentWidth": 2,
-      "lineWidth": 80
+    "$schema": "https://cdn.deno.land/deno/versions/v1.21.0/raw/cli/schemas/config-file.v1.json",
+    "importMap": "import_map.json",
+    "fmt": {
+        "options": {
+            "indentWidth": 4,
+            "lineWidth": 80
+        }
+    },
+    "tasks": {
+        "test": "deno test --no-check -A",
+        "test_coverage": "deno test --no-check -A --coverage coverage",
+        "gen_lcov": "deno coverage --lcov coverage --output=coverage.lcov",
+        "serve": "deno run --no-check --allow-all app.ts",
+        "test_debug": "deno test --no-check -A --inspect-brk",
+        "test_doc": "deno test --doc -A",
+        "fmt": "deno fmt src/"
     }
-  },
-  "tasks": {
-    "test": "deno test --no-check -A",
-    "test_coverage": "deno test --no-check -A --coverage coverage",
-    "gen_lcov": "deno coverage --lcov coverage --output=coverage.lcov",
-    "serve": "deno run --no-check --allow-all app.ts",
-    "test_debug": "deno test --no-check -A --inspect-brk",
-    "test_doc": "deno test --doc -A",
-    "fmt": "deno fmt src/"
-  }
 }

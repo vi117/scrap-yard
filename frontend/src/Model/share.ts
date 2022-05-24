@@ -9,35 +9,35 @@ import { IRPCMessageManager } from "./RPCManager";
  * @returns docPath
  */
 export async function shareDoc(
-  manager: IRPCMessageManager,
-  params: ShareDocMethod["params"],
+    manager: IRPCMessageManager,
+    params: ShareDocMethod["params"],
 ) {
-  const res = await manager.invokeMethod({
-    method: "share.doc",
-    params,
-  });
-  if (res.result) {
-    const result = res.result as ShareDocResult;
-    return result;
-  } else {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    throw new RPCErrorWrapper(res.error!);
-  }
+    const res = await manager.invokeMethod({
+        method: "share.doc",
+        params,
+    });
+    if (res.result) {
+        const result = res.result as ShareDocResult;
+        return result;
+    } else {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        throw new RPCErrorWrapper(res.error!);
+    }
 }
 
 export async function shareGetInfo(
-  manager: IRPCMessageManager,
-  params: ShareDocMethod["params"],
+    manager: IRPCMessageManager,
+    params: ShareDocMethod["params"],
 ) {
-  const res = await manager.invokeMethod({
-    method: "share.info",
-    params,
-  });
-  if (res.result) {
-    const result = res.result as ShareDocDescription;
-    return result;
-  } else {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    throw new RPCErrorWrapper(res.error!);
-  }
+    const res = await manager.invokeMethod({
+        method: "share.info",
+        params,
+    });
+    if (res.result) {
+        const result = res.result as ShareDocDescription;
+        return result;
+    } else {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        throw new RPCErrorWrapper(res.error!);
+    }
 }
