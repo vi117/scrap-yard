@@ -1,4 +1,4 @@
-import { serve } from "std/http";
+import { ConnInfo, serve } from "std/http";
 import {
   getStaticRouter,
   Handler,
@@ -53,22 +53,30 @@ export function serverRun() {
   const s = serverSetting;
   const sih = getServerInformationHandler(s.port, s.host);
   router.register("info", sih);
-  serve((req: Request) => {
+  serve(async (req: Request, _info: ConnInfo) => {
+    const begin = Date.now();
+    let response: Response;
     try {
-      return serveRequest(req);
+      response = await serveRequest(req);
     } catch (e) {
       console.error(e);
-      return makeResponse(Status.InternalServerError);
+      response = makeResponse(Status.InternalServerError);
     }
+    const end = Date.now();
+    log.info(
+      `${(new Date()).toISOString()} ${req.method} ${req.url}: ${
+        end - begin
+      }ms, response: ${response.status} ${response.statusText}`,
+    );
+    return response;
   }, { port: s.port, hostname: s.host });
 
-  function serveRequest(req: Request) {
+  async function serveRequest(req: Request) {
     const ctx = {};
     const url = new URL(req.url);
-    log.info(`${(new Date()).toUTCString()} ${req.method} ${req.url}`);
     const m = router.match(url.pathname, ctx);
     if (m) {
-      return m(req, ctx);
+      return await m(req, ctx);
     }
     return makeResponse(Status.NotFound);
   }
