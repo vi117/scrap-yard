@@ -34,7 +34,6 @@ import { IRPCMessageManager } from "./RPCManager";
  */
 export async function chunkCreate(manager: IRPCMessageManager, params: ChunkCreateMethod["params"]) {
   const res = await manager.invokeMethod({
-    ...manager.genHeader(),
     method: "chunk.create",
     params,
   });
