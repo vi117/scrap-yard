@@ -89,11 +89,14 @@ export class FsManager extends EventTarget implements IFsManager {
     }
     /**
      * fetch file
-     * @param path path to file
+     * @param filePath path to file
      * @returns content of file
      */
-    async get(path: string): Promise<Response> {
-        const url = new URL(path, this.url);
+    async get(filePath: string): Promise<Response> {
+        if (filePath.startsWith("/")) {
+            filePath = "." + filePath;
+        }
+        const url = new URL(filePath, this.url);
         const res = await fetch(url);
         return res;
     }
@@ -135,6 +138,9 @@ export class FsManager extends EventTarget implements IFsManager {
      * @returns status code
      */
     async upload(filePath: string, data: BodyInit): Promise<number> {
+        if (filePath.startsWith("/")) {
+            filePath = "." + filePath;
+        }
         const url = new URL(filePath, this.url);
         const res = await fetch(url, {
             method: "PUT",
@@ -151,6 +157,9 @@ export class FsManager extends EventTarget implements IFsManager {
      * @returns status code
      */
     async mkdir(filePath: string): Promise<number> {
+        if (filePath.startsWith("/")) {
+            filePath = "." + filePath;
+        }
         const url = new URL(filePath, this.url);
         url.searchParams.set("makeDir", "true");
         const res = await fetch(url, {
@@ -172,6 +181,9 @@ export class FsManager extends EventTarget implements IFsManager {
      * ```
      */
     async delete(filePath: string): Promise<number> {
+        if (filePath.startsWith("/")) {
+            filePath = "." + filePath;
+        }
         const url = new URL(filePath, this.url);
         const res = await fetch(url, {
             method: "DELETE",

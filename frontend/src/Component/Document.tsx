@@ -93,8 +93,12 @@ function InnerDocumentEditor(props: { doc: IDocumentViewModel }) {
     );
 }
 
-export function DocumentEditor() {
-    const doc = useDocViewModel("test.syd");
+export type DocumentEditorProps = {
+    path: string;
+};
+
+export function DocumentEditor(props: DocumentEditorProps) {
+    const doc = useDocViewModel(props.path);
 
     if (doc != null) {
         return <InnerDocumentEditor doc={doc} />;

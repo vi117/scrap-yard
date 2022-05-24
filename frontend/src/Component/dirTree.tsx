@@ -14,7 +14,8 @@ async function collectDirTree(path: string, name: string): Promise<DirTree> {
     const res = await manager.getStat(path);
 
     if (res.isDirectory) {
-        const proms = (res.entries ?? []).map(async (entry) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const proms = (res.entries!).map(async (entry) => {
             return await collectDirTree(path + "/" + entry.name, entry.name);
         });
 
@@ -28,9 +29,9 @@ async function collectDirTree(path: string, name: string): Promise<DirTree> {
 
 export function useDirTree(path: string): DirTree | null {
     const [dirtree, setDirtree] = useState<DirTree | null>(null);
-
+    path = path === "" ? "." : path;
     const getDirTree = async () => {
-        const d = await collectDirTree(path + "/", "/");
+        const d = await collectDirTree(path, ".");
         setDirtree(d);
     };
 
