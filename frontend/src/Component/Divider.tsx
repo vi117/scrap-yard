@@ -65,7 +65,7 @@ export function Divider(props: {
             } else { // upload file & link URL
                 // TODO: where to upload multimedia?
                 const path = encodeURI(`media/${Date.now()}-${file.name}`);
-                getFsManagerInstance().then(mgr => mgr.upload(path, file));
+                getFsManagerInstance().then(fs => fs.upload(path, file));
                 add(position, {
                     type: type,
                     // TODO: need a way to get file URL
