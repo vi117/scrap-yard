@@ -51,4 +51,5 @@ export async function getServerInfoInstance(): Promise<ServerInfo> {
 }
 
 // for debug
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as any).getServerInfoInstance = getServerInfoInstance;

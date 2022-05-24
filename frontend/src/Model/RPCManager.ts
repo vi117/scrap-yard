@@ -161,4 +161,5 @@ export async function getOpenedManagerInstance(): Promise<IRPCMessageManager> {
 }
 
 // for debugging
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as any).getOpenedManagerInstance = getOpenedManagerInstance;
