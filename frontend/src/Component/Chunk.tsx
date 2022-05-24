@@ -47,9 +47,9 @@ export function render_view(t: string, content: string) {
         case "image":
             return <img src={content} />;
         case "video":
-            return <video src={content} />;
+            return <video controls src={content} />;
         case "audio":
-            return <audio src={content} />;
+            return <audio controls src={content} />;
         case "rawhtml":
             return <div dangerouslySetInnerHTML={{ __html: content }} />;
         default:
