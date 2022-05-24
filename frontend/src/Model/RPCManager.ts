@@ -151,12 +151,20 @@ export class RPCMessageManager extends EventTarget implements IRPCMessageManager
 }
 
 const RPCManager = new RPCMessageManager();
+let RPCManagerLock: null | Promise<void> = null;
 
 export async function getOpenedManagerInstance(): Promise<IRPCMessageManager> {
   if (!RPCManager.opened) {
-    const info = await getServerInfoInstance();
-    const url = new URL(`ws://${info.host}:${info.port}/ws`);
-    await RPCManager.open(url);
+    if (RPCManagerLock !== null) {
+      await RPCManagerLock;
+    } else {
+      RPCManagerLock = (async () => {
+        const info = await getServerInfoInstance();
+        const url = new URL(`ws://${info.host}:${info.port}/ws`);
+        await RPCManager.open(url);
+      })();
+      await RPCManagerLock;
+    }
   }
   return RPCManager;
 }

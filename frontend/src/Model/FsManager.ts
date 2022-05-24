@@ -1,4 +1,4 @@
-import { IRPCMessageManager } from "./mod";
+import { getOpenedManagerInstance, getServerInfoInstance, IRPCMessageManager } from "./mod";
 
 export interface FsDirEntry {
   name: string;
@@ -74,13 +74,14 @@ export interface IFsManager extends EventTarget {
 
 export class FsManager extends EventTarget implements IFsManager {
   private manager: IRPCMessageManager;
-  private prefix: string;
+  /**
+   * end point url
+   */
   private url: string;
-  constructor(manager: IRPCMessageManager) {
+  constructor(manager: IRPCMessageManager, url: string) {
     super();
     this.manager = manager;
-    this.prefix = "/fs/";
-    this.url = window.location.origin + this.prefix;
+    this.url = url;
   }
   /**
    * fetch file
@@ -111,6 +112,9 @@ export class FsManager extends EventTarget implements IFsManager {
    * ```
    */
   async getStat(filePath: string): Promise<FsGetResult> {
+    if (filePath.startsWith("/")) {
+      filePath = "." + filePath;
+    }
     const url = new URL(filePath, this.url);
     url.searchParams.set("stat", "true");
     const res = await fetch(url);
@@ -174,4 +178,17 @@ export class FsManager extends EventTarget implements IFsManager {
     await res.json();
     return res.status;
   }
+}
+
+let fs: IFsManager | null = null;
+
+export async function getFsManagerInstance(): Promise<IFsManager> {
+  if (!fs) {
+    const manager = await getOpenedManagerInstance();
+    const info = await getServerInfoInstance();
+    const url = new URL("fs/", `http://${info.host}:${info.port}`);
+    console.log("fs url ", url);
+    fs = new FsManager(manager, url.href);
+  }
+  return fs;
 }

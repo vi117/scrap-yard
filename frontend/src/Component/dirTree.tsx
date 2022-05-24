@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { FsManager } from "../Model/FsManager";
-import { RPCManager as rpcman } from "../Model/RPCManager";
+import { getFsManagerInstance } from "../Model/mod";
 
 export type DirTree = {
   type: string;
@@ -10,9 +9,8 @@ export type DirTree = {
   children?: DirTree[];
 };
 
-const manager = new FsManager(rpcman);
-
 async function collectDirTree(path: string, name: string): Promise<DirTree> {
+  const manager = await getFsManagerInstance();
   const res = await manager.getStat(path);
 
   if (res.isDirectory) {
