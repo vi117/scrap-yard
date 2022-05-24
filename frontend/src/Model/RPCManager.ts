@@ -155,7 +155,8 @@ const RPCManager = new RPCMessageManager();
 export async function getOpenedManagerInstance(): Promise<IRPCMessageManager> {
   if (!RPCManager.opened) {
     const info = await getServerInfoInstance();
-    await RPCManager.open(info.host);
+    const url = new URL(`ws://${info.host}:${info.port}/ws`);
+    await RPCManager.open(url);
   }
   return RPCManager;
 }
