@@ -10,6 +10,8 @@ export function rpc(req: Request, _ctx: unknown): Response {
   if (req.headers.get("Upgrade") !== "websocket") {
     return makeResponse(Status.BadRequest, "Not websocket request");
   }
+  const begin = Date.now();
+
   const user = getSessionUser(req);
   const { socket, response } = Deno.upgradeWebSocket(req);
   const conn = new Connection(idGen.next().toString(), user, socket);
@@ -17,7 +19,8 @@ export function rpc(req: Request, _ctx: unknown): Response {
   // debug
 
   conn.addEventListener("open", () => {
-    log.info(`${conn.id} connected`);
+    const end = Date.now();
+    log.info(`${conn.id} connected: ${end - begin}ms`);
   });
   conn.addEventListener("message", (e) => {
     log.debug(`${conn.id} on message: ${e.data}`);
