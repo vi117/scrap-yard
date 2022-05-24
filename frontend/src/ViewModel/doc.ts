@@ -1,11 +1,8 @@
-import { Chunk, ChunkContent, ChunkContentKind, ChunkNotification, DocumentObject, RPCNotification } from "model";
+import { ChunkNotification, DocumentObject, RPCNotification } from "model";
 import { useEffect, useState } from "react";
-import * as stl from "tstl";
-import { v4 as uuidv4 } from "uuid";
-import { chunkCreate, chunkDelete, chunkModify, chunkMove } from "../Model/chunk";
 import { openDocument } from "../Model/Document";
-import { RPCManager as manager, RPCNotificationEvent } from "../Model/RPCManager";
-import { ChunkListMutator, ChunkListViewModel, ChunkMutator, ChunkViewModel } from "./chunklist";
+import { getOpenedManagerInstance, IRPCMessageManager, RPCNotificationEvent } from "../Model/mod";
+import { ChunkListMutator, ChunkListViewModel, ChunkViewModel } from "./chunklist";
 import { IPageViewModel } from "./page";
 
 export interface IDocumentViewModel extends IPageViewModel {
@@ -22,17 +19,19 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
   chunks: ChunkListViewModel;
   tags: string[];
   tagsUpdatedAt: number;
+  manager: IRPCMessageManager;
 
-  constructor(doc: DocumentObject) {
+  constructor(doc: DocumentObject, rpcManager: IRPCMessageManager) {
     super();
 
+    this.manager = rpcManager;
     this.docPath = doc.docPath;
     this.tags = doc.tags;
     this.tagsUpdatedAt = doc.tagsUpdatedAt;
 
-    this.chunks = new ChunkListViewModel(this.docPath, doc.chunks, doc.updatedAt, doc.seq);
+    this.chunks = new ChunkListViewModel(this.docPath, doc.chunks, doc.updatedAt, doc.seq, rpcManager);
 
-    manager.addEventListener("notification", (e: RPCNotificationEvent) => {
+    this.manager.addEventListener("notification", (e: RPCNotificationEvent) => {
       console.log("notification", e.notification);
       this.updateOnNotification(e.notification);
     });
@@ -81,7 +80,7 @@ export class DocumentViewModel extends EventTarget implements IDocumentViewModel
   }
 }
 
-export function createTestDocViewModel(url: string, path: string) {
+export function useDocViewModel(path: string) {
   const [doc, setDoc] = useState<DocumentViewModel | null>(null);
 
   useEffect(() => {
@@ -89,10 +88,9 @@ export function createTestDocViewModel(url: string, path: string) {
   });
 
   const getDoc = async () => {
-    console.log("connect to ", url);
-    await manager.open(url);
+    const manager = await getOpenedManagerInstance();
     const d = await openDocument(manager, path);
-    const viewModel = new DocumentViewModel(d);
+    const viewModel = new DocumentViewModel(d, manager);
     // for debbuging
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (self as any).docViewModel = viewModel;

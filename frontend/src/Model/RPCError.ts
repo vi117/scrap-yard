@@ -1,4 +1,4 @@
-import { RPCError, RPCErrorCode } from "model/dist/mod";
+import { RPCError, RPCErrorCode } from "model";
 
 export class RPCErrorWrapper extends Error {
   data?: unknown;

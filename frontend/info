@@ -1,0 +1,8 @@
+{
+    "name": "scrap-yard-server",
+    "version": "0.0.1",
+    "description": "A simple server",
+    "host": "localhost",
+    "port": "8000",
+    "allowAnonymous": true
+}
