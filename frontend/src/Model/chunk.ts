@@ -9,7 +9,7 @@ import {
   ChunkMoveResult,
 } from "model";
 import { RPCErrorWrapper } from "./RPCError";
-import { RPCMessageManager } from "./RPCManager";
+import { IRPCMessageManager } from "./RPCManager";
 
 /**
  * create chunk
@@ -18,7 +18,7 @@ import { RPCMessageManager } from "./RPCManager";
  * @returns chunkId created
  * @example
  * ```ts
- * const manager: RPCMessageManager = Foo.getInstance();
+ * const manager: IRPCMessageManager = Foo.getInstance();
  * const params = {
  *   docPath: "test.md",
  *   position: 0,
@@ -32,9 +32,8 @@ import { RPCMessageManager } from "./RPCManager";
  * console.log(chunkId); // "It's optional"
  * ```
  */
-export async function chunkCreate(manager: RPCMessageManager, params: ChunkCreateMethod["params"]) {
+export async function chunkCreate(manager: IRPCMessageManager, params: ChunkCreateMethod["params"]) {
   const res = await manager.invokeMethod({
-    ...manager.genHeader(),
     method: "chunk.create",
     params,
   });
@@ -54,7 +53,7 @@ export async function chunkCreate(manager: RPCMessageManager, params: ChunkCreat
  * @returns chunkId deleted
  * @example
  * ```ts
- * const manager: RPCMessageManager = Foo.getInstance();
+ * const manager: IRPCMessageManager = Foo.getInstance();
  * const params = {
  *  docPath: "test.md",
  *  chunkId: "some chunk id"
@@ -62,7 +61,7 @@ export async function chunkCreate(manager: RPCMessageManager, params: ChunkCreat
  * const {chunkId, updatedAt} = await manager.invokeMethod(manager, params);
  * console.log(chunkId); // "some chunk id"
  */
-export async function chunkDelete(manager: RPCMessageManager, params: ChunkDeleteMethod["params"]) {
+export async function chunkDelete(manager: IRPCMessageManager, params: ChunkDeleteMethod["params"]) {
   const res = await manager.invokeMethod({
     method: "chunk.delete",
     params,
@@ -83,7 +82,7 @@ export async function chunkDelete(manager: RPCMessageManager, params: ChunkDelet
  * @returns chunkId modified
  * @example
  * ```ts
- * const manager: RPCMessageManager = Foo.getInstance();
+ * const manager: IRPCMessageManager = Foo.getInstance();
  * const params = {
  *   docPath: "test.md",
  *   chunkId: "some chunk id",
@@ -95,7 +94,7 @@ export async function chunkDelete(manager: RPCMessageManager, params: ChunkDelet
  * const {chunkId, updatedAt} = await manager.invokeMethod(manager, params);
  * console.log(chunkId); // "some chunk id"
  */
-export async function chunkModify(manager: RPCMessageManager, params: ChunkModifyMethod["params"]) {
+export async function chunkModify(manager: IRPCMessageManager, params: ChunkModifyMethod["params"]) {
   const res = await manager.invokeMethod({
     method: "chunk.modify",
     params,
@@ -116,7 +115,7 @@ export async function chunkModify(manager: RPCMessageManager, params: ChunkModif
  * @returns chunkId moved
  * @example
  * ```ts
- * const manager: RPCMessageManager = Foo.getInstance();
+ * const manager: IRPCMessageManager = Foo.getInstance();
  * const params = {
  *  docPath: "test.md",
  * chunkId: "some chunk id",
@@ -126,7 +125,7 @@ export async function chunkModify(manager: RPCMessageManager, params: ChunkModif
  * console.log(chunkId); // "some chunk id"
  * ```
  */
-export async function chunkMove(manager: RPCMessageManager, params: ChunkMoveMethod["params"]) {
+export async function chunkMove(manager: IRPCMessageManager, params: ChunkMoveMethod["params"]) {
   const res = await manager.invokeMethod({
     method: "chunk.move",
     params,

@@ -1,9 +1,8 @@
-import { Chunk, ChunkContent, ChunkContentKind, ChunkNotification, DocumentObject, RPCNotification } from "model";
-import { useCallback, useEffect, useState } from "react";
+import { Chunk, ChunkContent, ChunkContentKind, RPCNotification } from "model";
+import { useEffect, useState } from "react";
 import * as stl from "tstl";
 import { v4 as uuidv4 } from "uuid";
-import { chunkCreate, chunkDelete, chunkModify, chunkMove } from "../Model/chunk";
-import { RPCManager as manager, RPCNotificationEvent } from "../Model/RPCManager";
+import { chunkCreate, chunkDelete, chunkModify, chunkMove, IRPCMessageManager } from "../Model/mod";
 
 export interface ChunkListMutator {
   /**
@@ -152,9 +151,11 @@ export class ChunkViewModel extends EventTarget {
   focused: boolean;
   overwrite?: Chunk;
   parent: ChunkListViewModel;
+  manager: IRPCMessageManager;
 
   constructor(parent: ChunkListViewModel, chunk: Chunk, updatedAt: number) {
     super();
+    this.manager = parent.manager;
     this.focused = false;
     this.parent = parent;
     this.chunk = chunk;
@@ -238,14 +239,16 @@ export class ChunkViewModel extends EventTarget {
         docUpdatedAt: this.parent.updatedAt,
       };
 
-      const { updatedAt, seq } = await chunkModify(manager, ps);
+      const { updatedAt, seq } = await chunkModify(this.manager, ps);
       const mutator = makeModifyMutator(chunk.id, nchunk, updatedAt);
       this.parent.apply(mutator, updatedAt, seq);
       setChunk(nchunk);
     };
 
     const setType = async (t: ChunkContentKind) => {
-      const nchunk: Chunk = { ...chunk, type: t };
+      // TODO(vi117): translate chunk to chunk.
+      // If you change the type from csv to markdown, you need to convert the contents of the csv to a table in markdown.
+      const nchunk: Chunk = { ...chunk, type: t } as Chunk;
       await updateChunk(nchunk);
     };
 
@@ -265,9 +268,12 @@ export class ChunkListViewModel extends EventTarget {
   seq: number;
   updatedAt: number;
   docPath: string;
+  manager: IRPCMessageManager;
 
-  constructor(docPath: string, chunks: Chunk[], updatedAt: number, seq: number) {
+  // TODO(vi117): parameter options
+  constructor(docPath: string, chunks: Chunk[], updatedAt: number, seq: number, manager: IRPCMessageManager) {
     super();
+    this.manager = manager;
     this.docPath = docPath;
     this.chunks = chunks.map(c => new ChunkViewModel(this, c, updatedAt));
     this.updatedAt = updatedAt;
@@ -393,7 +399,7 @@ export class ChunkListViewModel extends EventTarget {
       };
 
       // FIXME: this sends requests, but reutrns error.
-      const { updatedAt, chunkId, seq } = await chunkCreate(manager, ps);
+      const { updatedAt, chunkId, seq } = await chunkCreate(this.manager, ps);
       const mutator = makeCreateMutator(chunkId, updatedAt, i, chunkContent);
       this.apply(mutator, updatedAt, seq);
     };
@@ -413,7 +419,7 @@ export class ChunkListViewModel extends EventTarget {
         docUpdatedAt: this.updatedAt,
       };
 
-      const { updatedAt, seq } = await chunkDelete(manager, ps);
+      const { updatedAt, seq } = await chunkDelete(this.manager, ps);
       const mutator = makeDeleteMutator(id);
       this.apply(mutator, updatedAt, seq);
     };
@@ -426,7 +432,7 @@ export class ChunkListViewModel extends EventTarget {
         docUpdatedAt: this.updatedAt,
       };
 
-      const { updatedAt, seq } = await chunkMove(manager, ps);
+      const { updatedAt, seq } = await chunkMove(this.manager, ps);
       const mutator = makeMoveMutator(id, pos);
       this.apply(mutator, updatedAt, seq);
     };

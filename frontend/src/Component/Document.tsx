@@ -2,7 +2,7 @@ import { Button, Chip, Input, Stack } from "@mui/material";
 import { FormEventHandler, Fragment, useState } from "react";
 import { atom, RecoilState, useRecoilState } from "recoil";
 import { v4 as uuidv4 } from "uuid";
-import { createTestDocViewModel, IDocumentViewModel } from "../ViewModel/doc";
+import { IDocumentViewModel, useDocViewModel } from "../ViewModel/doc";
 
 import Chunk from "./Chunk";
 import Divider from "./Divider";
@@ -93,7 +93,7 @@ function InnerDocumentEditor(props: { doc: IDocumentViewModel }) {
 }
 
 export function DocumentEditor() {
-  const doc = createTestDocViewModel("ws://localhost:8000/ws", "test.syd");
+  const doc = useDocViewModel("test.syd");
 
   if (doc != null) {
     return <InnerDocumentEditor doc={doc} />;

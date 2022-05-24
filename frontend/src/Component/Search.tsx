@@ -1,17 +1,17 @@
 import { Button, Dialog, Input, List, ListItem } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
-import Chunk from "model";
+import { Chunk } from "model";
 
-type searchResult = {
+type SearchResult = {
   id: string;
   index: number;
   input: string;
 };
 
 // simple function that searches word in chunks.
-function search_word(chunks: Chunk[], target: string): searchResult[] {
-  const result: searchResult[] = [];
+function search_word(chunks: Chunk[], target: string): SearchResult[] {
+  const result: SearchResult[] = [];
 
   for (const chunk of chunks) {
     const matched = chunk.content.matchAll(new RegExp(target, "g"));
@@ -25,8 +25,8 @@ function search_word(chunks: Chunk[], target: string): searchResult[] {
 
 function SearchResult(props: {
   input: string;
-  results: searchResult[];
-  onSelect: (r: searchResult) => void;
+  results: SearchResult[];
+  onSelect: (r: SearchResult) => void;
 }) {
   const result_list = props.results.map((result, i) => {
     const { id, index, input } = result;
@@ -62,7 +62,7 @@ function SearchResult(props: {
 function SearchDialog(props: {
   open: boolean;
   onClose: () => void;
-  search: (target: string) => searchResult[];
+  search: (target: string) => SearchResult[];
 }) {
   const [input, setInput] = useState("");
   const [results, setResults] = useState([]);

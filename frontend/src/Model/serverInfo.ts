@@ -31,3 +31,25 @@ export async function fetchServerInfo(host: string, port: number): Promise<Serve
   const info = await res.json();
   return info;
 }
+
+let infoInstance: ServerInfo | null = null;
+/**
+ * get server info cached
+ * @returns ServerInfo
+ * @throws Error if not found
+ * @example
+ * ```ts
+ * const info = await getServerInfo();
+ * console.log(info.name); // "scrap-yard-server"
+ * ```
+ */
+export async function getServerInfoInstance(): Promise<ServerInfo> {
+  if (infoInstance === null) {
+    infoInstance = await fetchServerInfo(window.location.hostname, parseInt(window.location.port));
+  }
+  return infoInstance;
+}
+
+// for debug
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(window as any).getServerInfoInstance = getServerInfoInstance;

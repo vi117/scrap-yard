@@ -1,6 +1,6 @@
 import { ShareDocDescription, ShareDocMethod, ShareDocResult } from "model";
 import { RPCErrorWrapper } from "./RPCError";
-import { RPCMessageManager } from "./RPCManager";
+import { IRPCMessageManager } from "./RPCManager";
 
 /**
  * create or modify shared document
@@ -9,7 +9,7 @@ import { RPCMessageManager } from "./RPCManager";
  * @returns docPath
  */
 export async function shareDoc(
-  manager: RPCMessageManager,
+  manager: IRPCMessageManager,
   params: ShareDocMethod["params"],
 ) {
   const res = await manager.invokeMethod({
@@ -26,7 +26,7 @@ export async function shareDoc(
 }
 
 export async function shareGetInfo(
-  manager: RPCMessageManager,
+  manager: IRPCMessageManager,
   params: ShareDocMethod["params"],
 ) {
   const res = await manager.invokeMethod({

@@ -1,4 +1,5 @@
-import { RPCMethod, RPCNotification, RPCResponse } from "model/dist/mod";
+import { RPCMethod, RPCNotification, RPCResponse } from "model";
+import { getServerInfoInstance } from "./serverInfo";
 
 type RPCCallback = {
   resolve: (v: RPCResponse) => void;
@@ -77,7 +78,7 @@ export class RPCMessageManager extends EventTarget implements IRPCMessageManager
       this.ws.onopen = () => {
         resolve();
       };
-      this.ws.onerror = (e) => {
+      this.ws.onerror = () => {
         reject(new Error("connection error"));
       };
     });
@@ -149,4 +150,16 @@ export class RPCMessageManager extends EventTarget implements IRPCMessageManager
   }
 }
 
-export const RPCManager = new RPCMessageManager();
+const RPCManager = new RPCMessageManager();
+
+export async function getOpenedManagerInstance(): Promise<IRPCMessageManager> {
+  if (!RPCManager.opened) {
+    const info = await getServerInfoInstance();
+    await RPCManager.open(info.host);
+  }
+  return RPCManager;
+}
+
+// for debugging
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(window as any).getOpenedManagerInstance = getOpenedManagerInstance;
