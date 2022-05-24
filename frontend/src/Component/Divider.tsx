@@ -4,9 +4,14 @@ import AddIcon from "@mui/icons-material/Add";
 import { Box, IconButton } from "@mui/material";
 import * as ReactDOMServer from "react-dom/server";
 import { RecoilState, useRecoilState } from "recoil";
-import { useDrop } from "./dnd";
 
+import { FsManager } from "../Model/FsManager";
+import { RPCManager as rpcman } from "../Model/RPCManager";
+
+import { useDrop } from "./dnd";
 import { Chunk as ChunkType, ChunkContent } from "./model";
+
+const manager = new FsManager(rpcman);
 
 export function Divider(props: {
     doc: string;
@@ -24,41 +29,56 @@ export function Divider(props: {
         { chunk: ChunkType; doc: string; cur: number } & { text: string } & {
             html: string;
         }
-    >(
-        () => ({
-            accept: ["chunk", "text/html", "text/plain"],
-            drop: (t, item) => {
-                if (t == "chunk") {
-                    if (item.doc == props.doc) { // in-document move
-                        // prevent unnecessary move
-                        if (
-                            !(item.cur == position - 1 || item.cur == position)
-                        ) {
-                            moveChunk(item.chunk.id, position);
-                        }
-                    } else { // document-by-document move
-                        // TODO: need to test this (dnd doc-by-doc).
-                        insertChunk(position, {
-                            type: item.chunk.type,
-                            content: item.chunk.content,
-                        });
+    >(() => ({
+        accept: ["chunk", "text/html", "text/plain"],
+        acceptFile: true,
+
+        drop: (t, item) => {
+            if (t == "chunk") {
+                item = item as { chunk: ChunkType; doc: string; cur: number };
+                if (item.doc == props.doc) { // in-document move
+                    // prevent unnecessary move
+                    if (!(item.cur == position - 1 || item.cur == position)) {
+                        moveChunk(item.chunk.id, position);
                     }
-                } else if (t == "text/plain") {
-                    addFromText(position, item);
-                } else if (t == "text/html") {
-                    add(position, {
-                        type: "rawhtml",
-                        content: item.html,
+                } else { // document-by-document move
+                    // TODO: need to test this (dnd doc-by-doc).
+                    insertChunk(position, {
+                        type: item.chunk.type,
+                        content: item.chunk.content,
                     });
                 }
-            },
+            } else if (t == "text/plain") {
+                addFromText(position, item);
+            } else if (t == "text/html") {
+                add(position, { type: "rawhtml", content: item });
+            }
+        },
 
-            filedrop: (t: string, file: File) => {
-                console.log(file);
-            },
-        }),
-        [position],
-    );
+        filedrop: (t: string, file: File) => {
+            const type = t.split("/")[0];
+            if (file.size <= 2048) { // embed file as dataURL
+                const reader = new FileReader();
+                reader.addEventListener("load", () => {
+                    add(position, {
+                        type: type,
+                        content: reader.result,
+                    });
+                });
+
+                reader.readAsDataURL(file);
+            } else { // upload file & link URL
+                // TODO: where to upload multimedia?
+                const path = encodeURI(`media/${Date.now()}-${file.name}`);
+                manager.upload(path, file);
+                add(position, {
+                    type: type,
+                    // TODO: need a way to get file URL
+                    content: "http://localhost:8000/fs/" + path,
+                });
+            }
+        },
+    }), [position]);
 
     return (
         <Box
