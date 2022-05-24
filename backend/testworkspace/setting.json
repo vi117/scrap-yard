@@ -1,0 +1,8 @@
+{
+    "session": {
+        "allowAnonymous": true
+    },
+    "docStore": {
+        "docHitoryLength": 10
+    }
+}

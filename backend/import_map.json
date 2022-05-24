@@ -1,15 +1,15 @@
 {
-  "imports": {
-    "std/assert": "https://deno.land/std@0.136.0/testing/asserts.ts",
-    "std/bdd": "https://deno.land/std@0.136.0/testing/bdd.ts",
-    "std/mock": "https://deno.land/std@0.136.0/testing/mock.ts",
-    "std/http": "https://deno.land/std@0.136.0/http/mod.ts",
-    "std/file_server": "https://deno.land/std@0.136.0/http/file_server.ts",
-    "std/path": "https://deno.land/std@0.136.0/path/mod.ts",
-    "std/streams": "https://deno.land/std@0.136.0/streams/mod.ts",
-    "std/log": "https://deno.land/std@0.136.0/log/mod.ts",
-    "std/crypto": "https://deno.land/std@0.137.0/crypto/mod.ts",
-    "ajv": "https://esm.sh/ajv@8.11.0",
-    "model": "../model/mod.ts"
-  }
+    "imports": {
+        "std/assert": "https://deno.land/std@0.136.0/testing/asserts.ts",
+        "std/bdd": "https://deno.land/std@0.136.0/testing/bdd.ts",
+        "std/mock": "https://deno.land/std@0.136.0/testing/mock.ts",
+        "std/http": "https://deno.land/std@0.136.0/http/mod.ts",
+        "std/file_server": "https://deno.land/std@0.136.0/http/file_server.ts",
+        "std/path": "https://deno.land/std@0.136.0/path/mod.ts",
+        "std/streams": "https://deno.land/std@0.136.0/streams/mod.ts",
+        "std/log": "https://deno.land/std@0.136.0/log/mod.ts",
+        "std/crypto": "https://deno.land/std@0.137.0/crypto/mod.ts",
+        "ajv": "https://esm.sh/ajv@8.11.0",
+        "model": "../model/mod.ts"
+    }
 }

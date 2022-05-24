@@ -3,39 +3,39 @@
  * @see https://www.jsonrpc.org/specification#request_object
  */
 export interface JsonRPCMethodHeader {
-  /**
-   * jsonrpc must be "2.0"
-   */
-  jsonrpc: "2.0";
-  /**
-   * An identifier established by the client.
-   */
-  id: number;
+    /**
+     * jsonrpc must be "2.0"
+     */
+    jsonrpc: "2.0";
+    /**
+     * An identifier established by the client.
+     */
+    id: number;
 }
 
 export function isJsonRPCMethodHeader(
-  obj: unknown,
+    obj: unknown,
 ): obj is JsonRPCMethodHeader {
-  if (typeof obj !== "object" || obj === null) {
+    if (typeof obj !== "object" || obj === null) {
+        return false;
+    }
+    if ("jsonrpc" in obj && "id" in obj) {
+        return (obj as JsonRPCMethodHeader).jsonrpc === "2.0" &&
+            typeof (obj as JsonRPCMethodHeader).id === "number";
+    }
     return false;
-  }
-  if ("jsonrpc" in obj && "id" in obj) {
-    return (obj as JsonRPCMethodHeader).jsonrpc === "2.0" &&
-      typeof (obj as JsonRPCMethodHeader).id === "number";
-  }
-  return false;
 }
 
 export interface JsonRPCMethod extends JsonRPCMethodHeader {
-  method: string;
-  // deno-lint-ignore no-explicit-any
-  params: any;
+    method: string;
+    // deno-lint-ignore no-explicit-any
+    params: any;
 }
 
 export function isJsonRPCMethod(
-  method: JsonRPCMethodHeader,
+    method: JsonRPCMethodHeader,
 ): method is JsonRPCMethod {
-  return "method" in method && "params" in method;
+    return "method" in method && "params" in method;
 }
 
 /**
@@ -43,8 +43,8 @@ export function isJsonRPCMethod(
  * @see https://www.jsonrpc.org/specification#notification
  */
 export interface JsonRPCNotificationHeader {
-  /**
-   * jsonrpc must be "2.0"
-   */
-  jsonrpc: "2.0";
+    /**
+     * jsonrpc must be "2.0"
+     */
+    jsonrpc: "2.0";
 }
