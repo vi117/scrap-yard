@@ -4,7 +4,6 @@ import * as RPC from "model";
 import * as log from "std/log";
 import { ChunkMethodHistory } from "./chunk.ts";
 import * as setting from "../setting.ts";
-import { readDocFile } from "../document/filedoc.ts";
 import { DocFileReadWriter, DocReadWriter } from "../document/mod.ts";
 
 export type DocHistory = {
@@ -130,7 +129,7 @@ export class ActiveDocumentObject
     }
 
     async open(): Promise<void> {
-        const doc = await readDocFile(this.docPath);
+        const doc = await this.readWriter.read(this.docPath);
         this.chunks = doc.chunks;
         const updatedAt = Date.now();
         this.updatedAt = updatedAt;
