@@ -69,7 +69,7 @@ export function ChunkList(props: { doc: IDocumentViewModel }) {
     });
 
     return (
-        <Stack className="document">
+        <Stack spacing={0} className="chunklist">
             {chunklist}
             <Divider
                 doc={doc.docPath}

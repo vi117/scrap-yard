@@ -69,8 +69,8 @@ const TypeSelector = (props: {
     };
 
     return (
-        <>
-            <InputLabel id="typeselector-label">Type</InputLabel>
+        <div>
+            <InputLabel id="typeselector-label" shrink={true}>Type</InputLabel>
             <Select
                 labelId="typeselector-label"
                 id="typeselector"
@@ -80,7 +80,7 @@ const TypeSelector = (props: {
             >
                 {types.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
             </Select>
-        </>
+        </div>
     );
 };
 
@@ -116,6 +116,7 @@ const Chunk = (props: {
     // reference of textfield
     const inputRef = createRef<null | HTMLTextAreaElement>();
     const fc = chunk.useFocus();
+
     // Effects
     // set read mode when other chunk gets focused.
     useEffect(() => {
@@ -227,10 +228,7 @@ const Chunk = (props: {
             id={"chunk-" + id}
             key={id}
             ref={(mode == "Read") ? drag : null}
-            style={{
-                margin: "0.5em",
-                padding: "0.5em",
-            }}
+            style={{ padding: "0.5em" }}
             component={"div"}
         >
             <div
@@ -243,7 +241,13 @@ const Chunk = (props: {
                 </div>
 
                 {/* sidebar */}
-                <div>
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0.1em",
+                    }}
+                >
                     {editButton}
                     {deleteButton}
                     {typeSelector}
