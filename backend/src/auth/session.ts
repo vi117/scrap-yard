@@ -1,6 +1,7 @@
 import { makeResponse } from "../router/util.ts";
 import { createAdminUser, IUser } from "./user.ts";
 import * as setting from "../setting.ts";
+import { getCookies, setCookie } from "std/http";
 
 export class SessionStore<T> {
     sessions: Record<string, T>;
@@ -56,13 +57,16 @@ export async function handleLogin(req: Request): Promise<Response> {
     }
     const id = makeSessionId();
     sessionStore.set(id, createAdminUser(id));
-    return new Response('{"ok":true}', {
+    const res = new Response('{"ok":true}', {
         status: 200,
         statusText: "OK",
-        headers: {
-            "Set-Cookie": `session=${id}; path=/`,
-        },
     });
+    setCookie(res.headers, {
+        name: "session",
+        value: id,
+        secure: true,
+    });
+    return res;
 }
 
 export function handleLogout(req: Request): Response {
@@ -86,12 +90,11 @@ export function handleLogout(req: Request): Response {
 }
 
 export function getSessionId(req: Request): string | undefined {
-    const cookies = req.headers.get("Set-Cookie");
-    if (!cookies) {
+    const cookies = getCookies(req.headers);
+    if (!cookies.session) {
         return undefined;
     }
-    const id = cookies.split(";")[0].split("=")[1];
-    return id;
+    return cookies.session;
 }
 
 export function getSession(req: Request): IUser | undefined {

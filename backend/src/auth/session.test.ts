@@ -5,7 +5,8 @@ import {
     SessionStore,
 } from "./session.ts";
 import { createAdminUser, IUser } from "./user.ts";
-import { assertEquals, assertNotEquals } from "std/assert";
+import { assert, assertEquals, assertNotEquals } from "std/assert";
+import { getCookies, setCookie } from "std/http";
 
 Deno.test({
     name: "Session",
@@ -46,8 +47,8 @@ Deno.test({
             );
             assertEquals(res.status, 200);
             const cookies = res.headers.get("Set-Cookie");
-            assertNotEquals(cookies, undefined);
-            uuid = cookies?.split(";")[0].split("=")[1];
+            assert(cookies !== null, "no cookies");
+            uuid = cookies.split(";")[0].split("=")[1];
         });
 
         await t.step("logout", async () => {
@@ -56,7 +57,7 @@ Deno.test({
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "Set-Cookie": `session=${uuid}; path=/`,
+                        "Cookie": `session=${uuid}; path=/`,
                     },
                 }),
             );
