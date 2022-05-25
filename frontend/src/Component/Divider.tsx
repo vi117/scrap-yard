@@ -2,16 +2,11 @@
 
 import AddIcon from "@mui/icons-material/Add";
 import { Box, IconButton } from "@mui/material";
-import * as ReactDOMServer from "react-dom/server";
-import { RecoilState, useRecoilState } from "recoil";
 
-import { FsManager } from "../Model/FsManager";
-import { RPCManager as rpcman } from "../Model/RPCManager";
+import { getFsManagerInstance } from "../Model/mod";
 
+import { Chunk as ChunkType, ChunkContent } from "model";
 import { useDrop } from "./dnd";
-import { Chunk as ChunkType, ChunkContent } from "./model";
-
-const manager = new FsManager(rpcman);
 
 export function Divider(props: {
     doc: string;
@@ -70,7 +65,7 @@ export function Divider(props: {
             } else { // upload file & link URL
                 // TODO: where to upload multimedia?
                 const path = encodeURI(`media/${Date.now()}-${file.name}`);
-                manager.upload(path, file);
+                getFsManagerInstance().then(mgr => mgr.upload(path, file));
                 add(position, {
                     type: type,
                     // TODO: need a way to get file URL
