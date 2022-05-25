@@ -20,7 +20,6 @@ Deno.test({
             tags: [],
             version: 1,
         });
-        docObj.chunks = [];
         const docStore = stub(DocStore, "open", () => {
             return docObj;
         });
@@ -181,7 +180,6 @@ Deno.test({
             tags: [],
             version: 1,
         });
-        docObj.chunks = [];
         docObj.join(connAlice);
         docObj.join(connBob);
         docObj.updatedAt = 1000;
@@ -241,4 +239,95 @@ Deno.test({
         }
     },
 });
-// TODO(vi117): write conflict test
+
+Deno.test({
+    name: "test chunk conflict",
+    fn: async () => {
+        const connAlice = new MockUser("connIdAlice");
+        const connBob = new MockUser("connIdBob");
+
+        const docObj = new ActiveDocumentObject(
+            "docPath",
+            10,
+            MemoryDocReadWriter,
+        );
+
+        MemoryDocReadWriter.save("docPath", {
+            chunks: [{
+                id: "chunkId",
+                type: "text",
+                content: "content",
+            }],
+            tags: [],
+            version: 1,
+        });
+        docObj.join(connAlice);
+        docObj.join(connBob);
+        await docObj.open();
+        docObj.updatedAt = 1000;
+        const docStore = stub(DocStore, "open", () => {
+            return docObj;
+        });
+        try {
+            await handleChunkMethod(connAlice, {
+                method: "chunk.modify",
+                params: {
+                    docPath: "docPath",
+                    docUpdatedAt: 2000,
+                    chunkContent: {
+                        type: "text",
+                        content: "content2",
+                    },
+                    chunkId: "chunkId",
+                },
+                jsonrpc: "2.0",
+                id: 1,
+            });
+            const result = connAlice.popObject();
+            assertEquals(result, {
+                jsonrpc: "2.0",
+                id: 1,
+                result: {
+                    chunkId: "chunkId",
+                    updatedAt: docObj.updatedAt,
+                    seq: 1,
+                },
+            });
+            connBob.popObject();
+            await handleChunkMethod(connBob, {
+                method: "chunk.modify",
+                params: {
+                    docPath: "docPath",
+                    docUpdatedAt: 2000,
+                    chunkContent: {
+                        type: "text",
+                        content: "content3",
+                    },
+                    chunkId: "chunkId",
+                },
+                jsonrpc: "2.0",
+                id: 1,
+            });
+            const result2 = connBob.popObject();
+            assertEquals(result2, {
+                jsonrpc: "2.0",
+                id: 1,
+                error: {
+                    code: RPC.RPCErrorCode.ChunkConflict,
+                    message: "conflict",
+                    data: {
+                        chunks: [{
+                            content: "content2",
+                            id: "chunkId",
+                            type: "text",
+                        }],
+                        updatedAt: docObj.updatedAt,
+                    },
+                },
+            });
+        } finally {
+            docStore.restore();
+            MemoryDocReadWriter.clear();
+        }
+    },
+});
