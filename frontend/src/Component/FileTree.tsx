@@ -21,13 +21,23 @@ import {
     Typography,
 } from "@mui/material";
 import clsx from "clsx";
-import React, { forwardRef, useEffect, useRef, useState } from "react";
+import React, {
+    forwardRef,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 
+import { getFsManagerInstance } from "../Model/FsManager";
 import { DirTree, useDirTree } from "./dirTree";
+import { useDrop } from "./dnd";
 
 interface DirHandleProp {
     handleOpen: () => void;
     handleFile: (command: string) => void;
+    drop: (elem: HTMLElement) => void;
+    isOver: boolean;
 }
 
 function FileMenu(props: {
@@ -99,6 +109,8 @@ const DirContent = forwardRef(function DirContent(
         icon,
         handleOpen,
         handleFile,
+        drop,
+        isOver,
     } = props;
 
     const {
@@ -131,6 +143,11 @@ const DirContent = forwardRef(function DirContent(
         handleOpen();
     };
 
+    const rootRef = useCallback((elem) => {
+        ref.current = elem;
+        if (drop) drop(elem);
+    }, [ref]);
+
     return (
         <div
             className={clsx(className, classes.root, {
@@ -139,10 +156,11 @@ const DirContent = forwardRef(function DirContent(
                 [classes.focused]: focused,
                 [classes.disabled]: disabled,
             })}
-            ref={ref as React.Ref<HTMLDivElement>}
+            ref={rootRef}
             onMouseDown={handleMouseDown}
             style={{
                 display: "flex",
+                background: isOver ? "grey" : null,
             }}
         >
             <div className={classes.iconContainer}>
@@ -153,6 +171,7 @@ const DirContent = forwardRef(function DirContent(
                 component="div"
                 className={classes.label}
                 onClick={handleClick}
+                noWrap={true}
             >
                 {label}
             </Typography>
@@ -195,6 +214,23 @@ export function FileTreeInner(props: {
     const dirTree = props.dirTree;
 
     const renderTree = (node: DirTree) => {
+        const [{ isOver }, drop] = (node.type == "dir")
+            ? useDrop(() => ({
+                accept: [],
+                acceptFile: true,
+
+                drop: () => {
+                    return;
+                },
+                filedrop: (t, file) => {
+                    const path = encodeURI(`${node.path}/${file.name}`);
+                    getFsManagerInstance().then(fs => fs.upload(path, file));
+                },
+            }), [node])
+            : [{ isOver: false }, () => {
+                return;
+            }];
+
         return (
             <DirItem
                 key={node.name}
@@ -202,6 +238,8 @@ export function FileTreeInner(props: {
                 label={node.name}
                 icon={node.type == "dir" ? <FolderIcon /> : <ArticleIcon />}
                 handle={{
+                    drop: drop,
+                    isOver: isOver,
                     handleOpen: () => props.handleOpen(node.path),
                     handleFile: (com) => {
                         props.handleFile(com, node.path);
@@ -209,7 +247,7 @@ export function FileTreeInner(props: {
                 }}
             >
                 {Array.isArray(node.children)
-                    ? node.children.map(renderTree)
+                    ? node.children!.map(renderTree)
                     : null}
             </DirItem>
         );
@@ -221,8 +259,11 @@ export function FileTreeInner(props: {
             onClose={props.onClose}
         >
             <TreeView
-                sx={{ width: props.width }}
-                defaultExpanded={["/"]}
+                sx={{
+                    width: props.width,
+                    overflow: "hidden",
+                }}
+                defaultExpanded={["."]}
             >
                 {renderTree(dirTree)}
             </TreeView>
