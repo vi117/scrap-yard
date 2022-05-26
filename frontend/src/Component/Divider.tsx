@@ -52,7 +52,13 @@ export function Divider(props: {
 
         filedrop: (t: string, file: File) => {
             const type = t.split("/")[0];
-            if (file.size <= 2048) { // embed file as dataURL
+
+            if (t == "text/html" || type == "text") { // text embedding
+                const ctype = (t == "text/html") ? "rawhtml" : "text";
+                file.text().then(text =>
+                    add(position, { type: ctype, content: text })
+                );
+            } else if (file.size <= 2048) { // embed file as dataURL
                 const reader = new FileReader();
                 reader.addEventListener("load", () => {
                     add(position, {
