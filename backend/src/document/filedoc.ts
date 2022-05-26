@@ -22,13 +22,29 @@ export async function readDocFile(
 ): Promise<DocumentContent> {
     options = options ?? {};
     const rawText = await Deno.readTextFile(path, { signal: options.signal });
-    const data = JSON.parse(rawText);
+    // deno-lint-ignore no-explicit-any
+    let data: any;
+    try {
+        data = JSON.parse(rawText);
+    } catch (error) {
+        if (error instanceof SyntaxError) {
+            throw new DocFormatError(path, error.message);
+        } else {
+            throw error;
+        }
+    }
     if (!("chunks" in data) || !("tags" in data) || !("version" in data)) {
-        throw new DocFormatError(path, "Invalid document file");
+        throw new DocFormatError(
+            path,
+            "Invalid document file: missing chunks, tags, or version",
+        );
     }
 
     if (!(data.chunks instanceof Array)) {
-        throw new DocFormatError(path, "Invalid file format");
+        throw new DocFormatError(
+            path,
+            "Invalid file format: not array of chunks",
+        );
     }
     const content = data.chunks;
     for (const item of content) {
@@ -42,14 +58,23 @@ export async function readDocFile(
             // deno-lint-ignore no-explicit-any
             !(typeof (item as any).id === "string")
         ) {
-            throw new DocFormatError(path, "Invalid file format");
+            throw new DocFormatError(
+                path,
+                "Invalid file format: not valid chunk",
+            );
         }
     }
     if (!(data.tags instanceof Array)) {
-        throw new DocFormatError(path, "Invalid file format");
+        throw new DocFormatError(
+            path,
+            "Invalid file format: not array for tags",
+        );
     }
     if (data.version !== 1) {
-        throw new DocFormatError(path, "Unknown version format");
+        throw new DocFormatError(
+            path,
+            "Unknown version format " + data.version,
+        );
     }
     return {
         chunks: content,

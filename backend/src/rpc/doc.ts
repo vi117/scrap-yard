@@ -115,5 +115,8 @@ export async function handleTagMethod(
             conn.responseWith(makeRPCResult(method.id, result));
             return;
         }
+        default: {
+            const _exhaustiveCheck: never = methodKind;
+        }
     }
 }
