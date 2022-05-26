@@ -1,6 +1,6 @@
 import { Chunk as ChunkType, DocumentObject } from "model";
 import * as ReactDOMServer from "react-dom/server";
-import { render_view } from "./Chunk";
+import { render_view } from "./Renderer/mod";
 
 export function exportToHTML(doc: DocumentObject): string {
     const renderedChunks: JSX.Element[] = doc.chunks.map((c: ChunkType) =>

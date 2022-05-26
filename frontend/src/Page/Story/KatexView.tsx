@@ -1,6 +1,6 @@
 import { Button, Paper, TextField } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { KatexRenderer } from "../../Component/Chunk/KatexRenderer";
+import { KatexRenderer } from "../../Component/Renderer/KatexRenderer";
 
 export function TestStorybook() {
     const [tex, setTex] = useState("a^2 + b^2 = c^2");

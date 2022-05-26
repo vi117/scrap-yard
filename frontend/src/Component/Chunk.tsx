@@ -22,10 +22,8 @@ import { RecoilState, useRecoilState } from "recoil";
 import { ChunkViewModel, IChunkViewModel } from "../ViewModel/chunklist";
 import { IDocumentViewModel } from "../ViewModel/doc";
 
-import CsvRenderer from "./Chunk/csvRenderer";
-import { KatexRenderer } from "./Chunk/KatexRenderer";
-import MarkdownRenderer from "./Chunk/markdownRenderer";
 import { useDrag } from "./dnd";
+import render_view from "./Renderer/mod";
 
 const types = [
     "text",
@@ -36,29 +34,6 @@ const types = [
     "video",
     "audio",
 ];
-
-export function render_view(t: string, content: string) {
-    switch (t) {
-        case "text":
-            return <>{content}</>;
-        case "csv":
-            return <CsvRenderer content={content} />;
-        case "md":
-            return <MarkdownRenderer text={content} />;
-        case "image":
-            return <img style={{ width: "100%" }} src={content} />;
-        case "video":
-            return <video style={{ width: "100%" }} controls src={content} />;
-        case "audio":
-            return <audio style={{ width: "100%" }} controls src={content} />;
-        case "rawhtml":
-            return <div dangerouslySetInnerHTML={{ __html: content }} />;
-        case "katex":
-            return <KatexRenderer tex={content} />;
-        default:
-            return <>error: invalid type: {t} content: {content}</>;
-    }
-}
 
 const TypeSelector = (props: {
     update: (t: string) => void;
