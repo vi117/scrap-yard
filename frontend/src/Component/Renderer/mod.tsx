@@ -1,7 +1,7 @@
 import CsvRenderer from "./csvRenderer";
 import MarkdownRenderer from "./markdownRenderer";
 
-export function render_view(t: string, content: string) {
+export function renderView(t: string, content: string) {
     switch (t) {
         case "text":
             return <div>{content}</div>;
@@ -24,4 +24,4 @@ export function render_view(t: string, content: string) {
     }
 }
 
-export default render_view;
+export default renderView;

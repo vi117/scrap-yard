@@ -23,7 +23,7 @@ import { ChunkViewModel, IChunkViewModel } from "../ViewModel/chunklist";
 import { IDocumentViewModel } from "../ViewModel/doc";
 
 import { useDrag } from "./dnd";
-import render_view from "./Renderer/mod";
+import renderView from "./Renderer/mod";
 
 const types = [
     "text",
@@ -154,7 +154,7 @@ const Chunk = (props: {
                     className="content"
                     style={{ height: "100%" }}
                 >
-                    {render_view(chunkContent.type, chunkContent.content)}
+                    {renderView(chunkContent.type, chunkContent.content)}
                 </div>
             );
         } else { // edit mode
