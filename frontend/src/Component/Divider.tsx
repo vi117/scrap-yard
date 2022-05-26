@@ -71,12 +71,17 @@ export function Divider(props: {
             } else { // upload file & link URL
                 // TODO: where to upload multimedia?
                 const path = encodeURI(`media/${Date.now()}-${file.name}`);
-                getFsManagerInstance().then(fs => fs.upload(path, file));
-                add(position, {
-                    type: type,
-                    // TODO: need a way to get file URL
-                    content: "http://localhost:8000/fs/" + path,
-                });
+                getFsManagerInstance()
+                    .then(fs => fs.upload(path, file))
+                    .then((res) => {
+                        if (res == 200) {
+                            add(position, {
+                                type: type,
+                                // TODO: need a way to get file URL
+                                content: "http://localhost:8000/fs/" + path,
+                            });
+                        }
+                    });
             }
         },
     }), [position]);
