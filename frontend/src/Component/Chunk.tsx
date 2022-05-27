@@ -22,10 +22,8 @@ import { RecoilState, useRecoilState } from "recoil";
 import { ChunkViewModel, IChunkViewModel } from "../ViewModel/chunklist";
 import { IDocumentViewModel } from "../ViewModel/doc";
 
-import CsvRenderer from "./Chunk/csvRenderer";
-import { KatexRenderer } from "./Chunk/KatexRenderer";
-import MarkdownRenderer from "./Chunk/markdownRenderer";
 import { useDrag } from "./dnd";
+import renderView from "./Renderer/mod";
 
 const types = [
     "text",
@@ -37,29 +35,6 @@ const types = [
     "audio",
 ];
 
-export function render_view(t: string, content: string) {
-    switch (t) {
-        case "text":
-            return <>{content}</>;
-        case "csv":
-            return <CsvRenderer content={content} />;
-        case "md":
-            return <MarkdownRenderer text={content} />;
-        case "image":
-            return <img src={content} />;
-        case "video":
-            return <video controls src={content} />;
-        case "audio":
-            return <audio controls src={content} />;
-        case "rawhtml":
-            return <div dangerouslySetInnerHTML={{ __html: content }} />;
-        case "katex":
-            return <KatexRenderer tex={content} />;
-        default:
-            return <>error: invalid type: {t} content: {content}</>;
-    }
-}
-
 const TypeSelector = (props: {
     update: (t: string) => void;
     value: string;
@@ -69,8 +44,8 @@ const TypeSelector = (props: {
     };
 
     return (
-        <>
-            <InputLabel id="typeselector-label">Type</InputLabel>
+        <div>
+            <InputLabel id="typeselector-label" shrink={true}>Type</InputLabel>
             <Select
                 labelId="typeselector-label"
                 id="typeselector"
@@ -80,7 +55,7 @@ const TypeSelector = (props: {
             >
                 {types.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
             </Select>
-        </>
+        </div>
     );
 };
 
@@ -116,6 +91,7 @@ const Chunk = (props: {
     // reference of textfield
     const inputRef = createRef<null | HTMLTextAreaElement>();
     const fc = chunk.useFocus();
+
     // Effects
     // set read mode when other chunk gets focused.
     useEffect(() => {
@@ -178,7 +154,7 @@ const Chunk = (props: {
                     className="content"
                     style={{ height: "100%" }}
                 >
-                    {render_view(chunkContent.type, chunkContent.content)}
+                    {renderView(chunkContent.type, chunkContent.content)}
                 </div>
             );
         } else { // edit mode
@@ -227,10 +203,7 @@ const Chunk = (props: {
             id={"chunk-" + id}
             key={id}
             ref={(mode == "Read") ? drag : null}
-            style={{
-                margin: "0.5em",
-                padding: "0.5em",
-            }}
+            style={{ padding: "0.5em" }}
             component={"div"}
         >
             <div
@@ -243,7 +216,13 @@ const Chunk = (props: {
                 </div>
 
                 {/* sidebar */}
-                <div>
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0.1em",
+                    }}
+                >
                     {editButton}
                     {deleteButton}
                     {typeSelector}

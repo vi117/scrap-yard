@@ -7,84 +7,20 @@ import TreeItem, {
     useTreeItem,
 } from "@mui/lab/TreeItem";
 import TreeView from "@mui/lab/TreeView";
-import {
-    Button,
-    ClickAwayListener,
-    Drawer,
-    Grow,
-    IconButton,
-    Menu,
-    MenuItem,
-    MenuList,
-    Paper,
-    Popper,
-    Typography,
-} from "@mui/material";
+import { Drawer, IconButton, Typography } from "@mui/material";
 import clsx from "clsx";
-import React, { forwardRef, useEffect, useRef, useState } from "react";
+import React, { forwardRef, useCallback, useRef, useState } from "react";
 
+import { getFsManagerInstance } from "../Model/FsManager";
 import { DirTree, useDirTree } from "./dirTree";
+import { useDrop } from "./dnd";
+import FileMenu from "./FileMenu";
 
 interface DirHandleProp {
     handleOpen: () => void;
     handleFile: (command: string) => void;
-}
-
-function FileMenu(props: {
-    anchorEl: HTMLElement;
-    open: boolean;
-    handleClose: () => void;
-    handleFile: (command: string) => void;
-}) {
-    const { anchorEl, open, handleClose } = props;
-
-    const handleFile = (com: string) =>
-        () => {
-            props.handleFile(com);
-            handleClose();
-        };
-
-    return (
-        <Popper
-            id="filemenu"
-            anchorEl={anchorEl}
-            open={open}
-            placement="bottom-start"
-            transition
-            disablePortal
-            sx={{ zIndex: 1000 }} // use sufficiently big number
-        >
-            {({ TransitionProps, placement }) => (
-                <Grow
-                    {...TransitionProps}
-                    style={{
-                        transformOrigin: placement === "botton-start"
-                            ? "left top"
-                            : "left bottom",
-                    }}
-                >
-                    <Paper>
-                        <ClickAwayListener onClickAway={handleClose}>
-                            <MenuList
-                                autoFocusItem={open}
-                                id="filemenu-list"
-                            >
-                                <MenuItem onClick={handleFile("rename")}>
-                                    Rename
-                                </MenuItem>
-                                <MenuItem onClick={handleFile("move")}>
-                                    Move
-                                </MenuItem>
-                                <MenuItem onClick={handleFile("delete")}>
-                                    Delete
-                                </MenuItem>
-                            </MenuList>
-                        </ClickAwayListener>
-                    </Paper>
-                </Grow>
-            )}
-        </Popper>
-    );
+    drop: (elem: HTMLElement) => void;
+    isOver: boolean;
 }
 
 const DirContent = forwardRef(function DirContent(
@@ -99,6 +35,8 @@ const DirContent = forwardRef(function DirContent(
         icon,
         handleOpen,
         handleFile,
+        drop,
+        isOver,
     } = props;
 
     const {
@@ -131,6 +69,11 @@ const DirContent = forwardRef(function DirContent(
         handleOpen();
     };
 
+    const rootRef = useCallback((elem) => {
+        ref.current = elem;
+        if (drop) drop(elem);
+    }, [ref]);
+
     return (
         <div
             className={clsx(className, classes.root, {
@@ -139,10 +82,11 @@ const DirContent = forwardRef(function DirContent(
                 [classes.focused]: focused,
                 [classes.disabled]: disabled,
             })}
-            ref={ref as React.Ref<HTMLDivElement>}
+            ref={rootRef}
             onMouseDown={handleMouseDown}
             style={{
                 display: "flex",
+                background: isOver ? "grey" : null,
             }}
         >
             <div className={classes.iconContainer}>
@@ -153,6 +97,8 @@ const DirContent = forwardRef(function DirContent(
                 component="div"
                 className={classes.label}
                 onClick={handleClick}
+                title={label}
+                noWrap={true}
             >
                 {label}
             </Typography>
@@ -195,6 +141,23 @@ export function FileTreeInner(props: {
     const dirTree = props.dirTree;
 
     const renderTree = (node: DirTree) => {
+        const [{ isOver }, drop] = (node.type == "dir")
+            ? useDrop(() => ({
+                accept: [],
+                acceptFile: true,
+
+                drop: () => {
+                    return;
+                },
+                filedrop: (t, file) => {
+                    const path = encodeURI(`${node.path}/${file.name}`);
+                    getFsManagerInstance().then(fs => fs.upload(path, file));
+                },
+            }), [node])
+            : [{ isOver: false }, () => {
+                return;
+            }];
+
         return (
             <DirItem
                 key={node.name}
@@ -202,6 +165,8 @@ export function FileTreeInner(props: {
                 label={node.name}
                 icon={node.type == "dir" ? <FolderIcon /> : <ArticleIcon />}
                 handle={{
+                    drop: drop,
+                    isOver: isOver,
                     handleOpen: () => props.handleOpen(node.path),
                     handleFile: (com) => {
                         props.handleFile(com, node.path);
@@ -209,7 +174,7 @@ export function FileTreeInner(props: {
                 }}
             >
                 {Array.isArray(node.children)
-                    ? node.children.map(renderTree)
+                    ? node.children!.map(renderTree)
                     : null}
             </DirItem>
         );
@@ -221,8 +186,11 @@ export function FileTreeInner(props: {
             onClose={props.onClose}
         >
             <TreeView
-                sx={{ width: props.width }}
-                defaultExpanded={["/"]}
+                sx={{
+                    width: props.width,
+                    overflow: "hidden",
+                }}
+                defaultExpanded={["."]}
             >
                 {renderTree(dirTree)}
             </TreeView>

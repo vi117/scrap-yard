@@ -52,7 +52,13 @@ export function Divider(props: {
 
         filedrop: (t: string, file: File) => {
             const type = t.split("/")[0];
-            if (file.size <= 2048) { // embed file as dataURL
+
+            if (t == "text/html" || type == "text") { // text embedding
+                const ctype = (t == "text/html") ? "rawhtml" : "text";
+                file.text().then(text =>
+                    add(position, { type: ctype, content: text })
+                );
+            } else if (file.size <= 2048) { // embed file as dataURL
                 const reader = new FileReader();
                 reader.addEventListener("load", () => {
                     add(position, {
@@ -65,12 +71,17 @@ export function Divider(props: {
             } else { // upload file & link URL
                 // TODO: where to upload multimedia?
                 const path = encodeURI(`media/${Date.now()}-${file.name}`);
-                getFsManagerInstance().then(mgr => mgr.upload(path, file));
-                add(position, {
-                    type: type,
-                    // TODO: need a way to get file URL
-                    content: "http://localhost:8000/fs/" + path,
-                });
+                getFsManagerInstance()
+                    .then(fs => fs.upload(path, file))
+                    .then((res) => {
+                        if (res == 200) {
+                            add(position, {
+                                type: type,
+                                // TODO: need a way to get file URL
+                                content: "http://localhost:8000/fs/" + path,
+                            });
+                        }
+                    });
             }
         },
     }), [position]);
