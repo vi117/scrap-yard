@@ -1,4 +1,10 @@
-import { Chunk, ChunkContent, ChunkContentKind, RPCNotification } from "model";
+import {
+    Chunk,
+    ChunkContent,
+    ChunkContentKind,
+    compareChunkContent,
+    RPCNotification,
+} from "model";
 import { useEffect, useState } from "react";
 import * as stl from "tstl";
 import { v4 as uuidv4 } from "uuid";
@@ -161,7 +167,27 @@ class ChunkListHistory {
     }
 }
 
-export class ChunkViewModel extends EventTarget {
+export interface IChunkListViewModel {
+    docPath: string;
+
+    updateOnNotification(notification: RPCNotification): void;
+    useChunks(): [IChunkViewModel[], ChunkListMutator];
+}
+
+export interface IChunkViewModel {
+    parent: IChunkListViewModel;
+    id: string;
+    focus(): void;
+    unfocus(): void;
+
+    useFocus(): boolean;
+
+    useChunk(): [Chunk, ChunkMutator];
+
+    setState(state: ChunkState): void;
+}
+
+export class ChunkViewModel extends EventTarget implements IChunkViewModel {
     chunk: Chunk;
     updatedAt: number;
     focused: boolean;
@@ -194,6 +220,7 @@ export class ChunkViewModel extends EventTarget {
     }
 
     unfocus() {
+        if (!this.focused) return;
         this.focused = false;
         this.dispatchEvent(new Event("unfocus"));
     }
@@ -245,7 +272,7 @@ export class ChunkViewModel extends EventTarget {
 
         const updateChunk = async (nchunk: Chunk) => {
             if (
-                nchunk.type === chunk.type && nchunk.content === chunk.content
+                compareChunkContent(nchunk, this.chunk)
             ) {
                 return;
             }
@@ -281,7 +308,9 @@ export class ChunkViewModel extends EventTarget {
     }
 }
 
-export class ChunkListViewModel extends EventTarget {
+export class ChunkListViewModel extends EventTarget
+    implements IChunkListViewModel
+{
     chunks: ChunkViewModel[];
     history: ChunkListHistory;
     buffer: stl.PriorityQueue<
