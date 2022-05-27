@@ -13,6 +13,8 @@ import {
 } from "./chunklist";
 import { IPageViewModel } from "./page";
 
+import { IDisposable, makeDisposable } from "./IDisposable";
+
 export interface IDocumentViewModel extends IPageViewModel {
     docPath: string;
 
@@ -21,8 +23,8 @@ export interface IDocumentViewModel extends IPageViewModel {
     useTags(): [string[], (tags: string[]) => Promise<void>];
 }
 
-export class DocumentViewModel extends EventTarget
-    implements IDocumentViewModel
+export class DocumentViewModel extends makeDisposable(EventTarget)
+    implements IDocumentViewModel, IDisposable
 {
     readonly type = "document";
     readonly docPath: string;
@@ -47,13 +49,19 @@ export class DocumentViewModel extends EventTarget
             rpcManager,
         );
 
-        this.manager.addEventListener(
-            "notification",
-            (e: RPCNotificationEvent) => {
-                console.log("notification", e.notification);
-                this.updateOnNotification(e.notification);
+        const onChunkNotification = (notification: RPCNotificationEvent) => {
+            console.log("notification", notification.notification);
+            this.updateOnNotification(notification.notification);
+        };
+        this.manager.addEventListener("notification", onChunkNotification);
+        this.addDisposable({
+            dispose: () => {
+                this.manager.removeEventListener(
+                    "notification",
+                    onChunkNotification,
+                );
             },
-        );
+        });
     }
 
     updateOnNotification(notification: RPCNotification): void {
@@ -104,6 +112,10 @@ export function useDocViewModel(path: string) {
 
     useEffect(() => {
         console.log("useDocViewModel: ", path);
+        if (doc != null) {
+            console.log("dispose");
+            doc.dispose();
+        }
         setDoc(null);
         getDoc();
     }, [path]);

@@ -82,6 +82,7 @@ export class RPCMessageManager extends EventTarget
                 if ("id" in data) {
                     const response = data as RPCResponse;
                     const callback = this.callbackList.get(response.id);
+                    this.callbackList.delete(response.id);
                     if (callback) {
                         callback.resolve(response);
                     }
@@ -140,7 +141,6 @@ export class RPCMessageManager extends EventTarget
         }
         this.ws.send(JSON.stringify(message));
     }
-
     addEventListener(
         type: RPCMessageManagerEventType,
         callback:
