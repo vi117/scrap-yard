@@ -6,6 +6,7 @@ import { useState } from "react";
 import DocumentEditor from "../Component/Document";
 import FileTree from "../Component/FileTree";
 import Settings from "../Component/Settings";
+import ShareButton from "../Component/ShareButton";
 import Stash from "../Component/Stash";
 
 const drawerWidth = 240;
@@ -24,6 +25,7 @@ export function UI() {
                 <Button variant="contained" onClick={() => setSopen(!open)}>
                     settings
                 </Button>
+                <ShareButton doc={path} />
             </Toolbar>
 
             <Settings open={sopen} onClose={() => setSopen(false)} />
