@@ -120,7 +120,7 @@ class ChunkListHistory {
     constructor(
         public history: ChunkListHistoryElem[] = [],
         public limit: number = 20,
-    ) {}
+    ) { }
     private applyLast(mutator: ChunkListStateMutator, updatedAt: number): void {
         const newState = mutator(this.current);
         this.history.push({ state: newState, mutator, updatedAt });
@@ -255,6 +255,7 @@ export class ChunkViewModel extends EventTarget implements IChunkViewModel {
                 this.overwrite = this.chunk;
             }
             this.chunk = { ...this.chunk, ...content };
+            this.dispatchEvent(new Event("chunkChange"));
         }
     }
 
@@ -309,8 +310,7 @@ export class ChunkViewModel extends EventTarget implements IChunkViewModel {
 }
 
 export class ChunkListViewModel extends EventTarget
-    implements IChunkListViewModel
-{
+    implements IChunkListViewModel {
     chunks: ChunkViewModel[];
     history: ChunkListHistory;
     buffer: stl.PriorityQueue<
@@ -437,7 +437,6 @@ export class ChunkListViewModel extends EventTarget
         this.chunks = appiledChunks;
 
         if (refresh) {
-            console.log("apply", this.chunks);
             this.dispatchEvent(new Event("chunksChange"));
         }
     }
