@@ -2,8 +2,8 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { RecoilRoot } from "recoil";
 import "./App.css";
 import { NotFound } from "./Page/NotFoundPage";
-import { UI } from "./Page/Story/UI";
 import { Storybooks } from "./Page/StoryBooks";
+import { UI } from "./Page/UI";
 
 function App() {
     return (

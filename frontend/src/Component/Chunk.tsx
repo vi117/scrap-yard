@@ -23,6 +23,7 @@ import { ChunkViewModel, IChunkViewModel } from "../ViewModel/chunklist";
 import { IDocumentViewModel } from "../ViewModel/doc";
 
 import CsvRenderer from "./Chunk/csvRenderer";
+import { KatexRenderer } from "./Chunk/KatexRenderer";
 import MarkdownRenderer from "./Chunk/markdownRenderer";
 import { useDrag } from "./dnd";
 
@@ -52,6 +53,8 @@ export function render_view(t: string, content: string) {
             return <audio controls src={content} />;
         case "rawhtml":
             return <div dangerouslySetInnerHTML={{ __html: content }} />;
+        case "katex":
+            return <KatexRenderer tex={content} />;
         default:
             return <>error: invalid type: {t} content: {content}</>;
     }

@@ -1,21 +1,16 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import { useState } from "react";
-import { TestStorybook } from "./Story/Test";
-import { UI } from "./Story/UI";
+import { TestStorybook as KatexStorybook } from "./Story/KatexView";
 import { WebsocketIO } from "./Story/WebsocketIO";
 
 const StorybookList = [
-    {
-        name: "ui",
-        elem: <UI></UI>,
-    },
     {
         name: "websocket io",
         elem: <WebsocketIO></WebsocketIO>,
     },
     {
-        name: "test",
-        elem: <TestStorybook></TestStorybook>,
+        name: "katex view",
+        elem: <KatexStorybook></KatexStorybook>,
     },
 ];
 
