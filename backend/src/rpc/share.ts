@@ -58,6 +58,12 @@ export function handleShareGetInfo(
     conn: Participant,
     method: ShareGetInfoMethod,
 ) {
+    if (!conn.user.canCustom("shareToken", {})) {
+        conn.responseWith(
+            makeRPCError(method.id, new PermissionDeniedError("shareToken")),
+        );
+        return;
+    }
     const params = method.params;
     const shareInfo = ShareDocStore.get(params.docPath);
     if (shareInfo == undefined) {

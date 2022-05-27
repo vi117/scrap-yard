@@ -1,4 +1,9 @@
-import { ShareDocMethod, ShareDocResult, ShareGetInfoResult } from "model";
+import {
+    ShareDocMethod,
+    ShareDocResult,
+    ShareGetInfoMethod,
+    ShareGetInfoResult,
+} from "model";
 import { RPCErrorWrapper } from "./RPCError";
 import { IRPCMessageManager } from "./RPCManager";
 
@@ -7,6 +12,15 @@ import { IRPCMessageManager } from "./RPCManager";
  * @param manager manager of RPC
  * @param params params of method
  * @returns docPath
+ * @example
+ * ```ts
+ * const res = await shareDoc(manager, {
+ *    docPath: "test.md",
+ *    write: true,
+ *    expired: Date.now() + 1000* 3600 * 24* 14,
+ * });
+ * console.log(res); // { docPath: "test.md", token: "..." }
+ * ```
  */
 export async function shareDoc(
     manager: IRPCMessageManager,
@@ -24,10 +38,23 @@ export async function shareDoc(
         throw new RPCErrorWrapper(res.error!);
     }
 }
-
+/**
+ * get info of shared document
+ * @param manager manager of RPC
+ * @param params params of method
+ * @returns info
+ * @throws RPCError wrapper of InvalidDocPathError or PermissionDeniedError
+ * @example
+ * ```ts
+ * const info = await getShareInfo(manager, {
+ *    docPath: "share/test.md",
+ * });
+ * console.log(info); // { token: "token", desc: { basePath: "share", write: false, expired: ... } }
+ * ```
+ */
 export async function shareGetInfo(
     manager: IRPCMessageManager,
-    params: ShareDocMethod["params"],
+    params: ShareGetInfoMethod["params"],
 ) {
     const res = await manager.invokeMethod({
         method: "share.info",
