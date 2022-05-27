@@ -19,7 +19,7 @@ import React, {
     useState,
 } from "react";
 import { RecoilState, useRecoilState } from "recoil";
-import { ChunkViewModel } from "../ViewModel/chunklist";
+import { ChunkViewModel, IChunkViewModel } from "../ViewModel/chunklist";
 import { IDocumentViewModel } from "../ViewModel/doc";
 
 import CsvRenderer from "./Chunk/csvRenderer";
@@ -82,16 +82,16 @@ const TypeSelector = (props: {
 };
 
 const Chunk = (props: {
-    chunk: ChunkViewModel;
+    chunk: IChunkViewModel;
     position: number;
     deleteThis: () => void;
 }) => {
     const chunk = props.chunk;
-    const id = chunk.id;
+    const [chunkContent, { setType, setContent }] = props.chunk.useChunk();
+    const id = chunkContent.id;
     const deleteThis = props.deleteThis;
 
-    const [{ type, content }, { setType, setContent }] = props.chunk.useChunk();
-    const [buffer, setBuffer] = useState(content);
+    const [buffer, setBuffer] = useState(chunkContent.content);
 
     // Internal States
     const [mode, setMode] = useState<"Read" | "Write">("Read");
@@ -101,7 +101,7 @@ const Chunk = (props: {
     const [, drag] = useDrag(() => ({
         type: "chunk", // TODO: make this constant
         item: {
-            chunk: chunk.chunk,
+            chunk: chunkContent,
             doc: props.chunk.parent.docPath,
             cur: props.position,
         },
@@ -175,7 +175,7 @@ const Chunk = (props: {
                     className="content"
                     style={{ height: "100%" }}
                 >
-                    {render_view(type, content)}
+                    {render_view(chunkContent.type, chunkContent.content)}
                 </div>
             );
         } else { // edit mode
@@ -215,7 +215,9 @@ const Chunk = (props: {
         </Tooltip>
     );
 
-    const typeSelector = <TypeSelector update={updateType} value={type} />;
+    const typeSelector = (
+        <TypeSelector update={updateType} value={chunkContent.type} />
+    );
 
     return (
         <Paper

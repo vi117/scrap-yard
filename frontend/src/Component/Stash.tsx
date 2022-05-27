@@ -3,48 +3,115 @@ import { ClickAwayListener, Fab, Paper, Popper, Zoom } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
+import {
+    ChunkListMutator,
+    ChunkMutator,
+    IChunkListViewModel,
+    IChunkViewModel,
+} from "../ViewModel/chunklist";
 import { IDocumentViewModel } from "../ViewModel/doc";
+
+import { Chunk, ChunkContent, ChunkContentKind } from "model";
+import { atom, useRecoilValue, useSetRecoilState } from "recoil";
 import { ChunkList } from "./Document";
 
 const stash = "stash";
 
-function save(doc) {
+function save(doc: Chunk[]) {
     window.localStorage.setItem(stash, JSON.stringify(doc));
 }
 
-function load() {
-    return JSON.parse(window.localStorage.getItem(stash));
+function load(): Chunk[] {
+    const items = window.localStorage.getItem(stash);
+    if (items == null) {
+        return [];
+    } else {
+        return JSON.parse(items);
+    }
 }
 
-class LocalDocument implements IDocumentViewModel {
-    docPath = stash;
-    chunks = [];
-
-    constructor() {
-        this.chunks = this.loadChunks();
+class LocalChunk extends EventTarget implements IChunkViewModel {
+    focusState = false;
+    constructor(public parent: LocalDocument, public ch: Chunk) {
+        super();
     }
 
-    loadChunks() {
-        if (window.localStorage.getItem(stash) == null) {
-            return [];
-        } else {
-            return load();
-        }
+    get id(): string {
+        return this.ch.id;
+    }
+    focus(): void {
+        if (this.focusState) return;
+        this.focusState = true;
+        this.parent.chunks.forEach((c) => c.unfocus());
+
+        this.dispatchEvent(new Event("focus"));
+    }
+    unfocus(): void {
+        if (!this.focusState) return;
+        this.focusState = false;
+        this.dispatchEvent(new Event("unfocus"));
+    }
+    useFocus(): boolean {
+        const ch = useMemo(() => this.focusState, [this.focusState]);
+        return ch;
+    }
+    useChunk(): [Chunk, ChunkMutator] {
+        const [updateAt, setUpdateAt] = useState(0);
+        const chunk = useMemo(() => this.ch, [updateAt]);
+
+        const updateChunk = () => {
+            setUpdateAt(updateAt + 1);
+            save(this.parent.chunks.map(x => x.ch));
+        };
+
+        const setType = (t: ChunkContentKind) => {
+            this.ch.type = t;
+            updateChunk();
+        };
+
+        const setContent = (content: string) => {
+            this.ch.content = content;
+            updateChunk();
+        };
+
+        return [chunk, { setType, setContent }];
+    }
+    setState(_state: Chunk & { updatedAt: number }): void {
+        throw new Error("unreachable");
+    }
+}
+
+class LocalDocument implements IDocumentViewModel, IChunkListViewModel {
+    docPath = stash;
+    chunks: LocalChunk[];
+    type = "local";
+
+    constructor() {
+        this.chunks = load().map((x: Chunk) => new LocalChunk(this, x));
+    }
+    updateAsSource(_path: string, _updatedAt: number): void {
+        // nop
+        throw new Error("unreachable");
     }
 
     updateOnNotification() {
         // nop
+        throw new Error("unreachable");
+    }
+    applyChunkList(chunkList: Chunk[]) {
+        this.chunks = chunkList.map(x => new LocalChunk(this, x));
+        save(this.chunks.map(x => x.ch));
     }
 
-    useChunks() {
+    useChunks(): [IChunkViewModel[], ChunkListMutator] {
         const [updateAt, setUpdateAt] = useState(0);
-        const chunks = useMemo(() => this.chunks, [updateAt]);
+        const chunks = useMemo(() => this.chunks.map(x => x.ch), [updateAt]);
 
-        const add = (i?, chunkContent?) => {
+        const add = (i?: number, chunkContent?: Chunk) => {
             i = i ?? chunks.length;
 
             const id = uuidv4();
-            const chunk = chunkContent ?? {
+            const chunk: Chunk = chunkContent ?? {
                 id: id,
                 type: "text",
                 content: "",
@@ -52,69 +119,44 @@ class LocalDocument implements IDocumentViewModel {
 
             const nc = chunks.slice();
             nc.splice(i, 0, chunk);
-            this.chunks = nc;
+            this.applyChunkList(nc);
             setUpdateAt(updateAt + 1);
-            save(this.chunks);
         };
 
-        const create = (i?) => {
+        const create = (i?: number) => {
             add(i);
         };
 
-        const addFromText = (i?, text) => {
-            add(i, { type: "text", content: text });
+        const addFromText = (i: number, text: string) => {
+            add(i, { type: "text", content: text, id: uuidv4() });
         };
 
-        const del = (id) => {
+        const del = (id: string) => {
             const i = chunks.findIndex((c) => c.id === id);
             if (i < 0) return "";
 
             const nc = chunks.slice();
             nc.splice(i, 1);
-            this.chunks = nc;
+            this.applyChunkList(nc);
             setUpdateAt(updateAt + 1);
-            save(this.chunks);
         };
 
-        const move = (id, pos) => {
+        const move = (id: string, pos: number) => {
             const i = chunks.findIndex((c) => c.id === id);
 
             const nc = chunks.slice();
             const chunk = nc[i];
             nc.splice(i, 1);
             nc.splice((pos >= i) ? pos - 1 : pos, 0, chunk);
-            this.chunks = nc;
+            this.applyChunkList(nc);
             setUpdateAt(updateAt + 1);
-            save(this.chunks);
         };
 
-        return [chunks, { add, create, addFromText, del, move }];
+        return [this.chunks, { add, create, addFromText, del, move }];
     }
 
-    useTags() {
+    useTags(): [string[], (tag: string[]) => Promise<void>] {
         return [[], () => Promise.resolve()];
-    }
-
-    useChunk(orig_chunk) {
-        const [updateAt, setUpdateAt] = useState(0);
-        const chunk = useMemo(() => orig_chunk, [updateAt]);
-
-        const updateChunk = () => {
-            setUpdateAt(updateAt + 1);
-            save(this.chunks);
-        };
-
-        const setType = (t) => {
-            orig_chunk.type = t;
-            updateChunk();
-        };
-
-        const setContent = (content: string) => {
-            orig_chunk.content = content;
-            updateChunk();
-        };
-
-        return [chunk, { setType, setContent }];
     }
 }
 

@@ -9,7 +9,7 @@ import {
 import {
     ChunkListMutator,
     ChunkListViewModel,
-    ChunkViewModel,
+    IChunkViewModel,
 } from "./chunklist";
 import { IPageViewModel } from "./page";
 
@@ -19,7 +19,7 @@ export interface IDocumentViewModel extends IPageViewModel {
     docPath: string;
 
     updateOnNotification(notification: ChunkNotification): void;
-    useChunks(): [ChunkViewModel[], ChunkListMutator];
+    useChunks(): [IChunkViewModel[], ChunkListMutator];
     useTags(): [string[], (tags: string[]) => Promise<void>];
 }
 
@@ -80,7 +80,7 @@ export class DocumentViewModel extends makeDisposable(EventTarget)
     }
 
     // TODO(vi117): extract method
-    useChunks(): [ChunkViewModel[], ChunkListMutator] {
+    useChunks(): [IChunkViewModel[], ChunkListMutator] {
         return this.chunks.useChunks();
     }
 
