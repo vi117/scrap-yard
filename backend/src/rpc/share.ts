@@ -27,9 +27,10 @@ export function handleShareDocMethod(
     }
 
     const shareInfo = ShareDocStore.get(param.docPath);
+    let shareToken: string;
     if (shareInfo == undefined) {
         //create share token
-        const shareToken = makeSessionId();
+        shareToken = makeSessionId();
         ShareDocStore.set(param.docPath, {
             basePath: dirname(param.docPath),
             shareToken,
@@ -37,16 +38,18 @@ export function handleShareDocMethod(
             write: param.write ?? false,
         });
     } else {
+        shareToken = shareInfo.shareToken;
         //update share token info
         ShareDocStore.set(param.docPath, {
             basePath: param.basePath ?? shareInfo.basePath,
-            shareToken: shareInfo.shareToken,
+            shareToken: shareToken,
             expired: param.expired ?? shareInfo.expired,
             write: param.write ?? shareInfo.write,
         });
     }
     const result: ShareDocResult = {
         docPath: param.docPath,
+        token: shareToken,
     };
     conn.responseWith(makeRPCResult(method.id, result));
 }
@@ -69,6 +72,7 @@ export function handleShareGetInfo(
             write: shareInfo.write,
             expired: shareInfo.expired,
         },
+        token: shareInfo.shareToken,
     };
     conn.responseWith(makeRPCResult(method.id, result));
 }

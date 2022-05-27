@@ -6,6 +6,8 @@ import { BufReader } from "https://deno.land/std@0.139.0/io/buffer.ts";
 import { TextProtoReader } from "https://deno.land/std@0.139.0/textproto/mod.ts";
 import { readAll } from "https://deno.land/std@0.139.0/streams/conversion.ts";
 
+const PORT = 4567;
+
 let serverHandle: Deno.Process<Deno.RunOptions & { stdout: "piped" }>;
 async function startServer() {
     const currentDir = getCurrentScriptDir(import.meta);
@@ -17,7 +19,7 @@ async function startServer() {
         stderr: "null",
         env: {
             "SETTING_PATH": "test_setting.json",
-            "PORT": "4567",
+            "PORT": PORT.toString(),
             "HOST": "localhost",
         },
     });
@@ -50,7 +52,7 @@ class WebSocketConnection {
     }
     open(): Promise<void> {
         const ret = new Promise<void>((resolve, reject) => {
-            this.conn = new WebSocket("ws://localhost:4567/ws");
+            this.conn = new WebSocket(`ws://localhost:${PORT}/ws`);
             this.conn.addEventListener("message", (e) => {
                 const data = JSON.parse(e.data as string);
                 if (data.id) {

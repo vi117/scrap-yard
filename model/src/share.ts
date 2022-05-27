@@ -25,6 +25,7 @@ export interface ShareDocMethod extends JsonRPCMethodHeader {
 
 export interface ShareDocResult {
     docPath: string;
+    token: string;
 }
 
 export interface ShareGetInfoMethod extends JsonRPCMethodHeader {
@@ -36,6 +37,7 @@ export interface ShareGetInfoMethod extends JsonRPCMethodHeader {
 
 export interface ShareGetInfoResult {
     desc: ShareDocDescription;
+    token: string;
 }
 
 export interface ShareNotification extends JsonRPCNotificationHeader {

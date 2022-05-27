@@ -1,4 +1,4 @@
-import { ShareDocDescription, ShareDocMethod, ShareDocResult } from "model";
+import { ShareDocMethod, ShareDocResult, ShareGetInfoResult } from "model";
 import { RPCErrorWrapper } from "./RPCError";
 import { IRPCMessageManager } from "./RPCManager";
 
@@ -34,7 +34,7 @@ export async function shareGetInfo(
         params,
     });
     if (res.result) {
-        const result = res.result as ShareDocDescription;
+        const result = res.result as ShareGetInfoResult;
         return result;
     } else {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
