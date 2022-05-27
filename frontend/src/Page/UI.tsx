@@ -3,11 +3,10 @@ import { styled, useTheme } from "@mui/material/styles";
 import { extname } from "path-browserify";
 import { useState } from "react";
 
-import "../../App.css";
-import DocumentEditor from "../../Component/Document";
-import FileTree from "../../Component/FileTree";
-import Settings from "../../Component/Settings";
-import Stash from "../../Component/Stash";
+import DocumentEditor from "../Component/Document";
+import FileTree from "../Component/FileTree";
+import Settings from "../Component/Settings";
+import Stash from "../Component/Stash";
 
 const drawerWidth = 240;
 

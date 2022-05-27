@@ -255,6 +255,7 @@ export class ChunkViewModel extends EventTarget implements IChunkViewModel {
                 this.overwrite = this.chunk;
             }
             this.chunk = { ...this.chunk, ...content };
+            this.dispatchEvent(new Event("chunkChange"));
         }
     }
 
@@ -437,7 +438,6 @@ export class ChunkListViewModel extends EventTarget
         this.chunks = appiledChunks;
 
         if (refresh) {
-            console.log("apply", this.chunks);
             this.dispatchEvent(new Event("chunksChange"));
         }
     }
