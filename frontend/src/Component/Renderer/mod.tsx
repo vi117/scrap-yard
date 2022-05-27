@@ -4,7 +4,7 @@ import MarkdownRenderer from "./markdownRenderer";
 export function renderView(t: string, content: string) {
     switch (t) {
         case "text":
-            return <div>{content}</div>;
+            return <div style={{ whiteSpace: "pre-wrap" }}>{content}</div>;
         case "csv":
             return <CsvRenderer content={content} />;
         case "md":
