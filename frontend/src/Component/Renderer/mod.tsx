@@ -1,4 +1,5 @@
 import CsvRenderer from "./csvRenderer";
+import { KatexRenderer } from "./KatexRenderer";
 import MarkdownRenderer from "./markdownRenderer";
 
 export function renderView(t: string, content: string) {
