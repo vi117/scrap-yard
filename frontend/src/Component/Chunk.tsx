@@ -30,6 +30,7 @@ const types = [
     "csv",
     "md",
     "rawhtml",
+    "katex",
     "image",
     "video",
     "audio",
@@ -55,6 +56,23 @@ const TypeSelector = (props: {
             >
                 {types.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
             </Select>
+        </div>
+    );
+};
+
+const Preview = (props: {
+    type: string;
+    content: string;
+}) => {
+    return (
+        <div
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+            }}
+        >
+            {renderView(props.type, props.content)}
         </div>
     );
 };
@@ -153,6 +171,7 @@ const Chunk = (props: {
                     id="content"
                     className="content"
                     style={{ height: "100%" }}
+                    onClick={() => setMode("Write")}
                 >
                     {renderView(chunkContent.type, chunkContent.content)}
                 </div>
@@ -211,8 +230,21 @@ const Chunk = (props: {
                 onFocus={onFocus}
             >
                 {/* content */}
-                <div style={{ width: "100%" }} onClick={() => setMode("Write")}>
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        width: "100%",
+                    }}
+                >
                     {renderContent()}
+                    {(mode == "Write" && chunkContent.type == "katex")
+                        && (
+                            <Preview
+                                type={chunkContent.type}
+                                content={buffer}
+                            />
+                        )}
                 </div>
 
                 {/* sidebar */}

@@ -88,7 +88,7 @@ function makeMoveMutator(id: string, pos: number): ChunkListStateMutator {
         }
         const chunk = chunks[i];
         chunks.splice(i, 1);
-        chunks.splice(pos, 0, chunk);
+        chunks.splice(pos < i ? pos : pos - 1, 0, chunk);
         return chunks;
     };
 }
