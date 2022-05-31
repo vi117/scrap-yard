@@ -56,7 +56,8 @@ export async function handleLogin(req: Request): Promise<Response> {
         );
     }
     const id = makeSessionId();
-    sessionStore.set(id, createAdminUser(id));
+    const user = createAdminUser(id);
+    sessionStore.set(id, user);
     const res = new Response('{"ok":true}', {
         status: 200,
         statusText: "OK",
@@ -64,7 +65,9 @@ export async function handleLogin(req: Request): Promise<Response> {
     setCookie(res.headers, {
         name: "session",
         value: id,
-        secure: true,
+        secure: false,
+        httpOnly: false,
+        expires: new Date(user.expiredAt),
     });
     return res;
 }
