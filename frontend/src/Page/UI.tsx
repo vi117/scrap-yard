@@ -1,4 +1,4 @@
-import { AppBar, Box, Button, Portal, Toolbar } from "@mui/material";
+import { AppBar, Box, Button, Toolbar } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
 import { extname } from "path-browserify";
 import { useState } from "react";
@@ -15,15 +15,22 @@ export function UI() {
     const [open, setOpen] = useState(false);
     const [sopen, setSopen] = useState(false);
     const [path, setPath] = useState("test.syd");
+    const [readonly, setReadonly] = useState(false);
 
     return (
-        <Portal>
+        <div>
             <Toolbar>
                 <Button variant="contained" onClick={() => setOpen(!open)}>
                     {open ? "Close" : "Open"}
                 </Button>
                 <Button variant="contained" onClick={() => setSopen(!open)}>
                     settings
+                </Button>
+                <Button
+                    variant="contained"
+                    onClick={() => setReadonly(!readonly)}
+                >
+                    {readonly ? "readonly" : "writable"}
                 </Button>
                 <ShareButton doc={path} />
             </Toolbar>
@@ -45,8 +52,8 @@ export function UI() {
                 root={""}
             />
 
-            <DocumentEditor path={path} />
+            <DocumentEditor readonly={readonly} path={path} />
             <Stash />
-        </Portal>
+        </div>
     );
 }
