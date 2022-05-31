@@ -1,8 +1,10 @@
 import {
     Chunk,
+    ChunkConflictErrorData,
     ChunkContent,
     ChunkContentKind,
     compareChunkContent,
+    RPCErrorCode,
     RPCNotification,
 } from "model";
 import { useEffect, useState } from "react";
@@ -14,6 +16,7 @@ import {
     chunkModify,
     chunkMove,
     IRPCMessageManager,
+    RPCErrorWrapper,
 } from "../Model/mod";
 
 export interface ChunkListMutator {
@@ -287,10 +290,23 @@ export class ChunkViewModel extends EventTarget implements IChunkViewModel {
                 docUpdatedAt: this.parent.updatedAt,
             };
 
-            const { updatedAt, seq } = await chunkModify(this.manager, ps);
-            const mutator = makeModifyMutator(chunk.id, nchunk, updatedAt);
-            this.parent.apply(mutator, updatedAt, seq);
-            setChunk(nchunk);
+            try {
+                const { updatedAt, seq } = await chunkModify(this.manager, ps);
+                const mutator = makeModifyMutator(chunk.id, nchunk, updatedAt);
+                this.parent.apply(mutator, updatedAt, seq);
+                setChunk(nchunk);
+            } catch (e) {
+                if (e instanceof RPCErrorWrapper) {
+                    if (e.code === RPCErrorCode.ChunkConflict) {
+                        const data = e.data as ChunkConflictErrorData;
+                        this.parent.refresh(data.chunks, data.updatedAt);
+                    } else {
+                        throw e;
+                    }
+                } else {
+                    throw e;
+                }
+            }
         };
 
         const setType = async (t: ChunkContentKind) => {
@@ -417,12 +433,27 @@ export class ChunkListViewModel extends EventTarget
             this.seq = seq;
             currentUpdatedAt = updatedAt;
         }
-        this.updateMark(currentUpdatedAt);
+        this.refreshWith(this.history.current, currentUpdatedAt, refresh);
+    }
 
-        // get chunk view model from history.
+    refresh(chunks: Chunk[], updatedAt: number) {
+        this.history = new ChunkListHistory([{
+            state: (chunks.map(c => ({ ...c, updatedAt: updatedAt }))),
+            mutator: () => (chunks.map(c => ({ ...c, updatedAt: updatedAt }))),
+            updatedAt: this.updatedAt,
+        }]);
+        this.refreshWith(chunks, updatedAt);
+    }
+
+    private refreshWith(
+        chunkList: (Chunk | ChunkState)[],
+        currentUpdatedAt: number,
+        refresh = true,
+    ) {
+        this.updateMark(currentUpdatedAt);
         const appiledChunks: ChunkViewModel[] = [];
         // TODO(vi117): it is not efficient. O(n^2). use id map.
-        for (const chunk of this.history.current) {
+        for (const chunk of chunkList) {
             const ch = this.chunks.find(c => c.id === chunk.id);
             // if new chunk, create new chunk view model.
             if (ch === undefined) {
@@ -431,14 +462,31 @@ export class ChunkListViewModel extends EventTarget
                 );
             } else {
                 // if chunk exists, update chunk view model.
-                ch.setState(chunk);
+                if ("updatedAt" in chunk) {
+                    ch.setState(chunk);
+                } else {
+                    ch.setState({ ...chunk, updatedAt: currentUpdatedAt });
+                }
                 appiledChunks.push(ch);
             }
         }
         this.chunks = appiledChunks;
-
         if (refresh) {
             this.dispatchEvent(new Event("chunksChange"));
+        }
+    }
+
+    private resolveError(e: Error): void {
+        if (e instanceof RPCErrorWrapper) {
+            if (e.code === RPCErrorCode.ChunkConflict) {
+                const data = e.data as ChunkConflictErrorData;
+                this.refresh(data.chunks, data.updatedAt);
+            } else {
+                throw e;
+                // this.dispatchEvent(new ErrorEvent("error", { error }));
+            }
+        } else {
+            throw e;
         }
     }
 
@@ -471,18 +519,21 @@ export class ChunkListViewModel extends EventTarget
                 docUpdatedAt: this.updatedAt,
             };
 
-            // FIXME: this sends requests, but reutrns error.
-            const { updatedAt, chunkId, seq } = await chunkCreate(
-                this.manager,
-                ps,
-            );
-            const mutator = makeCreateMutator(
-                chunkId,
-                updatedAt,
-                i,
-                chunkContent,
-            );
-            this.apply(mutator, updatedAt, seq);
+            try {
+                const { updatedAt, chunkId, seq } = await chunkCreate(
+                    this.manager,
+                    ps,
+                );
+                const mutator = makeCreateMutator(
+                    chunkId,
+                    updatedAt,
+                    i,
+                    chunkContent,
+                );
+                this.apply(mutator, updatedAt, seq);
+            } catch (e) {
+                this.resolveError(e as Error);
+            }
         };
 
         const create = async (i?: number) => {
@@ -499,10 +550,13 @@ export class ChunkListViewModel extends EventTarget
                 chunkId: id,
                 docUpdatedAt: this.updatedAt,
             };
-
-            const { updatedAt, seq } = await chunkDelete(this.manager, ps);
-            const mutator = makeDeleteMutator(id);
-            this.apply(mutator, updatedAt, seq);
+            try {
+                const { updatedAt, seq } = await chunkDelete(this.manager, ps);
+                const mutator = makeDeleteMutator(id);
+                this.apply(mutator, updatedAt, seq);
+            } catch (e) {
+                this.resolveError(e as Error);
+            }
         };
 
         const move = async (id: string, pos: number) => {
@@ -512,10 +566,13 @@ export class ChunkListViewModel extends EventTarget
                 position: pos,
                 docUpdatedAt: this.updatedAt,
             };
-
-            const { updatedAt, seq } = await chunkMove(this.manager, ps);
-            const mutator = makeMoveMutator(id, pos);
-            this.apply(mutator, updatedAt, seq);
+            try {
+                const { updatedAt, seq } = await chunkMove(this.manager, ps);
+                const mutator = makeMoveMutator(id, pos);
+                this.apply(mutator, updatedAt, seq);
+            } catch (e) {
+                this.resolveError(e as Error);
+            }
         };
 
         return [chunks, {

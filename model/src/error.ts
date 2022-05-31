@@ -141,6 +141,11 @@ export class PermissionDeniedError
     extends RPCErrorBy(RPCErrorCode.PermissionDenied) {
 }
 
+export type ChunkConflictErrorData = {
+    chunks: Chunk[];
+    updatedAt: number;
+};
+
 /**
  * Chunk Conflict Error
  * you can update the document with the chunks in the error.data.
@@ -154,10 +159,7 @@ export class ChunkConflictError extends RPCErrorBy(RPCErrorCode.ChunkConflict) {
             updatedAt,
         };
     }
-    declare data: {
-        chunks: Chunk[];
-        updatedAt: number;
-    };
+    declare data: ChunkConflictErrorData;
 }
 
 export class TagsConflictError extends RPCErrorBy(RPCErrorCode.TagsConflict) {
