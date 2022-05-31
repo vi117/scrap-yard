@@ -57,6 +57,7 @@ export interface IFsEventMap {
 }
 
 export interface IFsManager extends EventTarget {
+    getURL(filePath: string): URL;
     get(path: string): Promise<Response>;
     getStat(path: string): Promise<FsGetResult>;
     upload(filePath: string, data: BodyInit): Promise<number>;
@@ -79,7 +80,7 @@ export interface IFsManager extends EventTarget {
 export class FsManager extends EventTarget implements IFsManager {
     private manager: IRPCMessageManager;
     /**
-     * end point url
+     * end point url. end with '/'
      */
     private url: string;
     constructor(manager: IRPCMessageManager, url: string) {
@@ -87,16 +88,22 @@ export class FsManager extends EventTarget implements IFsManager {
         this.manager = manager;
         this.url = url;
     }
+
+    getURL(filePath: string): URL {
+        if (filePath.startsWith("/")) {
+            filePath = "." + filePath;
+        }
+        const url = new URL(filePath, this.url);
+        return url;
+    }
+
     /**
      * fetch file
      * @param filePath path to file
      * @returns content of file
      */
     async get(filePath: string): Promise<Response> {
-        if (filePath.startsWith("/")) {
-            filePath = "." + filePath;
-        }
-        const url = new URL(filePath, this.url);
+        const url = this.getURL(filePath);
         const res = await fetch(url);
         return res;
     }
@@ -119,10 +126,7 @@ export class FsManager extends EventTarget implements IFsManager {
      * ```
      */
     async getStat(filePath: string): Promise<FsGetResult> {
-        if (filePath.startsWith("/")) {
-            filePath = "." + filePath;
-        }
-        const url = new URL(filePath, this.url);
+        const url = this.getURL(filePath);
         url.searchParams.set("stat", "true");
         const res = await fetch(url);
         if (!res.ok) {
@@ -138,10 +142,7 @@ export class FsManager extends EventTarget implements IFsManager {
      * @returns status code
      */
     async upload(filePath: string, data: BodyInit): Promise<number> {
-        if (filePath.startsWith("/")) {
-            filePath = "." + filePath;
-        }
-        const url = new URL(filePath, this.url);
+        const url = this.getURL(filePath);
         const res = await fetch(url, {
             method: "PUT",
             body: data,
@@ -157,10 +158,7 @@ export class FsManager extends EventTarget implements IFsManager {
      * @returns status code
      */
     async mkdir(filePath: string): Promise<number> {
-        if (filePath.startsWith("/")) {
-            filePath = "." + filePath;
-        }
-        const url = new URL(filePath, this.url);
+        const url = this.getURL(filePath);
         url.searchParams.set("makeDir", "true");
         const res = await fetch(url, {
             method: "PUT",
@@ -181,10 +179,7 @@ export class FsManager extends EventTarget implements IFsManager {
      * ```
      */
     async delete(filePath: string): Promise<number> {
-        if (filePath.startsWith("/")) {
-            filePath = "." + filePath;
-        }
-        const url = new URL(filePath, this.url);
+        const url = this.getURL(filePath);
         const res = await fetch(url, {
             method: "DELETE",
         });
