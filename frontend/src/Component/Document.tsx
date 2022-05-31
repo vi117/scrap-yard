@@ -6,9 +6,10 @@ import { IDocumentViewModel, useDocViewModel } from "../ViewModel/doc";
 
 import Chunk from "./Chunk";
 import Divider from "./Divider";
+import ReadonlyChunk from "./ReadonlyChunk";
 import Search from "./Search";
 
-function TagBar(props: { doc: IDocumentViewModel }) {
+function TagBar(props: { readonly: boolean; doc: IDocumentViewModel }) {
     const [tags, setTags] = props.doc.useTags();
     const [taglist, setTaglist] = useState(tags.join(" "));
     const [editable, setEditable] = useState(false);
@@ -35,21 +36,24 @@ function TagBar(props: { doc: IDocumentViewModel }) {
         return (
             <Stack direction="row" spacing={1}>
                 {tags.map((tag, i) => <Chip key={i} label={tag} />)}
-                <Button onClick={() => setEditable(true)}>Edit</Button>
+                {!props.readonly
+                    && <Button onClick={() => setEditable(true)}>Edit</Button>}
             </Stack>
         );
     }
 }
 
-export function ChunkList(props: { doc: IDocumentViewModel }) {
+export function ChunkList(
+    props: { readonly: boolean; doc: IDocumentViewModel },
+) {
     const doc = props.doc;
     const [chunks, mutation] = doc.useChunks();
 
-    const chunklist = chunks.map((chunk, i) => {
-        const id = chunk.id;
-        return (
-            <Fragment key={id}>
+    const divider = (i: number) => {
+        if (!props.readonly) {
+            return (
                 <Divider
+                    key={"divider-" + i}
                     doc={doc.docPath}
                     position={i}
                     newChunk={mutation.create}
@@ -58,12 +62,24 @@ export function ChunkList(props: { doc: IDocumentViewModel }) {
                     addFromText={mutation.addFromText}
                     add={mutation.add}
                 />
+            );
+        }
+    };
 
-                <Chunk
-                    chunk={chunk}
-                    position={i}
-                    deleteThis={() => mutation.del(id)}
-                />
+    const chunklist = chunks.map((chunk, i) => {
+        const id = chunk.id;
+        return (
+            <Fragment key={id}>
+                {divider(i)}
+                {props.readonly
+                    ? <ReadonlyChunk chunk={chunk} />
+                    : (
+                        <Chunk
+                            chunk={chunk}
+                            position={i}
+                            deleteThis={() => mutation.del(id)}
+                        />
+                    )}
             </Fragment>
         );
     });
@@ -71,37 +87,32 @@ export function ChunkList(props: { doc: IDocumentViewModel }) {
     return (
         <Stack spacing={0} className="chunklist">
             {chunklist}
-            <Divider
-                doc={doc.docPath}
-                position={chunks.length}
-                newChunk={mutation.create}
-                insertChunk={mutation.add}
-                moveChunk={mutation.move}
-                addFromText={mutation.addFromText}
-                add={mutation.add}
-            />
+            {divider(chunks.length)}
         </Stack>
     );
 }
 
-function InnerDocumentEditor(props: { doc: IDocumentViewModel }) {
+function InnerDocumentEditor(
+    props: { readonly: boolean; doc: IDocumentViewModel },
+) {
     return (
         <>
-            <TagBar doc={props.doc} />
-            <ChunkList doc={props.doc} />
+            <TagBar readonly={props.readonly} doc={props.doc} />
+            <ChunkList readonly={props.readonly} doc={props.doc} />
         </>
     );
 }
 
 export type DocumentEditorProps = {
     path: string;
+    readonly: boolean;
 };
 
 export function DocumentEditor(props: DocumentEditorProps) {
     const doc = useDocViewModel(props.path);
 
     if (doc != null) {
-        return <InnerDocumentEditor doc={doc} />;
+        return <InnerDocumentEditor readonly={props.readonly} doc={doc} />;
     } else {
         return <div>please wait...</div>;
     }
