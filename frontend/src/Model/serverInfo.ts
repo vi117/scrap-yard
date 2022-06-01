@@ -56,6 +56,22 @@ export async function getServerInfoInstance(): Promise<ServerInfo> {
     return infoInstance;
 }
 
+/**
+ * get server info cached
+ */
+export function getServerInfo() {
+    if (infoInstance === null) {
+        throw new Error("not loaded");
+    }
+    return infoInstance;
+}
+
+export async function makeEndpointURL(path: string) {
+    const info = await getServerInfoInstance();
+    const url = new URL(path, `http://${info.host}:${info.port}`);
+    return url;
+}
+
 // for debug
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as any).getServerInfoInstance = getServerInfoInstance;
