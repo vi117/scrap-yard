@@ -11,7 +11,7 @@ import { FileServeRouter } from "./fileServe.ts";
 import { rpc } from "./rpc.ts";
 import * as log from "std/log";
 import { getServerInformationHandler } from "./infoHandle.ts";
-import { handleLogin, handleLogout } from "./auth/session.ts";
+import { getAuthHandler } from "./auth/session.ts";
 import { configLoadFrom } from "./config.ts";
 import { parse as argParse } from "std/flags";
 import "std/dotenv";
@@ -27,8 +27,6 @@ router.registerRouter("dist", getStaticRouter("dist"));
 router.registerRouter("fs", new FileServeRouter());
 router.register("/app", app);
 router.register("/ws", rpc);
-router.register("/auth/login", handleLogin);
-router.register("/auth/logout", handleLogout);
 
 function app() {
     return new ResponseBuilder("Hello World!").setStatus(200);
@@ -41,6 +39,13 @@ export async function serverRun() {
 
     const sih = getServerInformationHandler();
     router.register("info", sih);
+
+    const { handleLogin, handleLogout } = getAuthHandler({
+        password: "secret",
+    });
+    router.register("/auth/login", handleLogin);
+    router.register("/auth/logout", handleLogout);
+
     serve(async (req: Request, _info: ConnInfo) => {
         const begin = Date.now();
         let response: ResponseBuilder;
