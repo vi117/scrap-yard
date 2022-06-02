@@ -1,6 +1,7 @@
 import { normalize } from "std/path";
 import * as log from "std/log";
 import { FsWatcher } from "./fswatcher.ts";
+import { writeAll } from "std/streams";
 
 type Command = {
     path: string;
@@ -18,7 +19,8 @@ export class RawReadWriter implements IReadWriter {
     }
     async write(path: string, content: string): Promise<void> {
         const file = await Deno.open(path, { create: true, write: true });
-        await file.write(new TextEncoder().encode(content));
+        const p = new TextEncoder().encode(content);
+        await writeAll(file, p);
         file.close();
     }
 }
