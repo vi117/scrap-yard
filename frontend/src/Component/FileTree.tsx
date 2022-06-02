@@ -9,7 +9,9 @@ import TreeItem, {
 import TreeView from "@mui/lab/TreeView";
 import { Drawer, IconButton, Typography } from "@mui/material";
 import clsx from "clsx";
+import { basename, dirname, extname } from "path-browserify";
 import React, { forwardRef, useCallback, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { getFsManagerInstance } from "../Model/FsManager";
 import { DirTree, useDirTree } from "./dirTree";
@@ -17,8 +19,8 @@ import { useDrop } from "./dnd";
 import FileMenu from "./FileMenu";
 
 interface DirHandleProp {
-    handleOpen: () => void;
     handleFile: (command: string) => void;
+    path: string;
     drop: (elem: HTMLElement) => void;
     isOver: boolean;
 }
@@ -33,8 +35,8 @@ const DirContent = forwardRef(function DirContent(
         label,
         nodeId,
         icon,
-        handleOpen,
         handleFile,
+        path,
         drop,
         isOver,
     } = props;
@@ -66,7 +68,6 @@ const DirContent = forwardRef(function DirContent(
     const handleClick = (event) => {
         handleExpansion(event);
         handleSelection(event);
-        handleOpen();
     };
 
     const rootRef = useCallback((elem) => {
@@ -84,6 +85,7 @@ const DirContent = forwardRef(function DirContent(
             })}
             ref={rootRef}
             onMouseDown={handleMouseDown}
+            onClick={handleClick}
             style={{
                 display: "flex",
                 background: isOver ? "grey" : null,
@@ -96,11 +98,25 @@ const DirContent = forwardRef(function DirContent(
             <Typography
                 component="div"
                 className={classes.label}
-                onClick={handleClick}
                 title={label}
                 noWrap={true}
             >
-                {label}
+                {(extname(path) == ".syd")
+                    ? (
+                        <Link
+                            style={{
+                                textDecoration: "none",
+                                color: "black",
+                                display: "block",
+                            }}
+                            key={path}
+                            to={"/app/" + dirname(path) + "/"
+                                + basename(path, ".syd")}
+                        >
+                            {label}
+                        </Link>
+                    )
+                    : label}
             </Typography>
 
             <IconButton
@@ -167,7 +183,7 @@ export function FileTreeInner(props: {
                 handle={{
                     drop: drop,
                     isOver: isOver,
-                    handleOpen: () => props.handleOpen(node.path),
+                    path: node.path,
                     handleFile: (com) => {
                         props.handleFile(com, node.path);
                     },

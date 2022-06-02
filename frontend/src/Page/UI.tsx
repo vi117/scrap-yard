@@ -2,6 +2,7 @@ import { AppBar, Box, Button, Toolbar } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
 import { extname } from "path-browserify";
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 
 import DocumentEditor from "../Component/Document";
 import FileTree from "../Component/FileTree";
@@ -11,10 +12,13 @@ import Stash from "../Component/Stash";
 
 const drawerWidth = 240;
 
-export function UI() {
+export function UI(props: {}) {
+    const params = useParams();
+    console.log(params);
+
     const [open, setOpen] = useState(false);
     const [sopen, setSopen] = useState(false);
-    const [path, setPath] = useState("test.syd");
+    const path = params.path + ".syd";
     const [readonly, setReadonly] = useState(false);
 
     return (
@@ -38,12 +42,6 @@ export function UI() {
             <Settings open={sopen} onClose={() => setSopen(false)} />
             <FileTree
                 width={drawerWidth}
-                handleOpen={(f: string) => {
-                    console.log(f);
-                    if (extname(f) == ".syd") {
-                        setPath(f);
-                    }
-                }}
                 handleFile={(com: string, f: string) => {
                     console.log(`${com} ${f}`);
                 }}
