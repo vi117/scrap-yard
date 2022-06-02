@@ -66,10 +66,9 @@ export async function serverRun() {
         const m = router.match(url.pathname, ctx);
         if (m) {
             const res = await m(req, ctx);
-            res.setHeaders({
-                "access-control-allow-origin": origin ?? "*",
-                "access-control-allow-credentials": "true",
-            });
+            if (!!origin && config.hosts.includes(origin)) {
+                res.setCors(origin, true);
+            }
             return res;
         }
         return makeResponse(Status.NotFound);

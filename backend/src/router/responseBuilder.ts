@@ -51,10 +51,11 @@ export class ResponseBuilder {
         }
         return this;
     }
-    setCors(origin: string) {
+    setCors(origin: string, credentials: boolean) {
         this.setHeader("Access-Control-Allow-Origin", origin);
         this.setHeader("Access-Control-Allow-Headers", "*");
         this.setHeader("Access-Control-Allow-Methods", "*");
+        this.setHeader("Access-Control-Allow-Credentials", `${credentials}`);
         return this;
     }
     setContentType(contentType: string) {

@@ -34,6 +34,28 @@ export function makeSessionId(): string {
     return crypto.randomUUID();
 }
 
+interface setSessionCookieOption {
+    id: string;
+    domain: string;
+    expiredAt: number;
+}
+
+function setSessionCookie(headers: Headers, {
+    id,
+    domain,
+    expiredAt,
+}: setSessionCookieOption) {
+    setCookie(headers, {
+        name: "session",
+        value: id,
+        secure: false,
+        httpOnly: true,
+        expires: new Date(expiredAt),
+        domain: domain,
+        path: "/",
+    });
+}
+
 export async function handleLogin(req: Request): Promise<ResponseBuilder> {
     const body = await (req.text());
     const data = JSON.parse(body);
@@ -53,14 +75,10 @@ export async function handleLogin(req: Request): Promise<ResponseBuilder> {
         const user = createAdminUser(id);
         sessionStore.set(id, user);
         const res = makeJsonResponse(Status.OK, { ok: true });
-        setCookie(res.headers, {
-            name: "session",
-            value: id,
-            secure: false,
-            httpOnly: true,
-            expires: new Date(user.expiredAt),
+        setSessionCookie(res.headers, {
+            id: id,
             domain: url.hostname,
-            path: "/",
+            expiredAt: user.expiredAt,
         });
         return res;
     } else if ("token" in data && typeof data.token === "string") {
@@ -73,12 +91,10 @@ export async function handleLogin(req: Request): Promise<ResponseBuilder> {
             });
         }
         const res = makeJsonResponse(Status.OK, {});
-        setCookie(res.headers, {
-            name: "session",
-            value: t,
-            secure: false,
-            httpOnly: false,
-            expires: new Date(user.expiredAt),
+        setSessionCookie(res.headers, {
+            id: t,
+            domain: url.hostname,
+            expiredAt: user.expiredAt,
         });
         return res;
     } else {
