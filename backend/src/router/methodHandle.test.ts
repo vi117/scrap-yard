@@ -1,10 +1,11 @@
 import { assertEquals } from "std/assert";
 import { MethodHandlerBuilber } from "./methodHandle.ts";
+import { ResponseBuilder } from "./responseBuilder.ts";
 import { Status } from "./util.ts";
 
 const fn = (i: number) =>
     (_req: Request, _ctx: unknown) => {
-        return new Response(i.toString(), {});
+        return new ResponseBuilder(i.toString());
     };
 const reqGen = (method: string) =>
     new Request("http://test.com/test.txt", { method: method });
@@ -21,10 +22,10 @@ Deno.test({
         const ctx = {};
 
         const i = r.build();
-        assertEquals(await (await i(reqGen("get"), ctx)).text(), "1");
-        assertEquals(await (await i(reqGen("post"), ctx)).text(), "2");
-        assertEquals(await (await i(reqGen("put"), ctx)).text(), "3");
-        assertEquals(await (await i(reqGen("delete"), ctx)).text(), "4");
+        assertEquals(await (await i(reqGen("get"), ctx)).body, "1");
+        assertEquals(await (await i(reqGen("post"), ctx)).body, "2");
+        assertEquals(await (await i(reqGen("put"), ctx)).body, "3");
+        assertEquals(await (await i(reqGen("delete"), ctx)).body, "4");
     },
 });
 
@@ -54,8 +55,9 @@ Deno.test({
         const ctx = {};
 
         const i = r.build();
+        const h = new Headers((await i(reqGen("options"), ctx)).headers);
         assertEquals(
-            (await i(reqGen("options"), ctx)).headers.get("Allows")!,
+            h.get("Allows")!,
             "get,post",
         );
     },

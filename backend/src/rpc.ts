@@ -3,10 +3,11 @@ import { Connection, registerParticipant } from "./rpc/connection.ts";
 import { IdGenerator } from "./util.ts";
 import { getSessionUser } from "./auth/session.ts";
 import * as log from "std/log";
+import { ResponseBuilder } from "./router/mod.ts";
 
 const idGen = new IdGenerator();
 
-export function rpc(req: Request, _ctx: unknown): Response {
+export function rpc(req: Request, _ctx: unknown): ResponseBuilder {
     if (req.headers.get("Upgrade") !== "websocket") {
         return makeResponse(Status.BadRequest, "Not websocket request");
     }
@@ -17,7 +18,6 @@ export function rpc(req: Request, _ctx: unknown): Response {
     const conn = new Connection(idGen.next().toString(), user, socket);
     registerParticipant(conn);
     // debug
-
     conn.addEventListener("open", () => {
         const end = Date.now();
         log.info(`${conn.id} connected: ${end - begin}ms`);
@@ -31,5 +31,7 @@ export function rpc(req: Request, _ctx: unknown): Response {
     conn.addEventListener("close", (e) => {
         log.info(`${conn.id} closed: ${e.code} ${e.reason}`);
     });
-    return response;
+    const builder = new ResponseBuilder();
+    builder.setResponse(response, true);
+    return builder;
 }

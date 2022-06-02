@@ -4,6 +4,7 @@ import {
     makeResponse,
     MatchContext,
     MethodHandlerBuilber,
+    ResponseBuilder,
     Router,
     Status,
 } from "./router/mod.ts";
@@ -59,8 +60,11 @@ export class FileServeRouter implements Router<Handler> {
                         msg: "Not file",
                     });
                 }
-
-                return await serveFile(req, path, { fileInfo: stat });
+                const builder = new ResponseBuilder()
+                    .setResponse(
+                        await serveFile(req, path, { fileInfo: stat }),
+                    );
+                return builder;
             }
         }
 

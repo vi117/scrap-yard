@@ -34,21 +34,17 @@ export class MethodHandlerBuilber {
         return (req, ctx) => {
             const method = req.method.toLowerCase();
             if (method === "options") {
-                return new Response("", {
-                    status: Status.OK,
-                    statusText: "OK",
-                    headers: {
-                        "Allows": Object.keys(this.handlers).join(","),
-                        "Access-Control-Allow-Methods": req.headers.get(
-                            "Access-Control-Request-Method",
-                        )!,
-                        "Access-Control-Allow-Headers": req.headers.get(
-                            "Access-Control-Request-Headers",
-                        )!,
-                        "Access-Control-Allow-Origin": req.headers.get(
-                            "Origin",
-                        )!,
-                    },
+                return makeResponse(Status.OK, "", {
+                    "Allows": Object.keys(this.handlers).join(","),
+                    "Access-Control-Allow-Methods": req.headers.get(
+                        "Access-Control-Request-Method",
+                    )!,
+                    "Access-Control-Allow-Headers": req.headers.get(
+                        "Access-Control-Request-Headers",
+                    )!,
+                    "Access-Control-Allow-Origin": req.headers.get(
+                        "Origin",
+                    )!,
                 });
             }
             const fn = this.handlers[method];

@@ -10,6 +10,7 @@ export async function loginWithToken(token: string): Promise<void> {
     const url = await makeEndpointURL("/auth/login/");
     const res = await fetch(url, {
         method: "POST",
+        credentials: "include",
         body: JSON.stringify({ token }),
     });
     if (!res.ok) {
@@ -24,10 +25,10 @@ export async function loginWithToken(token: string): Promise<void> {
  * @param password password of user
  */
 export async function loginWithPassword(password: string): Promise<void> {
-    const url = await makeEndpointURL("/auth/login/");
+    const url = await makeEndpointURL("/auth/login");
     const res = await fetch(url, {
         method: "POST",
-
+        credentials: "include",
         body: JSON.stringify({ password }),
     });
     if (!res.ok) {
@@ -45,6 +46,7 @@ export async function logout(): Promise<void> {
     const url = await makeEndpointURL("/auth/logout");
     const res = await fetch(url, {
         method: "POST",
+        credentials: "include",
     });
     if (!res.ok) {
         const reason = (await res.json()).reason;

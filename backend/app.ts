@@ -30,5 +30,5 @@ if (import.meta.main) {
         await setting.save();
     }
 
-    serverRun();
+    await serverRun();
 }

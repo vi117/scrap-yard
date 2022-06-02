@@ -3,11 +3,14 @@ import { serveFile } from "std/file_server";
 import { join } from "std/path";
 import { MethodHandlerBuilber } from "./methodHandle.ts";
 import { Router } from "./route.ts";
+import { ResponseBuilder } from "./mod.ts";
 
 export function getStaticHandler(path: string): Handler {
     return new MethodHandlerBuilber().get(
         async (req: Request) => {
-            return await serveFile(req, path);
+            return new ResponseBuilder().setResponse(
+                await serveFile(req, path),
+            );
         },
     ).build();
 }

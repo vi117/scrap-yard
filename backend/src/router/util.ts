@@ -1,32 +1,27 @@
-import { Status, STATUS_TEXT } from "std/http";
+import { Status } from "std/http";
+import { ResponseBuilder } from "./responseBuilder.ts";
 
 export function makeResponse(
     code: Status,
     content?: BodyInit,
-    headers?: HeadersInit,
-): Response {
-    const text = STATUS_TEXT.get(code);
-    return new Response(content ?? text, {
-        status: code,
-        statusText: text,
-        headers: headers,
-    });
+    headers?: Record<string, string>,
+): ResponseBuilder {
+    return new ResponseBuilder()
+        .setStatus(code)
+        .setHeaders(headers ?? {})
+        .setBody(content ?? "");
 }
-export function makeJsonResponse(code: Status, content?: unknown): Response {
+export function makeJsonResponse(
+    code: Status,
+    content?: unknown,
+): ResponseBuilder {
     return makeResponse(code, JSON.stringify(content), {
         "content-type": "application/json",
-        "Access-Control-Allow-Origin": "*",
     });
 }
 
-export function makeRedirect(location: string): Response {
-    return new Response("", {
-        status: Status.PermanentRedirect,
-        statusText: "Permanent Redirect",
-        headers: {
-            "Location": location,
-        },
-    });
+export function makeRedirect(location: string): ResponseBuilder {
+    return new ResponseBuilder().redirect(location);
 }
 
 export function isQueryValueTrue(value: string | undefined | null): boolean {

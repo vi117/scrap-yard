@@ -1,7 +1,8 @@
-import { makeJsonResponse, makeResponse, Status } from "../router/util.ts";
+import { makeJsonResponse, Status } from "../router/util.ts";
 import { createAdminUser, IUser } from "./user.ts";
 import * as setting from "../setting.ts";
-import { getCookies, setCookie } from "std/http";
+import { deleteCookie, getCookies, setCookie } from "std/http";
+import { ResponseBuilder } from "../router/mod.ts";
 
 export class SessionStore<T> {
     sessions: Record<string, T>;
@@ -33,9 +34,10 @@ export function makeSessionId(): string {
     return crypto.randomUUID();
 }
 
-export async function handleLogin(req: Request): Promise<Response> {
+export async function handleLogin(req: Request): Promise<ResponseBuilder> {
     const body = await (req.text());
     const data = JSON.parse(body);
+    const url = new URL(req.url);
     if ("password" in data && typeof data.password === "string") {
         const { password: p } = data;
         if (p !== password) {
@@ -55,8 +57,10 @@ export async function handleLogin(req: Request): Promise<Response> {
             name: "session",
             value: id,
             secure: false,
-            httpOnly: false,
+            httpOnly: true,
             expires: new Date(user.expiredAt),
+            domain: url.hostname,
+            path: "/",
         });
         return res;
     } else if ("token" in data && typeof data.token === "string") {
@@ -88,8 +92,9 @@ export async function handleLogin(req: Request): Promise<Response> {
     }
 }
 
-export function handleLogout(req: Request): Response {
+export function handleLogout(req: Request): ResponseBuilder {
     const id = getSessionId(req);
+    const url = new URL(req.url);
     if (!id) {
         return makeJsonResponse(
             Status.BadRequest,
@@ -105,12 +110,9 @@ export function handleLogout(req: Request): Response {
             ok: true,
         },
     );
-    setCookie(res.headers, {
-        name: "session",
-        value: "",
-        secure: false,
-        httpOnly: false,
-        expires: new Date(Date.now() - 1000),
+    deleteCookie(res.headers, "session", {
+        domain: url.hostname,
+        path: "/",
     });
     return res;
 }
