@@ -222,3 +222,7 @@ export async function getFsManagerInstance(): Promise<IFsManager> {
     }
     return fs;
 }
+
+// for debug
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(window as any).getFsManagerInstance = getFsManagerInstance;

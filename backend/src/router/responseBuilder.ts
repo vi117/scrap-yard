@@ -53,9 +53,20 @@ export class ResponseBuilder {
     }
     setCors(origin: string, credentials: boolean) {
         this.setHeader("Access-Control-Allow-Origin", origin);
-        this.setHeader("Access-Control-Allow-Headers", "*");
-        this.setHeader("Access-Control-Allow-Methods", "*");
         this.setHeader("Access-Control-Allow-Credentials", `${credentials}`);
+        if (!credentials) {
+            if (!this.headers.has("Access-Control-Allow-Headers")) {
+                this.setHeader("Access-Control-Allow-Headers", "*");
+            }
+            if (!this.headers.has("Access-Control-Allow-Methods")) {
+                this.setHeader("Access-Control-Allow-Methods", "*");
+            }
+        }
+        return this;
+    }
+    setCorsMethods(methods: string[]) {
+        methods = methods.map((x) => x.toUpperCase());
+        this.setHeader("Access-Control-Allow-Methods", methods.join(", "));
         return this;
     }
     setContentType(contentType: string) {

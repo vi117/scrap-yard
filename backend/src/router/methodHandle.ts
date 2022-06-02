@@ -31,25 +31,24 @@ export class MethodHandlerBuilber {
     }
 
     build(): Handler {
-        return (req, ctx) => {
+        return async (req, ctx) => {
             const method = req.method.toLowerCase();
+            const allowedMethod = [...Object.keys(this.handlers), "options"];
             if (method === "options") {
                 return makeResponse(Status.OK, "", {
-                    "Allows": Object.keys(this.handlers).join(","),
-                    "Access-Control-Allow-Methods": req.headers.get(
-                        "Access-Control-Request-Method",
-                    )!,
+                    "Allows": allowedMethod.map((x) => x.toUpperCase()).join(
+                        ", ",
+                    ),
                     "Access-Control-Allow-Headers": req.headers.get(
                         "Access-Control-Request-Headers",
                     )!,
-                    "Access-Control-Allow-Origin": req.headers.get(
-                        "Origin",
-                    )!,
-                });
+                }).setCorsMethods(allowedMethod);
             }
             const fn = this.handlers[method];
             if (fn) {
-                return fn(req, ctx);
+                const res = await fn(req, ctx);
+                res.setCorsMethods(allowedMethod);
+                return res;
             }
             return makeResponse(Status.MethodNotAllowed);
         };
