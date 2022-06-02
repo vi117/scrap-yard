@@ -95,7 +95,8 @@ export class RPCMessageManager extends EventTarget
             this.ws.onopen = () => {
                 resolve();
             };
-            this.ws.onerror = () => {
+            this.ws.onerror = (e) => {
+                console.error(e);
                 reject(new Error("connection error"));
             };
         });

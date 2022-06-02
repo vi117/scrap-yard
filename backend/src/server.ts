@@ -2,6 +2,7 @@ import { ConnInfo, serve } from "std/http";
 import {
     getStaticRouter,
     Handler,
+    makeRedirect,
     makeResponse,
     Status,
     TreeRouter,
@@ -10,17 +11,16 @@ import { FileServeRouter } from "./fileServe.ts";
 import { rpc } from "./rpc.ts";
 import * as log from "std/log";
 import { getServerInformationHandler } from "./infoHandle.ts";
+import { getAuthHandler } from "./auth/session.ts";
+import { configLoadFrom } from "./config.ts";
+import { parse as argParse } from "std/flags";
+import "std/dotenv";
+import { ResponseBuilder } from "./router/responseBuilder.ts";
 
 const router = new TreeRouter<Handler>();
 
 router.register("/", (_req) => {
-    return new Response("Hello World!", {
-        status: 200,
-        statusText: "OK",
-        headers: {
-            "Content-Type": "text/plain",
-        },
-    });
+    return makeRedirect("/app");
 });
 
 router.registerRouter("dist", getStaticRouter("dist"));
@@ -29,33 +29,26 @@ router.register("/app", app);
 router.register("/ws", rpc);
 
 function app() {
-    return new Response("Hello World!", {
-        status: 200,
-        statusText: "OK",
-        headers: {
-            "Content-Type": "text/plain",
-        },
-    });
+    return new ResponseBuilder("Hello World!").setStatus(200);
 }
 
-type ServerSetting = {
-    port: number;
-    host: string;
-};
-
-const serverSetting = {
-    port: parseInt(Deno.env.get("PORT") ?? "8000"),
-    host: Deno.env.get("HOST") ?? "localhost",
-};
-
-export function serverRun() {
+export async function serverRun() {
+    const args = argParse(Deno.args);
+    const config = await configLoadFrom(args.config ?? "config.jsonc");
     console.log(`Server Start`);
-    const s = serverSetting;
-    const sih = getServerInformationHandler(s.port, s.host);
+
+    const sih = getServerInformationHandler();
     router.register("info", sih);
+
+    const { handleLogin, handleLogout } = getAuthHandler({
+        password: "secret",
+    });
+    router.register("/auth/login", handleLogin);
+    router.register("/auth/logout", handleLogout);
+
     serve(async (req: Request, _info: ConnInfo) => {
         const begin = Date.now();
-        let response: Response;
+        let response: ResponseBuilder;
         try {
             response = await serveRequest(req);
         } catch (e) {
@@ -66,19 +59,24 @@ export function serverRun() {
         log.info(
             `${(new Date()).toISOString()} ${req.method} ${req.url}: ${
                 end - begin
-            }ms, response: ${response.status} ${response.statusText}`,
+            }ms, response: ${response.status}`,
         );
-        return response;
-    }, { port: s.port, hostname: s.host });
+        return response.build();
+    }, { port: config.port, hostname: "0.0.0.0" });
 
     async function serveRequest(req: Request) {
         const ctx = {};
         const url = new URL(req.url);
+        const origin = req.headers.get("origin");
         const m = router.match(url.pathname, ctx);
         if (m) {
-            return await m(req, ctx);
+            const res = await m(req, ctx);
+            if (!!origin && config.hosts.includes(origin)) {
+                res.setCors(origin, true);
+            }
+            return res;
         }
         return makeResponse(Status.NotFound);
     }
-    log.info(`listening on http://${s.host}:${s.port}`);
+    log.info(`listening on http://${"0.0.0.0"}:${config.port}`);
 }

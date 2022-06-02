@@ -5,6 +5,7 @@ import * as log from "std/log";
 import { ChunkMethodHistory } from "./chunk.ts";
 import * as setting from "../setting.ts";
 import { DocFileReadWriter, DocReadWriter } from "../document/mod.ts";
+import { IDisposable, RefCountSet } from "../util.ts";
 
 export type DocHistory = {
     time: number;
@@ -57,8 +58,10 @@ export interface ISubscriptable {
 //TODO(vi117)
 //Optimize this class.
 export class ActiveDocumentObject
-    implements RPC.DocumentObject, ISubscriptable {
-    private conns: Set<Participant>;
+    implements RPC.DocumentObject, ISubscriptable, IDisposable {
+    private conns: RefCountSet<Participant>;
+
+    private disposeHandlers: (() => void)[] = [];
 
     history: DocHistory[];
     readonly maxHistory: number;
@@ -77,7 +80,7 @@ export class ActiveDocumentObject
         readWriter?: DocReadWriter,
     ) {
         this.docPath = docPath;
-        this.conns = new Set();
+        this.conns = new RefCountSet();
         this.history = [];
         this.maxHistory = maxHistory;
         this.chunks = [];
@@ -86,6 +89,14 @@ export class ActiveDocumentObject
         this.#tags = [];
         this.tagsUpdatedAt = 0;
         this.readWriter = readWriter ?? DocFileReadWriter;
+
+        this.disposeHandlers.push(() => {
+            this.conns.clear();
+        });
+    }
+
+    dispose(): void {
+        this.disposeHandlers.forEach((handler) => handler());
     }
 
     async save() {
@@ -115,15 +126,43 @@ export class ActiveDocumentObject
         return [...this.conns.values()];
     }
 
+    /**
+     * subscribe to this document
+     * @param conn the connection that wants to subscribe
+     */
     join(conn: Participant) {
-        this.conns.add(conn);
-        conn.addEventListener("close", () => {
-            log.warning(`connection ${conn.id} closed`);
-            this.leave(conn);
-        });
+        if (!this.joined(conn)) {
+            const handler = () => {
+                if (this.joined(conn)) {
+                    log.warning(
+                        `connection ${conn.id} closed without leaving the document`,
+                    );
+                    this.conns.deleteForced(conn);
+                }
+            };
+            conn.addEventListener("close", handler);
+            this.conns.add(
+                conn,
+                () => conn.removeEventListener("close", handler),
+            );
+        } else {
+            this.conns.add(conn);
+        }
     }
 
-    //TODO(vi117): release the handler
+    /**
+     * is the participant subscribed to this document
+     * @param conn the connection that executed the method
+     * @returns true if the connection is subscribed to this document
+     */
+    joined(conn: Participant): boolean {
+        return this.conns.has(conn);
+    }
+
+    /**
+     * leave the document and unsubscribe the connection
+     * @param conn  the connection that wants to leave
+     */
     leave(conn: Participant) {
         this.conns.delete(conn);
     }
@@ -224,6 +263,7 @@ export class DocumentStore {
         }
         docGroup.leave(conn);
         if (docGroup.participantsCount === 0) {
+            docGroup.dispose();
             delete this.documents[docPath];
         }
     }

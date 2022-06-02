@@ -57,6 +57,7 @@ export interface IFsEventMap {
 }
 
 export interface IFsManager extends EventTarget {
+    getURL(filePath: string): URL;
     get(path: string): Promise<Response>;
     getStat(path: string): Promise<FsGetResult>;
     upload(filePath: string, data: BodyInit): Promise<number>;
@@ -79,7 +80,7 @@ export interface IFsManager extends EventTarget {
 export class FsManager extends EventTarget implements IFsManager {
     private manager: IRPCMessageManager;
     /**
-     * end point url
+     * end point url. end with '/'
      */
     private url: string;
     constructor(manager: IRPCMessageManager, url: string) {
@@ -87,17 +88,44 @@ export class FsManager extends EventTarget implements IFsManager {
         this.manager = manager;
         this.url = url;
     }
+
+    /**
+     * get url of file or directory
+     * @param filePath path to file
+     * @returns url of file or directory
+     */
+    getURL(filePath: string): URL {
+        if (filePath.startsWith("/")) {
+            filePath = "." + filePath;
+        }
+        const url = new URL(filePath, this.url);
+        return url;
+    }
+
+    async #fetchRequest(
+        filePath: string | URL,
+        init?: RequestInit,
+    ): Promise<Response> {
+        let url;
+        if (typeof filePath === "string") {
+            url = this.getURL(filePath);
+        } else {
+            url = filePath;
+        }
+        const res = new Request(url.href, {
+            credentials: "include",
+            ...init,
+        });
+        return await fetch(res);
+    }
+
     /**
      * fetch file
      * @param filePath path to file
      * @returns content of file
      */
     async get(filePath: string): Promise<Response> {
-        if (filePath.startsWith("/")) {
-            filePath = "." + filePath;
-        }
-        const url = new URL(filePath, this.url);
-        const res = await fetch(url);
+        const res = await this.#fetchRequest(filePath);
         return res;
     }
 
@@ -119,12 +147,9 @@ export class FsManager extends EventTarget implements IFsManager {
      * ```
      */
     async getStat(filePath: string): Promise<FsGetResult> {
-        if (filePath.startsWith("/")) {
-            filePath = "." + filePath;
-        }
-        const url = new URL(filePath, this.url);
+        const url = this.getURL(filePath);
         url.searchParams.set("stat", "true");
-        const res = await fetch(url);
+        const res = await this.#fetchRequest(url);
         if (!res.ok) {
             throw new Error(res.statusText);
         }
@@ -138,11 +163,7 @@ export class FsManager extends EventTarget implements IFsManager {
      * @returns status code
      */
     async upload(filePath: string, data: BodyInit): Promise<number> {
-        if (filePath.startsWith("/")) {
-            filePath = "." + filePath;
-        }
-        const url = new URL(filePath, this.url);
-        const res = await fetch(url, {
+        const res = await this.#fetchRequest(filePath, {
             method: "PUT",
             body: data,
         });
@@ -157,12 +178,9 @@ export class FsManager extends EventTarget implements IFsManager {
      * @returns status code
      */
     async mkdir(filePath: string): Promise<number> {
-        if (filePath.startsWith("/")) {
-            filePath = "." + filePath;
-        }
-        const url = new URL(filePath, this.url);
+        const url = this.getURL(filePath);
         url.searchParams.set("makeDir", "true");
-        const res = await fetch(url, {
+        const res = await this.#fetchRequest(url, {
             method: "PUT",
         });
         if (!res.ok) {
@@ -181,11 +199,7 @@ export class FsManager extends EventTarget implements IFsManager {
      * ```
      */
     async delete(filePath: string): Promise<number> {
-        if (filePath.startsWith("/")) {
-            filePath = "." + filePath;
-        }
-        const url = new URL(filePath, this.url);
-        const res = await fetch(url, {
+        const res = await this.#fetchRequest(filePath, {
             method: "DELETE",
         });
         if (!res.ok) {

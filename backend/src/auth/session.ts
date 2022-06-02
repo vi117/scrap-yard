@@ -1,7 +1,8 @@
-import { makeResponse } from "../router/util.ts";
+import { makeJsonResponse, Status } from "../router/util.ts";
 import { createAdminUser, IUser } from "./user.ts";
 import * as setting from "../setting.ts";
 import { getCookies, setCookie } from "std/http";
+import { ResponseBuilder } from "../router/mod.ts";
 
 export class SessionStore<T> {
     sessions: Record<string, T>;
@@ -26,67 +27,121 @@ export class SessionStore<T> {
     }
 }
 
-const password = Deno.env.get("SESSION_PASSWORD") || "secret";
 export const sessionStore = new SessionStore<IUser>();
 
 export function makeSessionId(): string {
     return crypto.randomUUID();
 }
 
-export async function handleLogin(req: Request): Promise<Response> {
-    const body = await (req.text());
-    const data = JSON.parse(body);
-    if (!("password" in data)) {
-        return makeResponse(
-            400,
-            JSON.stringify({
-                ok: false,
-                reason: "password required",
-            }),
-        );
-    }
-    const { password: p } = data;
-    if (p !== password) {
-        return makeResponse(
-            401,
-            JSON.stringify({
-                ok: false,
-                reason: "password incorrect",
-            }),
-        );
-    }
-    const id = makeSessionId();
-    sessionStore.set(id, createAdminUser(id));
-    const res = new Response('{"ok":true}', {
-        status: 200,
-        statusText: "OK",
-    });
-    setCookie(res.headers, {
-        name: "session",
-        value: id,
-        secure: true,
-    });
-    return res;
+interface setSessionCookieOption {
+    id: string;
+    domain: string;
+    expiredAt: number;
 }
 
-export function handleLogout(req: Request): Response {
-    const id = getSessionId(req);
-    if (!id) {
-        return makeResponse(
-            400,
-            JSON.stringify({
-                ok: false,
-                reason: "no session id",
-            }),
-        );
+function setSessionCookie(headers: Headers, {
+    id,
+    domain,
+    expiredAt,
+}: setSessionCookieOption) {
+    setCookie(headers, {
+        name: "session",
+        value: id,
+        secure: false,
+        httpOnly: true,
+        expires: new Date(expiredAt),
+        domain: domain,
+        path: "/",
+        sameSite: "Strict",
+    });
+}
+
+interface getAuthHandlerOption {
+    password: string;
+}
+
+export function getAuthHandler(options?: getAuthHandlerOption) {
+    options ??= { password: makeSessionId() };
+    const password = options.password;
+    return { handleLogin, handleLogout };
+
+    async function handleLogin(req: Request): Promise<ResponseBuilder> {
+        const body = await (req.text());
+        const data = JSON.parse(body);
+        const url = new URL(req.url);
+        if ("password" in data && typeof data.password === "string") {
+            const { password: p } = data;
+            if (p !== password) {
+                return makeJsonResponse(
+                    Status.Unauthorized,
+                    {
+                        ok: false,
+                        reason: "password incorrect",
+                    },
+                );
+            }
+            const id = makeSessionId();
+            const user = createAdminUser(id);
+            sessionStore.set(id, user);
+            const res = makeJsonResponse(Status.OK, { ok: true });
+            setSessionCookie(res.headers, {
+                id: id,
+                domain: url.hostname,
+                expiredAt: user.expiredAt,
+            });
+            return res;
+        } else if ("token" in data && typeof data.token === "string") {
+            const { token: t } = data;
+            const user = sessionStore.get(t);
+            if (!user) {
+                return makeJsonResponse(Status.Unauthorized, {
+                    ok: false,
+                    reason: "token incorrect",
+                });
+            }
+            const res = makeJsonResponse(Status.OK, {});
+            setSessionCookie(res.headers, {
+                id: t,
+                domain: url.hostname,
+                expiredAt: user.expiredAt,
+            });
+            return res;
+        } else {
+            return makeJsonResponse(
+                Status.BadRequest,
+                {
+                    ok: false,
+                    reason: "password or token required",
+                },
+            );
+        }
     }
-    sessionStore.delete(id);
-    return makeResponse(
-        200,
-        JSON.stringify({
-            ok: true,
-        }),
-    );
+
+    function handleLogout(req: Request): ResponseBuilder {
+        const id = getSessionId(req);
+        const url = new URL(req.url);
+        if (!id) {
+            return makeJsonResponse(
+                Status.BadRequest,
+                {
+                    ok: false,
+                    reason: "no session id",
+                },
+            );
+        }
+        const res = makeJsonResponse(
+            200,
+            {
+                ok: true,
+            },
+        );
+        setSessionCookie(res.headers, {
+            domain: url.hostname,
+            id: "",
+            expiredAt: 0,
+        });
+        return res;
+    }
 }
 
 export function getSessionId(req: Request): string | undefined {

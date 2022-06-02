@@ -1,0 +1,10 @@
+{
+    /* hosts of this server */
+    "hosts": ["http://localhost:8000", "http://localhost:3000"],
+    /* hosts of static files server */
+    "staticFileHost": ["http://localhost:3000", "http://localhost:8000"],
+    /* session secret */
+    "sessionSecret": "02766e5b-cba2-428a-99e9-7f625f2f4605",
+    /* port */
+    "port": 8000
+}
