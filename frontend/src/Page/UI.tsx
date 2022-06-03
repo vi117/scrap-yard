@@ -38,7 +38,7 @@ export function UI(props: {}) {
     const [sopen, setSopen] = useState(false);
     const [reason, setReason] = useState<null | string>(null);
     const eopen = Boolean(reason);
-    const path = params.path + ".syd";
+    const path = params.path ? params.path + ".syd" : "empty";
 
     const raise = (e: Error) => {
         setReason(e?.message);

@@ -117,12 +117,16 @@ export type DocumentEditorProps = {
 };
 
 export function DocumentEditor(props: DocumentEditorProps) {
-    const doc = useDocViewModel(props.path);
-
-    if (doc != null) {
-        return <InnerDocumentEditor doc={doc} />;
+    if (props.path == "empty") {
+        return <div>please open a document</div>; // TODO: proper empty document page
     } else {
-        return <div>please wait...</div>;
+        const doc = useDocViewModel(props.path);
+
+        if (doc != null) {
+            return <InnerDocumentEditor doc={doc} />;
+        } else {
+            return <div>please wait...</div>;
+        }
     }
 }
 
