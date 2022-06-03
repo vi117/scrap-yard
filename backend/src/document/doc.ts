@@ -1,5 +1,4 @@
 import * as RPC from "model";
-import { readDocFile, saveDocFile } from "./filedoc.ts";
 
 export interface DocumentContent {
     chunks: RPC.Chunk[];
@@ -12,7 +11,7 @@ export interface DocReadWriter {
     save(path: string, doc: DocumentContent): Promise<void>;
 }
 
-class MemoryDocReadWriterType implements DocReadWriter {
+export class MemoryDocReadWriterType implements DocReadWriter {
     private store: Map<string, DocumentContent>;
     constructor() {
         this.store = new Map();

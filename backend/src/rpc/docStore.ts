@@ -4,8 +4,14 @@ import * as RPC from "model";
 import * as log from "std/log";
 import { ChunkMethodHistory } from "./chunk.ts";
 import * as setting from "../setting.ts";
-import { DocFileReadWriter, DocReadWriter } from "../document/mod.ts";
+import { DocFileReadWriterType, DocReadWriter } from "../document/mod.ts";
 import { IDisposable, RefCountSet } from "../util.ts";
+import {
+    QueueReadWriter,
+    RawReadWriter,
+    WatchFilteredReadWriter,
+} from "../watcher/mod.ts";
+import { fileWatcher } from "./filewatch.ts";
 
 export type DocHistory = {
     time: number;
@@ -51,6 +57,13 @@ export interface ISubscriptable {
     readonly participants: Participant[];
 }
 
+const DefaultReadWriter = new DocFileReadWriterType({
+    rw: new QueueReadWriter(
+        1000,
+        new WatchFilteredReadWriter(fileWatcher, new RawReadWriter()),
+    ),
+});
+
 /**
  * A active document.
  *  each `conn` manages a staleness of the document.
@@ -88,7 +101,7 @@ export class ActiveDocumentObject
         this.seq = 0;
         this.#tags = [];
         this.tagsUpdatedAt = 0;
-        this.readWriter = readWriter ?? DocFileReadWriter;
+        this.readWriter = readWriter ?? DefaultReadWriter;
 
         this.disposeHandlers.push(() => {
             this.conns.clear();

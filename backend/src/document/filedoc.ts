@@ -1,4 +1,5 @@
 import { DocReadWriter, DocumentContent } from "./doc.ts";
+import { IReadWriter, RawReadWriter } from "../watcher/mod.ts";
 
 export class DocFormatError extends Error {
     constructor(public docPath: string, public message: string) {
@@ -7,7 +8,7 @@ export class DocFormatError extends Error {
 }
 
 export type ReadDocFileOptions = {
-    signal?: AbortSignal;
+    reader?: IReadWriter;
 };
 
 /**
@@ -21,7 +22,8 @@ export async function readDocFile(
     options?: ReadDocFileOptions,
 ): Promise<DocumentContent> {
     options = options ?? {};
-    const rawText = await Deno.readTextFile(path, { signal: options.signal });
+    const rw = options.reader ?? new RawReadWriter();
+    const rawText = await rw.read(path);
     // deno-lint-ignore no-explicit-any
     let data: any;
     try {
@@ -84,19 +86,7 @@ export async function readDocFile(
 }
 
 export type WriteDocFileOptions = {
-    /**
-     * a abort signal to allow cancellation of the operation
-     */
-    signal?: AbortSignal;
-    /**
-     * If true, create the file if it does not exist.
-     * @default true
-     */
-    create?: boolean;
-    /**
-     * permissions applied to the document
-     */
-    mode?: number;
+    writer?: IReadWriter;
 };
 
 /**
@@ -117,15 +107,22 @@ export async function saveDocFile(
         version: doc.version,
     };
     const rawText = JSON.stringify(data);
-    await Deno.writeTextFile(path, rawText, options);
+    const rw = options.writer ?? new RawReadWriter();
+    await rw.write(path, rawText);
 }
 
-class DocFileReadWriterType implements DocReadWriter {
+export class DocFileReadWriterType implements DocReadWriter {
+    rw: IReadWriter;
+    constructor(options?: {
+        rw?: IReadWriter;
+    }) {
+        this.rw = options?.rw ?? new RawReadWriter();
+    }
     read(path: string): Promise<DocumentContent> {
-        return readDocFile(path);
+        return readDocFile(path, { reader: this.rw });
     }
     save(path: string, doc: DocumentContent): Promise<void> {
-        return saveDocFile(path, doc);
+        return saveDocFile(path, doc, { writer: this.rw });
     }
 }
 

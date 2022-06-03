@@ -1,8 +1,4 @@
-import {
-    IReadWriter,
-    QueueReadWriter,
-    WatchFilteredReadWriter,
-} from "./readWriter.ts";
+import { IReadWriter, QueueReadWriter } from "./readWriter.ts";
 import { assertEquals } from "std/assert";
 
 class MockReadWriter implements IReadWriter {

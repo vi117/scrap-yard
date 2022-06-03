@@ -1,6 +1,4 @@
-import { AllParticipants } from "../rpc/connection.ts";
-import * as RPC from "model";
-import { relative } from "std/path";
+import { join as pathJoin, relative } from "std/path";
 
 export type FsWatchEventType = "create" | "modify" | "remove";
 
@@ -36,7 +34,9 @@ export class FsWatcher extends EventTarget {
             for await (const event of watcher) {
                 const cwd = Deno.cwd();
 
-                let paths = event.paths.map((x) => relative(cwd, x));
+                let paths = event.paths.map((x) =>
+                    relative(pathJoin(cwd, this.path), x)
+                );
                 const filterFns = [...this.filterFns];
                 paths = paths.filter((x) =>
                     filterFns.every((fn) => fn(x, event.kind))
@@ -82,39 +82,4 @@ export class FsWatcher extends EventTarget {
     ): void {
         return super.addEventListener(type, handler as EventListener, options);
     }
-}
-
-function makeFileNotification(
-    event: FsWatcherEvent,
-): RPC.RPCNotification {
-    const params = {
-        eventType: event.type as RPC.FileNotifyEventType,
-        paths: event.paths,
-    };
-    return {
-        jsonrpc: "2.0",
-        method: "file.update",
-        params,
-    };
-}
-
-export function startWatching(path: string) {
-    const watcher = new FsWatcher(path);
-    watcher.addEventListener("create", (e) => {
-        AllParticipants.broadcastNotification(
-            makeFileNotification(e as FsWatcherEvent),
-        );
-    });
-    watcher.addEventListener("remove", (e) => {
-        AllParticipants.broadcastNotification(
-            makeFileNotification(e as FsWatcherEvent),
-        );
-    });
-    watcher.addEventListener("modify", (e) => {
-        AllParticipants.broadcastNotification(
-            makeFileNotification(e as FsWatcherEvent),
-        );
-    });
-    watcher.startWatching();
-    return watcher;
 }

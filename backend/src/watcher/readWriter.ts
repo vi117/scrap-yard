@@ -20,6 +20,8 @@ export class RawReadWriter implements IReadWriter {
     async write(path: string, content: string): Promise<void> {
         const file = await Deno.open(path, { create: true, write: true });
         const p = new TextEncoder().encode(content);
+        await file.truncate(0);
+        await file.seek(0, Deno.SeekMode.Start);
         await writeAll(file, p);
         file.close();
     }
@@ -37,9 +39,13 @@ export class WatchFilteredReadWriter implements IReadWriter {
     }
     async write(path: string, content: string): Promise<void> {
         path = normalize(path);
+        let count = 2;
         const filter = (p: string, kind: string) => {
             if (kind === "modify" && path === p) {
-                this.fsWatcher.removeFilter(filter);
+                count -= 1;
+                if (count == 0) {
+                    this.fsWatcher.removeFilter(filter);
+                }
                 return false;
             }
             return true;
