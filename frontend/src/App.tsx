@@ -4,6 +4,7 @@ import "./App.css";
 import Login from "./Page/Login";
 import { NotFound } from "./Page/NotFoundPage";
 import { Storybooks } from "./Page/StoryBooks";
+import TokenLogin from "./Page/TokenLogin";
 import { UI } from "./Page/UI";
 
 function App() {
@@ -11,10 +12,11 @@ function App() {
         <RecoilRoot>
             <BrowserRouter>
                 <Routes>
-                    <Route path="/" element={<Navigate to={"/app/test"} />}>
+                    <Route path="/" element={<Navigate to={"/login"} />}>
                     </Route>
                     <Route path="app/:path" element={<UI />}>
                     </Route>
+                    <Route path="token/:token" element={<TokenLogin />} />
                     <Route path="login" element={<Login />} />
                     <Route
                         path="storybook/*"
