@@ -1,0 +1,10 @@
+{
+    /* hosts of this server */
+    "hosts": [],
+    /* hosts of static files server */
+    "staticFileHost": [],
+    /* session secret */
+    "sessionSecret": "secret",
+    /* port */
+    "port": 4567
+}
