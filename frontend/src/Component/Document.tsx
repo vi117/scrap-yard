@@ -2,7 +2,11 @@ import { Button, Chip, Input, Stack } from "@mui/material";
 import { FormEventHandler, Fragment, useState } from "react";
 import { atom, RecoilState, useRecoilState } from "recoil";
 import { v4 as uuidv4 } from "uuid";
-import { IDocumentViewModel, useDocViewModel } from "../ViewModel/doc";
+import {
+    IDocumentViewModel,
+    useDocViewModel,
+    useWritable,
+} from "../ViewModel/doc";
 
 import Stash from "../Component/Stash";
 import Chunk from "./Chunk";
@@ -94,27 +98,29 @@ export function ChunkList(
 }
 
 function InnerDocumentEditor(
-    props: { readonly: boolean; doc: IDocumentViewModel },
+    props: { doc: IDocumentViewModel },
 ) {
+    const [writable] = props.doc.useWritable();
+    const readonly = !writable;
+
     return (
         <div id="document">
-            <TagBar readonly={props.readonly} doc={props.doc} />
-            <ChunkList readonly={props.readonly} doc={props.doc} />
-            {!props.readonly && <Stash />}
+            <TagBar readonly={readonly} doc={props.doc} />
+            <ChunkList readonly={readonly} doc={props.doc} />
+            {!readonly && <Stash />}
         </div>
     );
 }
 
 export type DocumentEditorProps = {
     path: string;
-    readonly: boolean;
 };
 
 export function DocumentEditor(props: DocumentEditorProps) {
     const doc = useDocViewModel(props.path);
 
     if (doc != null) {
-        return <InnerDocumentEditor readonly={props.readonly} doc={doc} />;
+        return <InnerDocumentEditor doc={doc} />;
     } else {
         return <div>please wait...</div>;
     }

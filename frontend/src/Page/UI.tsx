@@ -37,7 +37,6 @@ export function UI(props: {}) {
     const [open, setOpen] = useState(false);
     const [sopen, setSopen] = useState(false);
     const [reason, setReason] = useState<null | string>(null);
-    const [readonly, setReadonly] = useState(false);
     const eopen = Boolean(reason);
     const path = params.path + ".syd";
 
@@ -53,12 +52,6 @@ export function UI(props: {}) {
                 </Button>
                 <Button variant="contained" onClick={() => setSopen(!open)}>
                     settings
-                </Button>
-                <Button
-                    variant="contained"
-                    onClick={() => setReadonly(!readonly)}
-                >
-                    {readonly ? "readonly" : "writable"}
                 </Button>
                 <ShareButton doc={path} />
                 <LogoutButton />
@@ -82,7 +75,7 @@ export function UI(props: {}) {
                 reason={reason}
             />
 
-            <DocumentEditor readonly={readonly} path={path} />
+            <DocumentEditor path={path} />
         </div>
     );
 }
