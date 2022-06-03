@@ -3,7 +3,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import {
     Button,
-    Grid,
     InputLabel,
     MenuItem,
     Paper,
@@ -11,20 +10,19 @@ import {
     TextField,
     Tooltip,
 } from "@mui/material";
-import { Chunk as ChunkType } from "model";
 import React, {
     ChangeEventHandler,
     createRef,
     useEffect,
     useState,
 } from "react";
-import { RecoilState, useRecoilState } from "recoil";
-import { ChunkViewModel, IChunkViewModel } from "../ViewModel/chunklist";
-import { IDocumentViewModel } from "../ViewModel/doc";
 
+import { ChunkContentKind } from "model";
+import { IChunkViewModel } from "../ViewModel/chunklist";
 import { useDrag } from "./dnd";
 import renderView from "./Renderer/mod";
 
+// TODO: should be in seperate module.
 const types = [
     "text",
     "csv",
@@ -37,11 +35,11 @@ const types = [
 ];
 
 const TypeSelector = (props: {
-    update: (t: string) => void;
+    update: (t: ChunkContentKind) => void;
     value: string;
 }) => {
     const update = (event: { target: { value: string } }) => {
-        props.update(event.target.value as string);
+        props.update(event.target.value as ChunkContentKind);
     };
 
     return (
@@ -83,17 +81,12 @@ const Chunk = (props: {
     deleteThis: () => void;
 }) => {
     const chunk = props.chunk;
-    const [chunkContent, { setType, setContent }] = props.chunk.useChunk();
-    const id = chunkContent.id;
+    const id = chunk.id;
     const deleteThis = props.deleteThis;
 
-    const [buffer, setBuffer] = useState(chunkContent.content);
-
-    // Internal States
-    const [mode, setMode] = useState<"Read" | "Write">("Read");
-    const [onDelete, setOnDelete] = useState(false);
-
-    // drag
+    // Hooks
+    const [chunkContent, { setType, setContent }] = props.chunk.useChunk();
+    const fc = chunk.useFocus();
     const [, drag] = useDrag(() => ({
         type: "chunk", // TODO: make this constant
         item: {
@@ -102,22 +95,22 @@ const Chunk = (props: {
             cur: props.position,
         },
         end: () => {
-            // TODO: need to fill dragend.
+            // TODO: fill here to delete when moving document-by-document.
         },
     }), [props.position]);
 
+    // Internal States
+    const [buffer, setBuffer] = useState(chunkContent.content);
+    const [mode, setMode] = useState<"Read" | "Write">("Read");
+    const [onDelete, setOnDelete] = useState(false);
+
     // reference of textfield
     const inputRef = createRef<null | HTMLTextAreaElement>();
-    const fc = chunk.useFocus();
 
     // Effects
-    // set read mode when other chunk gets focused.
     useEffect(() => {
-        if (!fc) {
-            setMode("Read");
-        } else {
-            setMode("Write");
-        }
+        // set read mode when other chunk gets focused.
+        if (!fc) setMode("Read");
     }, [fc]);
 
     useEffect(() => {
@@ -134,16 +127,7 @@ const Chunk = (props: {
 
     // Callbacks
 
-    const changeMode = () => {
-        setMode(mode == "Read" ? "Write" : "Read");
-    };
-
-    const updateType = (t: string) => {
-        if (t != "") {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            setType(t as any);
-        }
-    };
+    const changeMode = () => setMode(mode == "Read" ? "Write" : "Read");
 
     const onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement> =
         (e) => setBuffer(e.target.value);
@@ -214,51 +198,45 @@ const Chunk = (props: {
     );
 
     const typeSelector = (
-        <TypeSelector update={updateType} value={chunkContent.type} />
+        <TypeSelector update={setType} value={chunkContent.type} />
     );
 
     return (
         <Paper
             id={"chunk-" + id}
             key={id}
-            ref={(mode == "Read") ? drag : null}
-            style={{ padding: "0.5em" }}
+            ref={(mode == "Read") ? drag : null} // use drag only in read mode.
+            style={{
+                padding: "0.5em",
+                display: "flex",
+                flexDirection: "row",
+                gap: "0.5em",
+            }}
+            onFocus={onFocus}
             component={"div"}
         >
-            <div
-                style={{ display: "flex", flexDirection: "row", gap: "0.5em" }}
-                onFocus={onFocus}
+            <div // content
+                style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    width: "100%",
+                }}
             >
-                {/* content */}
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        width: "100%",
-                    }}
-                >
-                    {renderContent()}
-                    {(mode == "Write" && chunkContent.type == "katex")
-                        && (
-                            <Preview
-                                type={chunkContent.type}
-                                content={buffer}
-                            />
-                        )}
-                </div>
+                {renderContent()}
+                {(mode == "Write" && chunkContent.type == "katex")
+                    && <Preview type={chunkContent.type} content={buffer} />}
+            </div>
 
-                {/* sidebar */}
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "0.1em",
-                    }}
-                >
-                    {editButton}
-                    {deleteButton}
-                    {typeSelector}
-                </div>
+            <div // sidebar
+                style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.1em",
+                }}
+            >
+                {editButton}
+                {deleteButton}
+                {typeSelector}
             </div>
         </Paper>
     );
