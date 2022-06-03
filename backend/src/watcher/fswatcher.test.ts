@@ -1,7 +1,7 @@
 import { assertEquals } from "std/assert";
 import { FsWatcher, FsWatcherEvent } from "./fswatcher.ts";
 import { getCurrentScriptDir } from "../util.ts";
-import { RawReadWriter, WatchFilteredReadWriter } from "./readWriter.ts";
+import { AtomicReadWriter, WatchFilteredReadWriter } from "./readWriter.ts";
 import { join as pathJoin } from "std/path";
 
 Deno.test({
@@ -25,7 +25,7 @@ Deno.test({
             watcher.startWatching();
             await new Promise((resolve: (value: unknown) => void) => {
                 setTimeout(async () => {
-                    const rw = new RawReadWriter();
+                    const rw = new AtomicReadWriter();
                     const fillter = new WatchFilteredReadWriter(watcher, rw);
                     await fillter.write(
                         pathJoin(curPath, "testdata", "test.txt"),
@@ -43,11 +43,10 @@ Deno.test({
         } finally {
             await watcher.stopWatching();
         }
-        const c = `modify ${pathJoin(curPath, "testdata", "test1.txt")}`;
-        const cs = [c, c, c];
+        const test1_path = pathJoin(curPath, "testdata", "test1.txt");
         assertEquals(
             buf,
-            cs,
+            [`remove ${test1_path}`, `create ${test1_path}`],
         );
     },
 });
