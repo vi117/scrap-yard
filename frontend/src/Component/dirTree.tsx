@@ -30,16 +30,33 @@ async function collectDirTree(path: string, name: string): Promise<DirTree> {
 export function useDirTree(path: string): DirTree | null {
     const [dirtree, setDirtree] = useState<DirTree | null>(null);
     path = path === "" ? "." : path;
+
     const getDirTree = async () => {
         const d = await collectDirTree(path, ".");
         setDirtree(d);
     };
 
+    const handleUpdate = () => getDirTree();
+
     useEffect(() => {
-        if (!dirtree) {
-            getDirTree();
-        }
-    });
+        if (!dirtree) getDirTree();
+
+        getFsManagerInstance()
+            .then(fs => {
+                fs.addEventListener("create", handleUpdate);
+                fs.addEventListener("modify", handleUpdate);
+                fs.addEventListener("delete", handleUpdate);
+            });
+
+        return () => {
+            getFsManagerInstance()
+                .then(fs => {
+                    fs.removeEventListener("create", handleUpdate);
+                    fs.removeEventListener("modify", handleUpdate);
+                    fs.removeEventListener("delete", handleUpdate);
+                });
+        };
+    }, []);
 
     return dirtree;
 }
