@@ -2,7 +2,13 @@ import { join as pathJoin, relative } from "std/path";
 
 export type FsWatchEventType = "create" | "modify" | "remove";
 
+
 export class FsWatcherEvent extends Event {
+    /**
+     * constructor of FsWatcherEvent
+     * @param type the type of event
+     * @param paths the paths of the event (relative to the current working directory)
+     */
     constructor(type: FsWatchEventType, public paths: string[]) {
         super(type);
     }
@@ -35,7 +41,7 @@ export class FsWatcher extends EventTarget {
                 const cwd = Deno.cwd();
 
                 let paths = event.paths.map((x) =>
-                    relative(pathJoin(cwd, this.path), x)
+                    relative(cwd, x)
                 );
                 const filterFns = [...this.filterFns];
                 paths = paths.filter((x) =>

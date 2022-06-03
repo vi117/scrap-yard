@@ -21,7 +21,6 @@ export class RawReadWriter implements IReadWriter {
         const file = await Deno.open(path, { create: true, write: true });
         const p = new TextEncoder().encode(content);
         await file.truncate(0);
-        await file.seek(0, Deno.SeekMode.Start);
         await writeAll(file, p);
         file.close();
     }
@@ -39,8 +38,16 @@ export class WatchFilteredReadWriter implements IReadWriter {
     }
     async write(path: string, content: string): Promise<void> {
         path = normalize(path);
-        let count = 2;
+        // TODO: impl content based filtering
+        // Because we don't know how many times the file event has occurred when we modify contents.
+        let count = 3;
+        const now = Date.now();
         const filter = (p: string, kind: string) => {
+            // if filter is old, ignore it
+            if (Date.now() - now > 10) {
+                this.fsWatcher.removeFilter(filter);
+                return true;
+            }
             if (kind === "modify" && path === p) {
                 count -= 1;
                 if (count == 0) {
@@ -65,7 +72,7 @@ export class QueueReadWriter implements IReadWriter {
     constructor(
         public delayCount: number,
         public baseReadWriter: IReadWriter,
-    ) {}
+    ) { }
     async read(path: string): Promise<string> {
         return await this.baseReadWriter.read(path);
     }
