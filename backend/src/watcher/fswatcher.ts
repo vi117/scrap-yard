@@ -1,4 +1,5 @@
 import { join as pathJoin, relative } from "std/path";
+import { isHidden } from "./util.ts";
 
 export type FsWatchEventType = "create" | "modify" | "remove";
 
@@ -16,16 +17,17 @@ export class FsWatcherEvent extends Event {
 export class FsWatcher extends EventTarget {
     private path: string;
     private watcher?: Deno.FsWatcher;
-    private filterFns: ((path: string, kind: string) => boolean)[] = [];
+    private filterFns: ((path: string, kind: FsWatchEventType) => boolean)[] =
+        [];
     constructor(path: string) {
         super();
         this.path = path;
     }
 
-    addFilter(fn: (path: string, kind: string) => boolean) {
+    addFilter(fn: (path: string, kind: FsWatchEventType) => boolean) {
         this.filterFns.push(fn);
     }
-    removeFilter(fn: (path: string, kind: string) => boolean) {
+    removeFilter(fn: (path: string, kind: FsWatchEventType) => boolean) {
         const index = this.filterFns.indexOf(fn);
         if (index >= 0) {
             this.filterFns.splice(index, 1);
@@ -38,11 +40,20 @@ export class FsWatcher extends EventTarget {
         (async () => {
             for await (const event of watcher) {
                 const cwd = Deno.cwd();
+                const kind = event.kind;
+                if (
+                    kind === "other" ||
+                    kind === "access" ||
+                    kind === "any"
+                ) {
+                    continue;
+                }
 
                 let paths = event.paths.map((x) => relative(cwd, x));
                 const filterFns = [...this.filterFns];
                 paths = paths.filter((x) =>
-                    filterFns.every((fn) => fn(x, event.kind))
+                    (!isHidden(x)) &&
+                    filterFns.every((fn) => fn(x, kind))
                 );
 
                 if (paths.length == 0) continue;

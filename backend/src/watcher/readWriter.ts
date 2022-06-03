@@ -1,6 +1,6 @@
 import { normalize } from "std/path";
 import * as log from "std/log";
-import { FsWatcher } from "./fswatcher.ts";
+import { FsWatcher, FsWatchEventType } from "./fswatcher.ts";
 import { writeAll } from "std/streams";
 
 type Command = {
@@ -26,10 +26,25 @@ export class RawReadWriter implements IReadWriter {
     }
 }
 
+export class AtomicReadWriter implements IReadWriter {
+    async read(path: string): Promise<string> {
+        return await Deno.readTextFile(path);
+    }
+    async write(path: string, content: string): Promise<void> {
+        const tempFile = await Deno.makeTempFile({
+            prefix: ".deno_tmp_",
+        });
+        await Deno.writeTextFile(tempFile, content);
+        // rename is atomic on POSIX
+        // but windows is not sure.
+        await Deno.rename(tempFile, path);
+    }
+}
+
 export class WatchFilteredReadWriter implements IReadWriter {
-    private readonly raw: IReadWriter;
+    private readonly raw: AtomicReadWriter;
     private fsWatcher: FsWatcher;
-    constructor(fsWatcher: FsWatcher, raw: IReadWriter) {
+    constructor(fsWatcher: FsWatcher, raw: AtomicReadWriter) {
         this.fsWatcher = fsWatcher;
         this.raw = raw;
     }
@@ -40,15 +55,15 @@ export class WatchFilteredReadWriter implements IReadWriter {
         path = normalize(path);
         // TODO: impl content based filtering
         // Because we don't know how many times the file event has occurred when we modify contents.
-        let count = 3;
+        let count = 2;
         const now = Date.now();
-        const filter = (p: string, kind: string) => {
+        const filter = (p: string, kind: FsWatchEventType) => {
             // if filter is old, ignore it
             if (Date.now() - now > 10) {
                 this.fsWatcher.removeFilter(filter);
                 return true;
             }
-            if (kind === "modify" && path === p) {
+            if ((kind === "create" || kind === "remove") && path === p) {
                 count -= 1;
                 if (count == 0) {
                     this.fsWatcher.removeFilter(filter);
