@@ -13,7 +13,7 @@ import FileTree from "../Component/FileTree";
 import Settings from "../Component/Settings";
 import ShareButton from "../Component/ShareButton";
 
-import { logout } from "../Model/login";
+import { loginType, logout } from "../Model/login";
 
 const drawerWidth = 240;
 
@@ -53,7 +53,7 @@ export function UI(props: {}) {
                 <Button variant="contained" onClick={() => setSopen(!open)}>
                     settings
                 </Button>
-                <ShareButton doc={path} />
+                {loginType() == "pass" && <ShareButton doc={path} />}
                 <LogoutButton />
             </Toolbar>
 

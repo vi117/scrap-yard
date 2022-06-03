@@ -1,6 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { RecoilRoot } from "recoil";
+
 import "./App.css";
+import { loginType } from "./Model/login";
 import Login from "./Page/Login";
 import { NotFound } from "./Page/NotFoundPage";
 import { Storybooks } from "./Page/StoryBooks";
@@ -8,11 +10,16 @@ import TokenLogin from "./Page/TokenLogin";
 import { UI } from "./Page/UI";
 
 function App() {
+    const login = loginType() != "logout";
+
     return (
         <RecoilRoot>
             <BrowserRouter>
                 <Routes>
-                    <Route path="/" element={<Navigate to={"/login"} />} />
+                    <Route
+                        path="/"
+                        element={<Navigate to={login ? "/app" : "/login"} />}
+                    />
                     <Route path="app" element={<UI />} />
                     <Route path="app/:path" element={<UI />} />
                     <Route path="token/:token" element={<TokenLogin />} />

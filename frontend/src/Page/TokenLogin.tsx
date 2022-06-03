@@ -6,9 +6,9 @@ import { loginWithToken } from "../Model/login";
 
 export function TokenLogin() {
     const params = useParams();
-    loginWithToken(params.token);
+    loginWithToken(params.token ?? "");
 
-    return <Navigate to={"/"} />;
+    return <Navigate to={"/app"} />;
 }
 
 export default TokenLogin;

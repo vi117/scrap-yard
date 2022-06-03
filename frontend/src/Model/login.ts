@@ -1,5 +1,9 @@
 import { makeEndpointURL } from "./serverInfo";
 
+export function loginType(): string {
+    return sessionStorage.getItem("logintype") ?? "logout";
+}
+
 /**
  * login to server with token
  * @param token token of user
@@ -17,6 +21,8 @@ export async function loginWithToken(token: string): Promise<void> {
         const reason = (await res.json()).reason;
         throw new Error(res.statusText + ": " + reason);
     }
+
+    sessionStorage.setItem("logintype", "token");
 }
 
 /**
@@ -35,6 +41,8 @@ export async function loginWithPassword(password: string): Promise<void> {
         const reason = (await res.json()).reason;
         throw new Error(res.statusText + ": " + reason);
     }
+
+    sessionStorage.setItem("logintype", "pass");
 }
 
 /**
@@ -52,6 +60,8 @@ export async function logout(): Promise<void> {
         const reason = (await res.json()).reason;
         throw new Error(res.statusText + ": " + reason);
     }
+
+    sessionStorage.removeItem("logintype");
 }
 
 export type LoginInfo = {
