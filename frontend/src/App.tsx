@@ -12,19 +12,16 @@ function App() {
         <RecoilRoot>
             <BrowserRouter>
                 <Routes>
-                    <Route path="/" element={<Navigate to={"/login"} />}>
-                    </Route>
-                    <Route path="app/:path" element={<UI />}>
-                    </Route>
+                    <Route path="/" element={<Navigate to={"/login"} />} />
+                    <Route path="app" element={<UI />} />
+                    <Route path="app/:path" element={<UI />} />
                     <Route path="token/:token" element={<TokenLogin />} />
                     <Route path="login" element={<Login />} />
                     <Route
                         path="storybook/*"
                         element={<Storybooks></Storybooks>}
-                    >
-                    </Route>
-                    <Route path="" element={<NotFound />}>
-                    </Route>
+                    />
+                    <Route path="" element={<NotFound />} />
                 </Routes>
             </BrowserRouter>
         </RecoilRoot>
