@@ -12,7 +12,6 @@ import handleFile from "../Component/FileHandler";
 import FileTree from "../Component/FileTree";
 import Settings from "../Component/Settings";
 import ShareButton from "../Component/ShareButton";
-import Stash from "../Component/Stash";
 
 import { logout } from "../Model/login";
 
@@ -84,7 +83,6 @@ export function UI(props: {}) {
             />
 
             <DocumentEditor readonly={readonly} path={path} />
-            {!readonly && <Stash />}
         </div>
     );
 }

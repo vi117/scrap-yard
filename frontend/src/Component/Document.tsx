@@ -4,6 +4,7 @@ import { atom, RecoilState, useRecoilState } from "recoil";
 import { v4 as uuidv4 } from "uuid";
 import { IDocumentViewModel, useDocViewModel } from "../ViewModel/doc";
 
+import Stash from "../Component/Stash";
 import Chunk from "./Chunk";
 import Divider from "./Divider";
 import ReadonlyChunk from "./ReadonlyChunk";
@@ -96,10 +97,11 @@ function InnerDocumentEditor(
     props: { readonly: boolean; doc: IDocumentViewModel },
 ) {
     return (
-        <>
+        <div id="document">
             <TagBar readonly={props.readonly} doc={props.doc} />
             <ChunkList readonly={props.readonly} doc={props.doc} />
-        </>
+            {!props.readonly && <Stash />}
+        </div>
     );
 }
 
