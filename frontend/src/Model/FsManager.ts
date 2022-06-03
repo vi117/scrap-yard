@@ -48,32 +48,125 @@ export interface FsGetResult extends FsStatInfo {
     entries?: FsDirEntry[];
 }
 
-export type NotImplemented = () => never;
-
-export interface IFsEventMap {
-    "modify": (this: IFsManager, event: MessageEvent<NotImplemented>) => void;
-    "create": (this: IFsManager, event: MessageEvent<NotImplemented>) => void;
-    "delete": (this: IFsManager, event: MessageEvent<NotImplemented>) => void;
+/**
+ * File Event Class
+ * @param kind "create" | "modify" | "remove"
+ * @param paths file paths
+ */
+export class FileEvent<T extends FileEventType> extends Event {
+    constructor(public readonly kind: T, public readonly path: string[]) {
+        super(kind);
+    }
 }
 
+export interface IFsEventMap {
+    "modify": FileEvent<"modify">;
+    "create": FileEvent<"create">;
+    "remove": FileEvent<"remove">;
+}
+export type FileEventType = keyof IFsEventMap;
+
+type EventHandler<T extends FileEventType> = (
+    this: IFsManager,
+    event: FileEvent<T>,
+) => void;
+
 export interface IFsManager extends EventTarget {
+    /**
+     * get url of the file or directory
+     * @param filePath file path
+     * @returns url of the file or directory
+     * ```ts
+     * const url = fsManager.getUrl("/path/to/file");
+     * ```
+     */
     getURL(filePath: string): URL;
+    /**
+     * fetch file
+     * @param filePath path to file
+     * @returns content of file
+     */
     get(path: string): Promise<Response>;
+    /**
+     * get file info. directory too.
+     * @param path
+     * @returns file info
+     * @throws Error if not found
+     * @example
+     * ```
+     * const info = await fs.getInfo("test.txt");
+     * console.log(info.isFile);
+     * ```
+     * @example
+     * ```
+     * const info = await fs.getInfo("directory");
+     * console.log(info.isDirectory);
+     * console.log(info.entries);
+     * ```
+     */
     getStat(path: string): Promise<FsGetResult>;
+    /**
+     * upload file to server
+     * @param filePath upload file path
+     * @param data upload data
+     * @returns status code
+     */
     upload(filePath: string, data: BodyInit): Promise<number>;
+    /**
+     * delete file or directory
+     * @param filePath file path
+     * @returns status code
+     * @throws Error if not found
+     * @example
+     * ```
+     * await fs.delete("test.txt");
+     * ```
+     */
     delete(filePath: string): Promise<number>;
+    /**
+     * make directory
+     * it will create parent directory if not exists.
+     * @param path file path
+     * @returns status code
+     */
     mkdir(path: string): Promise<number>;
 
+    /**
+     * add event listener for file or directory
+     * @param type "create" | "modify" | "remove"
+     * @param listener event listener
+     * ```ts
+     * fsManager.addEventListener("create", (event) => {
+     *    console.log(event.path);
+     * });
+     * ```
+     */
+    addEventListener<T extends keyof IFsEventMap>(
+        type: T,
+        listener: EventHandler<T>,
+    ): void;
     addEventListener(
         name: string,
         listener: EventListenerOrEventListenerObject | null,
         options?: boolean | EventListenerOptions,
     ): void;
+
+    removeEventListener<T extends keyof IFsEventMap>(
+        type: T,
+        listener: EventHandler<T>,
+    ): void;
+
     removeEventListener(
         name: string,
         listener: EventListenerOrEventListenerObject | null,
         options?: boolean | EventListenerOptions,
     ): void;
+
+    /**
+     * emit event.
+     * do not use this method. it is for internal use.
+     * @param event event
+     */
     dispatchEvent(event: Event): boolean;
 }
 
@@ -87,13 +180,42 @@ export class FsManager extends EventTarget implements IFsManager {
         super();
         this.manager = manager;
         this.url = url;
+
+        this.manager.addEventListener("notification", (event) => {
+            const { method, params } = event.data;
+            if (method === "file.update") {
+                const paths = params.paths;
+                const event = new FileEvent(params.eventType, paths);
+                console.log("file.update", event);
+                this.dispatchEvent(event);
+            }
+        });
     }
 
-    /**
-     * get url of file or directory
-     * @param filePath path to file
-     * @returns url of file or directory
-     */
+    addEventListener<T extends keyof IFsEventMap>(
+        type: string,
+        callback: EventListenerOrEventListenerObject | null | EventHandler<T>,
+        options?: boolean | AddEventListenerOptions | undefined,
+    ): void {
+        super.addEventListener(
+            type,
+            callback as EventListenerOrEventListenerObject,
+            options,
+        );
+    }
+
+    removeEventListener<T extends keyof IFsEventMap>(
+        type: string,
+        callback: EventListenerOrEventListenerObject | null | EventHandler<T>,
+        options?: boolean | EventListenerOptions,
+    ): void {
+        super.removeEventListener(
+            type,
+            callback as EventListenerOrEventListenerObject,
+            options,
+        );
+    }
+
     getURL(filePath: string): URL {
         if (filePath.startsWith("/")) {
             filePath = "." + filePath;
@@ -119,33 +241,11 @@ export class FsManager extends EventTarget implements IFsManager {
         return await fetch(res);
     }
 
-    /**
-     * fetch file
-     * @param filePath path to file
-     * @returns content of file
-     */
     async get(filePath: string): Promise<Response> {
         const res = await this.#fetchRequest(filePath);
         return res;
     }
 
-    /**
-     * get file info. directory too.
-     * @param path
-     * @returns file info
-     * @throws Error if not found
-     * @example
-     * ```
-     * const info = await fs.getInfo("test.txt");
-     * console.log(info.isFile);
-     * ```
-     * @example
-     * ```
-     * const info = await fs.getInfo("directory");
-     * console.log(info.isDirectory);
-     * console.log(info.entries);
-     * ```
-     */
     async getStat(filePath: string): Promise<FsGetResult> {
         const url = this.getURL(filePath);
         url.searchParams.set("stat", "true");
@@ -156,12 +256,7 @@ export class FsManager extends EventTarget implements IFsManager {
         const info = await res.json() as FsGetResult;
         return info;
     }
-    /**
-     * upload file to server
-     * @param filePath upload file path
-     * @param data upload data
-     * @returns status code
-     */
+
     async upload(filePath: string, data: BodyInit): Promise<number> {
         const res = await this.#fetchRequest(filePath, {
             method: "PUT",
@@ -172,11 +267,7 @@ export class FsManager extends EventTarget implements IFsManager {
         }
         return res.status;
     }
-    /**
-     * make directory
-     * @param filePath
-     * @returns status code
-     */
+
     async mkdir(filePath: string): Promise<number> {
         const url = this.getURL(filePath);
         url.searchParams.set("makeDir", "true");
@@ -188,16 +279,7 @@ export class FsManager extends EventTarget implements IFsManager {
         }
         return res.status;
     }
-    /**
-     * delete file or directory
-     * @param filePath file path
-     * @returns status code
-     * @throws Error if not found
-     * @example
-     * ```
-     * await fs.delete("test.txt");
-     * ```
-     */
+
     async delete(filePath: string): Promise<number> {
         const res = await this.#fetchRequest(filePath, {
             method: "DELETE",

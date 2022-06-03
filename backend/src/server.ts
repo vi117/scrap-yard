@@ -16,6 +16,7 @@ import { configLoadFrom } from "./config.ts";
 import { parse as argParse } from "std/flags";
 import "std/dotenv";
 import { ResponseBuilder } from "./router/responseBuilder.ts";
+import { fileWatcher } from "./rpc/filewatch.ts";
 
 const router = new TreeRouter<Handler>();
 
@@ -45,6 +46,8 @@ export async function serverRun() {
     });
     router.register("/auth/login", handleLogin);
     router.register("/auth/logout", handleLogout);
+
+    fileWatcher.startWatching();
 
     serve(async (req: Request, _info: ConnInfo) => {
         const begin = Date.now();

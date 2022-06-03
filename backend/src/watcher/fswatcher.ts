@@ -1,5 +1,4 @@
-import { AllParticipants } from "../rpc/connection.ts";
-import * as RPC from "model";
+import { join as pathJoin, relative } from "std/path";
 
 export type FsWatchEventType = "create" | "modify" | "remove";
 
@@ -12,22 +11,47 @@ export class FsWatcherEvent extends Event {
 export class FsWatcher extends EventTarget {
     private path: string;
     private watcher?: Deno.FsWatcher;
+    private filterFns: ((path: string, kind: string) => boolean)[] = [];
     constructor(path: string) {
         super();
         this.path = path;
+    }
+
+    addFilter(fn: (path: string, kind: string) => boolean) {
+        this.filterFns.push(fn);
+    }
+    removeFilter(fn: (path: string, kind: string) => boolean) {
+        const index = this.filterFns.indexOf(fn);
+        if (index >= 0) {
+            this.filterFns.splice(index, 1);
+            return true;
+        }
+        return false;
     }
     startWatching(): void {
         const watcher = Deno.watchFs(this.path, { recursive: true });
         (async () => {
             for await (const event of watcher) {
+                const cwd = Deno.cwd();
+
+                let paths = event.paths.map((x) =>
+                    relative(pathJoin(cwd, this.path), x)
+                );
+                const filterFns = [...this.filterFns];
+                paths = paths.filter((x) =>
+                    filterFns.every((fn) => fn(x, event.kind))
+                );
+
+                if (paths.length == 0) continue;
+
                 if (event.kind === "create") {
-                    const e = new FsWatcherEvent("create", event.paths);
+                    const e = new FsWatcherEvent("create", paths);
                     this.dispatchEvent(e);
                 } else if (event.kind === "modify") {
-                    const e = new FsWatcherEvent("modify", event.paths);
+                    const e = new FsWatcherEvent("modify", paths);
                     this.dispatchEvent(e);
                 } else if (event.kind === "remove") {
-                    const e = new FsWatcherEvent("remove", event.paths);
+                    const e = new FsWatcherEvent("remove", paths);
                     this.dispatchEvent(e);
                 }
             }
@@ -39,39 +63,23 @@ export class FsWatcher extends EventTarget {
             this.watcher.close();
         }
     }
-}
-
-function makeFileNotification(
-    event: FsWatcherEvent,
-): RPC.RPCNotification {
-    const params = {
-        eventType: event.type as RPC.FileNotifyEventType,
-        paths: event.paths,
-    };
-
-    return {
-        jsonrpc: "2.0",
-        method: "file.update",
-        params,
-    };
-}
-
-export function startWatching() {
-    const watcher = new FsWatcher("src/watcher/fswatcher.ts");
-    watcher.addEventListener("create", (e) => {
-        AllParticipants.broadcastNotification(
-            makeFileNotification(e as FsWatcherEvent),
-        );
-    });
-    watcher.addEventListener("remove", (e) => {
-        AllParticipants.broadcastNotification(
-            makeFileNotification(e as FsWatcherEvent),
-        );
-    });
-    watcher.addEventListener("modify", (e) => {
-        AllParticipants.broadcastNotification(
-            makeFileNotification(e as FsWatcherEvent),
-        );
-    });
-    watcher.startWatching();
+    addEventListener(
+        type: FsWatchEventType,
+        handler: (e: FsWatcherEvent) => void,
+    ): void;
+    addEventListener(
+        type: string,
+        handler: EventListenerOrEventListenerObject | null,
+        options?: boolean | AddEventListenerOptions,
+    ): void;
+    addEventListener(
+        type: string,
+        handler:
+            | ((e: FsWatcherEvent) => void)
+            | EventListenerOrEventListenerObject
+            | null,
+        options?: boolean | AddEventListenerOptions,
+    ): void {
+        return super.addEventListener(type, handler as EventListener, options);
+    }
 }

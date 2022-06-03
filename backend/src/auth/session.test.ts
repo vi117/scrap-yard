@@ -1,12 +1,13 @@
 import {
+    getAuthHandler,
     getSession,
-    handleLogin,
-    handleLogout,
     makeSessionId,
     SessionStore,
 } from "./session.ts";
 import { createAdminUser, IUser } from "./user.ts";
 import { assert, assertEquals, assertNotEquals } from "std/assert";
+
+const { handleLogin, handleLogout } = getAuthHandler({ "password": "secret" });
 
 Deno.test({
     name: "Session",
@@ -95,7 +96,7 @@ Deno.test({
 Deno.test({
     name: "getSession",
     fn: async () => {
-        const password = Deno.env.get("SESSION_PASSWORD") || "secret";
+        const password = "secret";
         const body = JSON.stringify({
             password,
         });

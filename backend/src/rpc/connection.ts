@@ -99,6 +99,9 @@ export class ParticipantList {
             connection.sendNotification(notification);
         }
     }
+    [Symbol.iterator]() {
+        return this.connections.values();
+    }
 }
 
 export const AllParticipants = new ParticipantList();
