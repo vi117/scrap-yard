@@ -54,6 +54,28 @@ export async function logout(): Promise<void> {
     }
 }
 
+export type LoginInfo = {
+    login: false;
+} | {
+    login: true;
+    expiredAt: number;
+};
+
+/**
+ * get login info
+ * @returns login info
+ */
+export async function getLoginInfo(): Promise<LoginInfo> {
+    const url = await makeEndpointURL("/auth/info");
+    const res = await fetch(url);
+    if (!res.ok) {
+        // propably server goes down
+        throw new Error(res.statusText);
+    }
+    const json = await res.json();
+    return json as LoginInfo;
+}
+
 (window as any).loginWithPassword = loginWithPassword;
 (window as any).loginWithToken = loginWithToken;
 (window as any).logout = logout;

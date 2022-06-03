@@ -186,3 +186,17 @@ export function getSessionUser(req: Request): IUser {
     }
     return session;
 }
+
+export function handleGetSessionUserInfo(req: Request) {
+    const session = getSession(req);
+    if (!session) {
+        return makeJsonResponse(Status.OK, {
+            login: false,
+        });
+    } else {
+        return makeJsonResponse(Status.OK, {
+            login: true,
+            expiredAt: session.expiredAt,
+        });
+    }
+}
