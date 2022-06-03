@@ -2,7 +2,6 @@ import { join as pathJoin, relative } from "std/path";
 
 export type FsWatchEventType = "create" | "modify" | "remove";
 
-
 export class FsWatcherEvent extends Event {
     /**
      * constructor of FsWatcherEvent
@@ -40,9 +39,7 @@ export class FsWatcher extends EventTarget {
             for await (const event of watcher) {
                 const cwd = Deno.cwd();
 
-                let paths = event.paths.map((x) =>
-                    relative(cwd, x)
-                );
+                let paths = event.paths.map((x) => relative(cwd, x));
                 const filterFns = [...this.filterFns];
                 paths = paths.filter((x) =>
                     filterFns.every((fn) => fn(x, event.kind))

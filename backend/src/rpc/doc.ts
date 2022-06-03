@@ -18,6 +18,7 @@ export async function handleDocumentMethod(
     conn: Participant,
     method: DocumentMethod,
 ): Promise<void> {
+    // get real path of docPath
     const docPath = conn.user.joinPath(method.params.docPath);
     if (!conn.user.canRead(docPath)) {
         conn.responseWith(
@@ -39,6 +40,7 @@ export async function handleDocumentMethod(
                         tagsUpdatedAt: d.tagsUpdatedAt,
                         docPath: method.params.docPath,
                     },
+                    writable: conn.user.canWrite(docPath),
                 };
                 conn.responseWith(makeRPCResult(method.id, result));
                 return;

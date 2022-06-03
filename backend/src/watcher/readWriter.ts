@@ -72,7 +72,7 @@ export class QueueReadWriter implements IReadWriter {
     constructor(
         public delayCount: number,
         public baseReadWriter: IReadWriter,
-    ) { }
+    ) {}
     async read(path: string): Promise<string> {
         return await this.baseReadWriter.read(path);
     }

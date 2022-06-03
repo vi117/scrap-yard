@@ -3,12 +3,12 @@ import { normalize as normalizePath, relative } from "std/path";
 export interface IPermissionDescriptor {
     /**
      * ability to read the document
-     * @param path the path to check
+     * @param path the path to check (relative to the user root)
      */
     canRead(path: string): boolean;
     /**
      * ability to write the document
-     * @param path the path to check
+     * @param path the path to check (relative to the user root)
      */
     canWrite(path: string): boolean;
 
