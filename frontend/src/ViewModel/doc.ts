@@ -17,11 +17,16 @@ import { IDisposable, makeDisposable } from "./IDisposable";
 
 export interface IDocumentViewModel extends IPageViewModel {
     docPath: string;
+    readonly writable: boolean;
 
     updateOnNotification(notification: ChunkNotification): void;
     useChunks(): [IChunkViewModel[], ChunkListMutator];
     useTags(): [string[], (tags: string[]) => Promise<void>];
 }
+
+export type DocumentViewModelOptions = {
+    wriatble?: boolean;
+};
 
 export class DocumentViewModel extends makeDisposable(EventTarget)
     implements IDocumentViewModel, IDisposable
@@ -32,10 +37,15 @@ export class DocumentViewModel extends makeDisposable(EventTarget)
     tags: string[];
     tagsUpdatedAt: number;
     manager: IRPCMessageManager;
+    writable: boolean;
 
-    constructor(doc: DocumentObject, rpcManager: IRPCMessageManager) {
+    constructor(
+        doc: DocumentObject,
+        rpcManager: IRPCMessageManager,
+        options: DocumentViewModelOptions = {},
+    ) {
         super();
-
+        this.writable = options.wriatble ?? false;
         this.manager = rpcManager;
         this.docPath = doc.docPath;
         this.tags = doc.tags;
@@ -105,6 +115,31 @@ export class DocumentViewModel extends makeDisposable(EventTarget)
 
         return [tags, setTags];
     }
+
+    /**
+     * hook of writable
+     * @returns writable, setWritable
+     */
+    useWritable(): [boolean, (writable: boolean) => Promise<void>] {
+        const [writable, set] = useState(this.writable);
+
+        useEffect(() => {
+            const onChange = () => {
+                set(this.writable);
+            };
+            this.addEventListener("writableChange", onChange);
+            return () => {
+                this.removeEventListener("writableChange", onChange);
+            };
+        }, [writable]);
+
+        const setWritable = async (writable: boolean) => {
+            this.writable = writable;
+            this.dispatchEvent(new Event("writableChange"));
+        };
+
+        return [writable, setWritable];
+    }
 }
 
 export function useDocViewModel(path: string) {
@@ -123,7 +158,9 @@ export function useDocViewModel(path: string) {
     const getDoc = async () => {
         const manager = await getOpenedManagerInstance();
         const d = await openDocument(manager, path);
-        const viewModel = new DocumentViewModel(d, manager);
+        const viewModel = new DocumentViewModel(d.doc, manager, {
+            wriatble: d.writable,
+        });
         // for debbuging
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (self as any).docViewModel = viewModel;

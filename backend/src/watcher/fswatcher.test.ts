@@ -8,7 +8,9 @@ Deno.test({
     name: "WatchFilteredReadWriter",
     fn: async () => {
         const curPath = getCurrentScriptDir(import.meta);
-        const watcher = new FsWatcher(pathJoin(curPath, "testdata"));
+
+        const watchPath = pathJoin(curPath, "testdata");
+        const watcher = new FsWatcher(watchPath);
         const buf: string[] = [];
         watcher.addEventListener("create", (e: FsWatcherEvent) => {
             buf.push(`create ${e.paths.join(" ")}`);
@@ -41,9 +43,11 @@ Deno.test({
         } finally {
             await watcher.stopWatching();
         }
+        const c = `modify ${pathJoin(curPath, "testdata", "test1.txt")}`;
+        const cs = [c, c, c];
         assertEquals(
-            buf.join("\n"),
-            `modify ${pathJoin(curPath, "testdata", "test1.txt")}`,
+            buf,
+            cs,
         );
     },
 });

@@ -60,6 +60,7 @@ Deno.test({
                         tagsUpdatedAt: docObj.tagsUpdatedAt,
                         docPath,
                     },
+                    writable: true,
                 },
             });
         } finally {

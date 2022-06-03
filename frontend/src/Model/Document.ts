@@ -24,8 +24,7 @@ export async function openDocument(
         },
     });
     if (res.result) {
-        const doc = res.result as DocumentOpenResult;
-        return doc.doc;
+        return res.result as DocumentOpenResult;
     } else {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         throw new RPCErrorWrapper(res.error!);

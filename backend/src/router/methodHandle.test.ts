@@ -58,7 +58,7 @@ Deno.test({
         const h = new Headers((await i(reqGen("options"), ctx)).headers);
         assertEquals(
             h.get("Allows")!,
-            "get,post",
+            "GET, POST, OPTIONS",
         );
     },
 });
