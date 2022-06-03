@@ -11,7 +11,7 @@ import { FileServeRouter } from "./fileServe.ts";
 import { rpc } from "./rpc.ts";
 import * as log from "std/log";
 import { getServerInformationHandler } from "./infoHandle.ts";
-import { getAuthHandler } from "./auth/session.ts";
+import { getAuthHandler, handleGetSessionUserInfo } from "./auth/session.ts";
 import { configLoadFrom } from "./config.ts";
 import { parse as argParse } from "std/flags";
 import "std/dotenv";
@@ -46,6 +46,7 @@ export async function serverRun() {
     });
     router.register("/auth/login", handleLogin);
     router.register("/auth/logout", handleLogout);
+    router.register("/auth/info", handleGetSessionUserInfo);
 
     fileWatcher.startWatching();
 
