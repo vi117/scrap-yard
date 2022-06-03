@@ -28,7 +28,9 @@ export function ShareButton(props: {
     };
 
     const copy = () => {
-        navigator.clipboard.writeText(token ?? "")
+        // TODO: need to change URL.
+        const url = "http://localhost:3000/token/" + token;
+        navigator.clipboard.writeText(url)
             .then(() => setText("Copied"));
     };
 
