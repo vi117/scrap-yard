@@ -34,7 +34,7 @@ export function FileMenu(props: {
         };
 
     const fileMenuItem = (op: FileOp) => (
-        <MenuItem onClick={handleFile(op.com)}>
+        <MenuItem key={op.com} onClick={handleFile(op.com)}>
             {op.name}
         </MenuItem>
     );
