@@ -36,7 +36,7 @@ export function UI(props: {}) {
 
     const [open, setOpen] = useState(false);
     const [sopen, setSopen] = useState(false);
-    const [reason, setReason] = useState<null | string>(null);
+    const [reason, setReason] = useState<undefined | string>(undefined);
     const eopen = Boolean(reason);
     const path = params.path ? params.path + ".syd" : "empty";
 
@@ -71,7 +71,7 @@ export function UI(props: {}) {
             />
             <ErrorDialog
                 open={eopen}
-                onClose={() => setReason(null)}
+                onClose={() => setReason(undefined)}
                 reason={reason}
             />
 
