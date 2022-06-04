@@ -4,7 +4,7 @@ import { AppBar, Box, Button, Toolbar } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
 import { extname } from "path-browserify";
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import DocumentEditor from "../Component/Document";
 import ErrorDialog from "../Component/ErrorDialog";
@@ -18,12 +18,13 @@ import { loginType, logout } from "../Model/login";
 const drawerWidth = 240;
 
 function LogoutButton() {
+    const navigate = useNavigate();
     return (
         <Button
             variant="contained"
             onClick={() => {
                 logout();
-                window.location.replace("/login");
+                navigate("/login");
             }}
         >
             Logout
@@ -31,7 +32,7 @@ function LogoutButton() {
     );
 }
 
-export function UI(props: {}) {
+export function UI() {
     const params = useParams();
 
     const [open, setOpen] = useState(false);

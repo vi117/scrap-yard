@@ -1,20 +1,20 @@
 // login page for admin.
 
-import { Input } from "@mui/material";
-import { useEffect, useRef } from "react";
+import { Input, Typography, Button } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { loginWithPassword } from "../Model/login";
 
 export function Login() {
-    const inputRef = useRef();
-    const errorRef = useRef();
+    const navigate = useNavigate();
+    const [errorMsg, setErrorMsg] = useState<string | undefined>();
+    const [password, setPassword] = useState<string>("");
 
     const login = () => {
-        if (inputRef.current != null) {
-            loginWithPassword(inputRef.current.value)
-                .then(() => window.location.replace("/app"))
-                .catch(e => errorRef.current.innerText = e.message);
-        }
+        loginWithPassword(password)
+            .then(() => navigate("/app"))
+            .catch(e => setErrorMsg(e.message));
     };
 
     return (
@@ -27,18 +27,17 @@ export function Login() {
                 alignItems: "center",
             }}
         >
-            <h1>welcome to Scrapyard!</h1>
+            <Typography variant="h3">Welcome to Scrapyard!</Typography>
 
             <div>
-                <Input type="password" inputRef={inputRef} />
-                <Input type="button" onClick={login} value="Login" />
+                <Input type="password" onChange={(e) => { setPassword(e.currentTarget.value) }} placeholder="password" />
+                <Button type="button" onClick={login}>Login</Button>
             </div>
 
             <div
                 style={{ color: "red" }}
                 id="error"
-                ref={errorRef}
-            />
+            >{errorMsg}</div>
         </main>
     );
 }
