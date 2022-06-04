@@ -66,7 +66,10 @@ export function useDrag<T>(source: DragSource<T>, deps?: unknown[]) {
     return [null, setDrag];
 }
 
-export function useDrop<T>(source: DropSource<T>, deps?: unknown[]) {
+export function useDrop<T>(
+    source: DropSource<T>,
+    deps?: unknown[],
+): [{ isOver: boolean }, (el: HTMLElement) => void] {
     deps = deps ?? [];
     const data = useMemo(source, deps);
     const [isOver, setIsOver] = useState(false);

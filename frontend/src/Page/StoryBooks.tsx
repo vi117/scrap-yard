@@ -1,6 +1,7 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import { useState } from "react";
 import { TestStorybook as KatexStorybook } from "./Story/KatexView";
+import { MediaStory } from "./Story/Media";
 import { WebsocketIO } from "./Story/WebsocketIO";
 
 const StorybookList = [
@@ -11,6 +12,10 @@ const StorybookList = [
     {
         name: "katex view",
         elem: <KatexStorybook></KatexStorybook>,
+    },
+    {
+        name: "page",
+        elem: <MediaStory></MediaStory>,
     },
 ];
 

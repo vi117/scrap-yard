@@ -1,12 +1,9 @@
 // main UI of the app.
 
-import { AppBar, Box, Button, Toolbar } from "@mui/material";
-import { styled, useTheme } from "@mui/material/styles";
-import { extname } from "path-browserify";
+import { Button, Toolbar } from "@mui/material";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import DocumentEditor from "../Component/Document";
 import ErrorDialog from "../Component/ErrorDialog";
 import handleFile from "../Component/FileHandler";
 import FileTree from "../Component/FileTree";
@@ -14,6 +11,7 @@ import Settings from "../Component/Settings";
 import ShareButton from "../Component/ShareButton";
 
 import { loginType, logout } from "../Model/login";
+import Page from "./Page";
 
 const drawerWidth = 240;
 
@@ -39,7 +37,7 @@ export function UI() {
     const [sopen, setSopen] = useState(false);
     const [reason, setReason] = useState<undefined | string>(undefined);
     const eopen = Boolean(reason);
-    const path = params.path ? params.path + ".syd" : "empty";
+    const path = params.path ?? "";
 
     const raise = (e: Error) => {
         setReason(e?.message);
@@ -76,7 +74,7 @@ export function UI() {
                 reason={reason}
             />
 
-            <DocumentEditor path={path} />
+            <Page path={path} />
         </div>
     );
 }

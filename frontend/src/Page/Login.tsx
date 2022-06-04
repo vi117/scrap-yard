@@ -1,6 +1,6 @@
 // login page for admin.
 
-import { Input, Typography, Button } from "@mui/material";
+import { Button, Input, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -30,14 +30,22 @@ export function Login() {
             <Typography variant="h3">Welcome to Scrapyard!</Typography>
 
             <div>
-                <Input type="password" onChange={(e) => { setPassword(e.currentTarget.value) }} placeholder="password" />
+                <Input
+                    type="password"
+                    onChange={(e) => {
+                        setPassword(e.currentTarget.value);
+                    }}
+                    placeholder="password"
+                />
                 <Button type="button" onClick={login}>Login</Button>
             </div>
 
             <div
                 style={{ color: "red" }}
                 id="error"
-            >{errorMsg}</div>
+            >
+                {errorMsg}
+            </div>
         </main>
     );
 }

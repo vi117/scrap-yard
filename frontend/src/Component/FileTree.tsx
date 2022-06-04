@@ -9,7 +9,7 @@ import TreeItem, {
 import TreeView from "@mui/lab/TreeView";
 import { Drawer, IconButton, Typography } from "@mui/material";
 import clsx from "clsx";
-import { basename, dirname, extname } from "path-browserify";
+import { join as pathJoin } from "path-browserify";
 import React, { forwardRef, useCallback, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -51,7 +51,7 @@ const DirContent = forwardRef(function DirContent(
         preventSelection,
     } = useTreeItem(nodeId);
 
-    const anchorRef = useRef<HTMLElement | null>(null);
+    const anchorRef = useRef<HTMLAnchorElement>(null);
     const [menuOpen, setMenuOpen] = useState(false);
 
     const handleMenuClick = () => {
@@ -61,11 +61,11 @@ const DirContent = forwardRef(function DirContent(
         setMenuOpen(false);
     };
 
-    const handleMouseDown = (event) => {
+    const handleMouseDown = (event: React.SyntheticEvent<Element, Event>) => {
         preventSelection(event);
     };
 
-    const handleClick = (event) => {
+    const handleClick = (event: React.SyntheticEvent<Element, Event>) => {
         handleExpansion(event);
         handleSelection(event);
     };
@@ -88,7 +88,7 @@ const DirContent = forwardRef(function DirContent(
             onClick={handleClick}
             style={{
                 display: "flex",
-                background: isOver ? "grey" : null,
+                background: isOver ? "grey" : undefined,
             }}
         >
             <div className={classes.iconContainer}>
@@ -98,25 +98,19 @@ const DirContent = forwardRef(function DirContent(
             <Typography
                 component="div"
                 className={classes.label}
-                title={label}
                 noWrap={true}
             >
-                {(extname(path) == ".syd")
-                    ? (
-                        <Link
-                            style={{
-                                textDecoration: "none",
-                                color: "black",
-                                display: "block",
-                            }}
-                            key={path}
-                            to={"/app/" + dirname(path) + "/"
-                                + basename(path, ".syd")}
-                        >
-                            {label}
-                        </Link>
-                    )
-                    : label}
+                <Link
+                    style={{
+                        textDecoration: "none",
+                        color: "black",
+                        display: "block",
+                    }}
+                    key={path}
+                    to={pathJoin("/app", path)}
+                >
+                    {label}
+                </Link>
             </Typography>
 
             <IconButton
@@ -145,7 +139,7 @@ const DirItem = (props: TreeItemProps & { handle: DirHandleProp }) => (
     />
 );
 
-export function FileTreeInner(props: {
+type FileTreeProp = {
     dirTree: DirTree;
     width: number;
     open: boolean;
@@ -153,7 +147,9 @@ export function FileTreeInner(props: {
     handleFile: (com: string, file: string) => void;
     onClose: () => void;
     root: string;
-}) {
+};
+
+export function FileTreeInner(props: FileTreeProp) {
     const dirTree = props.dirTree;
 
     const renderTree = (node: DirTree) => {
@@ -190,7 +186,7 @@ export function FileTreeInner(props: {
                 }}
             >
                 {Array.isArray(node.children)
-                    ? node.children!.map(renderTree)
+                    ? node.children.map(renderTree)
                     : null}
             </DirItem>
         );
@@ -214,7 +210,7 @@ export function FileTreeInner(props: {
     );
 }
 
-export function FileTree(props) {
+export function FileTree(props: FileTreeProp) {
     const dirTree = useDirTree(props.root);
 
     if (dirTree != null) {
