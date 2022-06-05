@@ -12,7 +12,7 @@ export function loginType(): string {
  */
 export async function loginWithToken(token: string): Promise<void> {
     const url = await makeEndpointURL("/auth/login/");
-    const res = await fetch(url, {
+    const res = await fetch(url.href, {
         method: "POST",
         credentials: "include",
         body: JSON.stringify({ token }),
@@ -32,7 +32,7 @@ export async function loginWithToken(token: string): Promise<void> {
  */
 export async function loginWithPassword(password: string): Promise<void> {
     const url = await makeEndpointURL("/auth/login");
-    const res = await fetch(url, {
+    const res = await fetch(url.href, {
         method: "POST",
         credentials: "include",
         body: JSON.stringify({ password }),
@@ -52,7 +52,7 @@ export async function loginWithPassword(password: string): Promise<void> {
  */
 export async function logout(): Promise<void> {
     const url = await makeEndpointURL("/auth/logout");
-    const res = await fetch(url, {
+    const res = await fetch(url.href, {
         method: "POST",
         credentials: "include",
     });
@@ -77,7 +77,7 @@ export type LoginInfo = {
  */
 export async function getLoginInfo(): Promise<LoginInfo> {
     const url = await makeEndpointURL("/auth/info");
-    const res = await fetch(url);
+    const res = await fetch(url.href);
     if (!res.ok) {
         // propably server goes down
         throw new Error(res.statusText);
