@@ -11,4 +11,15 @@ export default defineConfig({
         environment: "jsdom",
         globals: true,
     },
+    server: {
+        port: 3000,
+        proxy: {
+            "/app": {
+                target: "http://localhost:3000",
+                "rewrite": (path) => {
+                    return "/index.html";
+                },
+            },
+        },
+    },
 });
