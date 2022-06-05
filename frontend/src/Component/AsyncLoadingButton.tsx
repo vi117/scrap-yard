@@ -22,10 +22,7 @@ export function AsyncLoadingButton(props: AsyncLoadingButtonProps) {
             }}
         >
             <React.Fragment>
-                {loading && (
-                    <CircularProgress color="inherit" size={16}>
-                    </CircularProgress>
-                )}
+                {loading && <CircularProgress color="inherit" size={16} />}
                 {children}
             </React.Fragment>
         </Button>

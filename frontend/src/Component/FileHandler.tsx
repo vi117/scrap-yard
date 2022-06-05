@@ -18,7 +18,10 @@ export async function handleFile(
             fs.delete(args.path).catch(raise);
             break;
         default:
-            raise({ message: "not a command" });
+            raise({
+                message: "not a command",
+                name: "",
+            });
     }
 }
 

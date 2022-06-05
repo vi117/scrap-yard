@@ -76,6 +76,7 @@ class LocalChunk extends EventTarget implements IChunkViewModel {
 
         return [chunk, { setType, setContent }];
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setState(_state: Chunk & { updatedAt: number }): void {
         throw new Error("unreachable");
     }
@@ -85,6 +86,7 @@ class LocalDocument implements IDocumentViewModel, IChunkListViewModel {
     docPath = stash;
     chunks: LocalChunk[];
     type = "local";
+    writable = true;
 
     constructor() {
         this.chunks = load().map((x: Chunk) => new LocalChunk(this, x));
@@ -195,7 +197,7 @@ export function Stash() {
                                 overflow: "scroll",
                             }}
                         >
-                            <ChunkList doc={doc} />
+                            <ChunkList doc={doc} readonly={false} />
                         </Paper>
                     </Zoom>
                 </ClickAwayListener>

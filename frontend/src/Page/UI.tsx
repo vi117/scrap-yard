@@ -1,12 +1,9 @@
 // main UI of the app.
 
-import { AppBar, Box, Button, Toolbar } from "@mui/material";
-import { styled, useTheme } from "@mui/material/styles";
-import { extname } from "path-browserify";
+import { Button, Toolbar } from "@mui/material";
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-import DocumentEditor from "../Component/Document";
 import ErrorDialog from "../Component/ErrorDialog";
 import handleFile from "../Component/FileHandler";
 import FileTree from "../Component/FileTree";
@@ -14,16 +11,18 @@ import Settings from "../Component/Settings";
 import ShareButton from "../Component/ShareButton";
 
 import { loginType, logout } from "../Model/login";
+import Page from "./Page";
 
 const drawerWidth = 240;
 
 function LogoutButton() {
+    const navigate = useNavigate();
     return (
         <Button
             variant="contained"
             onClick={() => {
                 logout();
-                window.location.replace("/login");
+                navigate("/login");
             }}
         >
             Logout
@@ -31,14 +30,14 @@ function LogoutButton() {
     );
 }
 
-export function UI(props: {}) {
+export function UI() {
     const params = useParams();
 
     const [open, setOpen] = useState(false);
     const [sopen, setSopen] = useState(false);
-    const [reason, setReason] = useState<null | string>(null);
+    const [reason, setReason] = useState<undefined | string>(undefined);
     const eopen = Boolean(reason);
-    const path = params.path ? params.path + ".syd" : "empty";
+    const path = params.path ?? "";
 
     const raise = (e: Error) => {
         setReason(e?.message);
@@ -71,11 +70,11 @@ export function UI(props: {}) {
             />
             <ErrorDialog
                 open={eopen}
-                onClose={() => setReason(null)}
+                onClose={() => setReason(undefined)}
                 reason={reason}
             />
 
-            <DocumentEditor path={path} />
+            <Page path={path} />
         </div>
     );
 }

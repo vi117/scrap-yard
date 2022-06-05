@@ -9,7 +9,7 @@ import {
 export function ErrorDialog(props: {
     open: boolean;
     onClose: () => void;
-    reason: string;
+    reason?: string;
 }) {
     const { open, onClose, reason } = props;
 
