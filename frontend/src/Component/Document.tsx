@@ -2,11 +2,7 @@ import { Button, Chip, Input, Stack } from "@mui/material";
 import { FormEventHandler, Fragment, useState } from "react";
 import { atom, RecoilState, useRecoilState } from "recoil";
 import { v4 as uuidv4 } from "uuid";
-import {
-    IDocumentViewModel,
-    useDocViewModel,
-    useWritable,
-} from "../ViewModel/doc";
+import { IDocumentViewModel, useDocViewModel } from "../ViewModel/doc";
 
 import Stash from "../Component/Stash";
 import Chunk from "./Chunk";

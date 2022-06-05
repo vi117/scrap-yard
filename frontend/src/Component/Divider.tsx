@@ -12,7 +12,7 @@ export function Divider(props: {
     doc: string;
     position: number;
     newChunk: (pos: number) => void;
-    insertChunk: (pos: number, chunk: ChunkType) => void;
+    insertChunk: (pos: number, chunk: ChunkContent | ChunkType) => void;
     moveChunk: (id: string, pos: number) => void;
     addFromText: (pos: number, content: string) => void;
     add: (pos: number, content: ChunkContent) => void;
@@ -21,9 +21,7 @@ export function Divider(props: {
         props;
 
     const [{ isOver }, drop] = useDrop<
-        { chunk: ChunkType; doc: string; cur: number } & { text: string } & {
-            html: string;
-        }
+        { chunk: ChunkType; doc: string; cur: number }
     >(() => ({
         accept: ["chunk", "text/html", "text/plain"],
         acceptFile: true,
@@ -38,15 +36,12 @@ export function Divider(props: {
                     }
                 } else { // document-by-document move
                     // TODO: need to test this (dnd doc-by-doc).
-                    insertChunk(position, {
-                        type: item.chunk.type,
-                        content: item.chunk.content,
-                    });
+                    insertChunk(position, item.chunk);
                 }
             } else if (t == "text/plain") {
-                addFromText(position, item);
+                addFromText(position, item as string);
             } else if (t == "text/html") {
-                add(position, { type: "rawhtml", content: item });
+                add(position, { type: "rawhtml", content: item as string });
             }
         },
 

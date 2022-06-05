@@ -65,12 +65,12 @@ function SearchDialog(props: {
     search: (target: string) => SearchResult[];
 }) {
     const [input, setInput] = useState("");
-    const [results, setResults] = useState([]);
+    const [results, setResults] = useState<SearchResult[]>([]);
 
-    const inputRef = useRef(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const onClick = () => {
-        const inp = inputRef.current?.value;
+        const inp = inputRef.current?.value ?? "";
         const rs = props.search(inp);
 
         setInput(inp);
