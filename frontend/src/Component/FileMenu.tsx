@@ -53,7 +53,7 @@ export function FileMenu(props: {
                 <Grow
                     {...TransitionProps}
                     style={{
-                        transformOrigin: placement === "botton-start"
+                        transformOrigin: placement === "bottom-start"
                             ? "left top"
                             : "left bottom",
                     }}
