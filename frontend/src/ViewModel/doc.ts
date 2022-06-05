@@ -22,6 +22,12 @@ export interface IDocumentViewModel extends IPageViewModel {
     updateOnNotification(notification: ChunkNotification): void;
     useChunks(): [IChunkViewModel[], ChunkListMutator];
     useTags(): [string[], (tags: string[]) => Promise<void>];
+
+    /**
+     * hook of writable
+     * @returns writable, setWritable
+     */
+    useWritable(): [boolean, (writable: boolean) => Promise<void>];
 }
 
 export type DocumentViewModelOptions = {
