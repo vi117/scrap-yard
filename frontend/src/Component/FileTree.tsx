@@ -143,9 +143,9 @@ type FileTreeProp = {
     dirTree: DirTree;
     width: number;
     open: boolean;
-    handleOpen: (f: string) => void;
     handleFile: (com: string, file: string) => void;
     onClose: () => void;
+    onError: (e: Error) => void;
     root: string;
 };
 
@@ -210,7 +210,7 @@ export function FileTreeInner(props: FileTreeProp) {
     );
 }
 
-export function FileTree(props: FileTreeProp) {
+export function FileTree(props: Omit<FileTreeProp, "dirTree">) {
     const dirTree = useDirTree(props.root);
 
     if (dirTree != null) {

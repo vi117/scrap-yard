@@ -91,6 +91,9 @@ class LocalDocument implements IDocumentViewModel, IChunkListViewModel {
     constructor() {
         this.chunks = load().map((x: Chunk) => new LocalChunk(this, x));
     }
+    useWritable(): [boolean, (writable: boolean) => Promise<void>] {
+        throw new Error("Unreachable");
+    }
     updateAsSource(_path: string, _updatedAt: number): void {
         // nop
         throw new Error("unreachable");

@@ -24,19 +24,24 @@ export type DropData<T> = {
 
 export type DropSource<T> = () => DropData<T>;
 
-export function useDrag<T>(source: DragSource<T>, deps?: unknown[]) {
+export function useDrag<T>(
+    source: DragSource<T>,
+    deps?: unknown[],
+): [null, (e: HTMLElement | null) => void] {
     deps = deps ?? [];
     const data = useMemo(source, deps);
 
     const handleDragStart = (e: DragEvent) => {
-        e.dataTransfer.setData(data.type, JSON.stringify(data.item));
-        e.dataTransfer.effectAllowed = "move";
+        if (e.dataTransfer) {
+            e.dataTransfer.setData(data.type, JSON.stringify(data.item));
+            e.dataTransfer.effectAllowed = "move";
+        }
     };
 
     // TODO: finish handleDragEnd
     const handleDragEnd = (e: DragEvent) => {
         e.preventDefault();
-        if (e.dataTransfer.dropEffect == "none") { // canceled
+        if (e.dataTransfer?.dropEffect == "none") { // canceled
             return;
         } else { // something happend
             data.end(e);
@@ -51,16 +56,18 @@ export function useDrag<T>(source: DragSource<T>, deps?: unknown[]) {
 
     const ref = useRef<HTMLElement | null>(null);
 
-    const setDrag = useCallback((elem: HTMLElement) => {
+    const setDrag = useCallback((elem: HTMLElement | null) => {
         if (elem == null && ref.current != null) {
             clearDrag(ref.current);
             return;
         }
-        ref.current = elem;
+        if (elem != null) {
+            ref.current = elem;
 
-        elem.draggable = true;
-        elem.addEventListener("dragstart", handleDragStart);
-        elem.addEventListener("dragend", handleDragEnd);
+            elem.draggable = true;
+            elem.addEventListener("dragstart", handleDragStart);
+            elem.addEventListener("dragend", handleDragEnd);
+        }
     }, deps);
 
     return [null, setDrag];
@@ -83,14 +90,14 @@ export function useDrop<T>(
     };
 
     const handleDragOver = (e: DragEvent) => {
-        if (isAcceptable(e.dataTransfer)) {
+        if (e.dataTransfer && isAcceptable(e.dataTransfer)) {
             setIsOver(true);
         }
         e.preventDefault();
     };
 
     const handleDragEnter = (e: DragEvent) => {
-        if (isAcceptable(e.dataTransfer)) {
+        if (e.dataTransfer && isAcceptable(e.dataTransfer)) {
             setIsOver(true);
         }
         e.preventDefault();
@@ -101,17 +108,18 @@ export function useDrop<T>(
     };
 
     const handleDrop = (e: DragEvent) => {
-        if (e.dataTransfer.files.length !== 0) { // file drop
+        if (e.dataTransfer && e.dataTransfer.files.length !== 0) { // file drop
             for (const item of e.dataTransfer.items) {
                 if (item.kind === "file") {
-                    data.filedrop(item.type, item.getAsFile());
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    data.filedrop(item.type, item.getAsFile()!);
                     break; // TODO: support multiple file drop
                 }
             }
         } else {
             for (const type of data.accept) {
-                const item = e.dataTransfer.getData(type);
-                if (item != "") {
+                const item = e.dataTransfer?.getData(type);
+                if (item && item != "") {
                     if (nativeTypes.includes(type)) {
                         data.drop(type, item);
                     } else {
