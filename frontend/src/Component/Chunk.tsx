@@ -3,6 +3,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import {
     Button,
+    FormControl,
     InputLabel,
     MenuItem,
     Paper,
@@ -43,8 +44,8 @@ const TypeSelector = (props: {
     };
 
     return (
-        <div>
-            <InputLabel id="typeselector-label" shrink={true}>Type</InputLabel>
+        <FormControl>
+            <InputLabel id="typeselector-label">Type</InputLabel>
             <Select
                 labelId="typeselector-label"
                 id="typeselector"
@@ -54,7 +55,7 @@ const TypeSelector = (props: {
             >
                 {types.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
             </Select>
-        </div>
+        </FormControl>
     );
 };
 
@@ -182,15 +183,17 @@ const Chunk = (props: {
     };
 
     const editButton = (
-        <Tooltip title={mode == "Read" ? "Edit" : "Save"}>
+        <Tooltip title={mode == "Read" ? "Edit" : "Save"} placement="left">
             <Button onClick={changeMode}>
-                {mode == "Read" ? <EditIcon /> : <SaveIcon />}
+                {mode == "Read"
+                    ? <EditIcon />
+                    : <SaveIcon />}
             </Button>
         </Tooltip>
     );
 
     const deleteButton = (
-        <Tooltip title="Delete">
+        <Tooltip title="Delete" placement="left">
             <Button onClick={deleteThis}>
                 <DeleteIcon />
             </Button>
