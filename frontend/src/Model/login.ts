@@ -77,7 +77,9 @@ export type LoginInfo = {
  */
 export async function getLoginInfo(): Promise<LoginInfo> {
     const url = await makeEndpointURL("/auth/info");
-    const res = await fetch(url.href);
+    const res = await fetch(url.href, {
+        credentials: "include",
+    });
     if (!res.ok) {
         // propably server goes down
         throw new Error(res.statusText);
@@ -89,3 +91,4 @@ export async function getLoginInfo(): Promise<LoginInfo> {
 (window as any).loginWithPassword = loginWithPassword;
 (window as any).loginWithToken = loginWithToken;
 (window as any).logout = logout;
+(window as any).getLoginInfo = getLoginInfo;
