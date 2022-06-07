@@ -1,14 +1,20 @@
 // login by token
 
-import { Navigate, useParams } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { loginWithToken } from "../Model/login";
 
 export function TokenLogin() {
     const params = useParams();
-    loginWithToken(params.token ?? "");
+    const navigate = useNavigate();
+    const [msg, setMsg] = useState("please wait");
 
-    return <Navigate to={"/app"} />;
+    loginWithToken(params.token ?? "")
+        .then(() => navigate("/app"))
+        .catch(e => setMsg(e.message));
+
+    return <div>{msg}</div>;
 }
 
 export default TokenLogin;

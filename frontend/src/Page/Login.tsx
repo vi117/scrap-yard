@@ -1,7 +1,7 @@
 // login page for admin.
 
 import { Button, Input, Typography } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { loginWithPassword } from "../Model/login";
@@ -15,6 +15,10 @@ export function Login() {
         loginWithPassword(password)
             .then(() => navigate("/app"))
             .catch(e => setErrorMsg(e.message));
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key == "Enter") login();
     };
 
     return (
@@ -35,6 +39,7 @@ export function Login() {
                     onChange={(e) => {
                         setPassword(e.currentTarget.value);
                     }}
+                    onKeyDown={handleKeyDown}
                     placeholder="password"
                 />
                 <Button type="button" onClick={login}>Login</Button>
