@@ -2,6 +2,11 @@
 
 import { getFsManagerInstance, IFsManager } from "../Model/FsManager";
 
+const emptyDocument = { version: 1, tags: [], chunks: [] };
+const emptyFile = new Blob([JSON.stringify(emptyDocument)], {
+    type: "application/json",
+});
+
 export async function handleFile(
     com: string,
     args: { path: string; newpath?: string },
@@ -10,6 +15,11 @@ export async function handleFile(
     const fs = await getFsManagerInstance();
 
     switch (com) {
+        case "create":
+            // create document by uploading Blob
+            fs.upload(args.path, emptyFile);
+            break;
+
         case "rename":
             break;
         case "move":
