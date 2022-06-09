@@ -110,6 +110,7 @@ export async function handleTagMethod(
                 return;
             }
             doc.setTags(method.params.tags);
+            await doc.save();
             const result: DocumentTagSetResult = {
                 updatedAt: doc.tagsUpdatedAt,
             };
