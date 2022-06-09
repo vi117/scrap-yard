@@ -41,7 +41,7 @@ function makeJSONRequest(headers: Record<string, string> = {}, body = "") {
 Deno.test({
     name: "Login Handler",
     fn: async (t) => {
-        const password = Deno.env.get("SESSION_PASSWORD") || "secret";
+        const password = "secret";
         let uuid: string | undefined;
 
         await t.step("login with invalid format", async () => {

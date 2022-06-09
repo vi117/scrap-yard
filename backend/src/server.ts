@@ -11,7 +11,11 @@ import { FileServeRouter } from "./fileServe.ts";
 import { rpc } from "./rpc.ts";
 import * as log from "std/log";
 import { getServerInformationHandler } from "./infoHandle.ts";
-import { getAuthHandler, handleGetSessionUserInfo } from "./auth/session.ts";
+import {
+    getAuthHandler,
+    handleGetSessionUserInfo,
+    setAllowAnonymous,
+} from "./auth/session.ts";
 import { configLoadFrom } from "./config.ts";
 import { parse as argParse } from "std/flags";
 import "std/dotenv";
@@ -36,7 +40,10 @@ function app() {
 export async function serverRun() {
     const args = argParse(Deno.args);
     const config = await configLoadFrom(args.config ?? "config.jsonc");
+
     console.log(`Server Start`);
+
+    setAllowAnonymous(config.allowAnonymous);
 
     const sih = getServerInformationHandler();
     router.register("info", sih);
@@ -44,6 +51,7 @@ export async function serverRun() {
     const { handleLogin, handleLogout } = getAuthHandler({
         password: "secret",
     });
+
     router.register("/auth/login", handleLogin);
     router.register("/auth/logout", handleLogout);
     router.register("/auth/info", handleGetSessionUserInfo);
