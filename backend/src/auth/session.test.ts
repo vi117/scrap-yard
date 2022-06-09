@@ -7,7 +7,8 @@ import {
 import { createAdminUser, IUser } from "./user.ts";
 import { assert, assertEquals, assertNotEquals } from "std/assert";
 
-const { handleLogin, handleLogout } = getAuthHandler({ "password": "secret" });
+const PASSWORD = "secret";
+const { handleLogin, handleLogout } = getAuthHandler({ "password": PASSWORD });
 
 Deno.test({
     name: "Session",
@@ -41,7 +42,6 @@ function makeJSONRequest(headers: Record<string, string> = {}, body = "") {
 Deno.test({
     name: "Login Handler",
     fn: async (t) => {
-        const password = "secret";
         let uuid: string | undefined;
 
         await t.step("login with invalid format", async () => {
@@ -54,7 +54,7 @@ Deno.test({
 
         await t.step("login with invalid password", async () => {
             const body = JSON.stringify({
-                password: "no such password" + password,
+                password: "no such password" + PASSWORD,
             });
             const res = await handleLogin(
                 makeJSONRequest({}, body),
@@ -64,7 +64,7 @@ Deno.test({
 
         await t.step("login", async () => {
             const body = JSON.stringify({
-                password,
+                PASSWORD,
             });
             const res = await handleLogin(
                 makeJSONRequest({}, body),
@@ -96,9 +96,8 @@ Deno.test({
 Deno.test({
     name: "getSession",
     fn: async () => {
-        const password = "secret";
         const body = JSON.stringify({
-            password,
+            PASSWORD,
         });
         const res = await handleLogin(
             makeJSONRequest({}, body),
