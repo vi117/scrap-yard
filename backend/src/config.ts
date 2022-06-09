@@ -8,6 +8,7 @@ interface ConfigSchema {
     staticFileHost: string[];
     sessionSecret: string;
     port: number;
+    allowAnonymous: boolean;
 }
 
 const configSchema: JSONSchemaType<ConfigSchema> = {
@@ -30,6 +31,9 @@ const configSchema: JSONSchemaType<ConfigSchema> = {
         },
         port: {
             type: "number",
+        },
+        allowAnonymous: {
+            type: "boolean",
         },
     },
     required: [],
@@ -66,8 +70,10 @@ const defaultConfigText = `{
     "staticFileHost": [],
     /* session secret */
     "sessionSecret": "${crypto.randomUUID()}",
-    /* port */
+    /* port to serve */
     "port": 8000,
+    /* allow anonymous user*/
+    "allowAnonymous": true
 }`;
 
 export async function configLoadFrom(path: string) {

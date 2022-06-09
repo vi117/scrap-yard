@@ -1,6 +1,5 @@
 import { makeJsonResponse, Status } from "../router/util.ts";
 import { createAdminUser, IUser } from "./user.ts";
-import * as setting from "../setting.ts";
 import { getCookies, setCookie } from "std/http";
 import { ResponseBuilder } from "../router/mod.ts";
 
@@ -160,19 +159,12 @@ export function getSession(req: Request): IUser | undefined {
     return sessionStore.get(id);
 }
 
-type SessionSetting = {
-    allowAnonymous: boolean;
-};
-
-setting.register("session", {
-    type: "object",
-    properties: {
-        allowAnonymous: { type: "boolean", default: true },
-    },
-});
-
+let allowAnonymous = false;
+export function setAllowAnonymous(value: boolean) {
+    allowAnonymous = value;
+}
 export function getAllowAnonymous(): boolean {
-    return setting.get<SessionSetting>("session").allowAnonymous;
+    return allowAnonymous;
 }
 
 export function getSessionUser(req: Request): IUser {

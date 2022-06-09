@@ -3,7 +3,6 @@ import { ChunkNotificationParam } from "model";
 import * as RPC from "model";
 import * as log from "std/log";
 import { ChunkMethodHistory } from "./chunk.ts";
-import * as setting from "../setting.ts";
 import { DocFileReadWriterType, DocReadWriter } from "../document/mod.ts";
 import { IDisposable, RefCountSet } from "../util.ts";
 import {
@@ -18,31 +17,13 @@ export type DocHistory = {
     method: ChunkMethodHistory;
 };
 
-type DocStoreSetting = {
-    docHistoryLength: number;
-};
-
-setting.register("docStore", {
-    type: "object",
-    properties: {
-        docHitoryLength: {
-            type: "number",
-            default: 10,
-            minimum: 1,
-            maximum: 100,
-            title: "History Length",
-            description: "The number of historys to keep",
-        },
-    },
-});
-
 /**
  * get the maximum number of historys to keep
  * must be called after setting is loaded
  * @returns The number of historys to keep
  */
 export function getSettingDocHistoryMaximum(): number {
-    return setting.get<DocStoreSetting>("docStore").docHistoryLength;
+    return 10;
 }
 
 export interface ISubscriptable {
