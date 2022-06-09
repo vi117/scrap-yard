@@ -1,9 +1,15 @@
-import { ChunkNotification, DocumentObject, RPCNotification } from "model";
+import {
+    ChunkNotification,
+    DocumentObject,
+    RPCErrorCode,
+    RPCNotification,
+} from "model";
 import { useEffect, useState } from "react";
-import { openDocument } from "../Model/Document";
+import { openDocument, setDocumentTags } from "../Model/Document";
 import {
     getOpenedManagerInstance,
     IRPCMessageManager,
+    RPCErrorWrapper,
     RPCNotificationEvent,
 } from "../Model/mod";
 import {
@@ -81,12 +87,22 @@ export class DocumentViewModel extends makeDisposable(EventTarget)
     }
 
     updateOnNotification(notification: RPCNotification): void {
-        if (notification.method === "chunk.refresh") {
-            // TODO(vi117): implement refreshing document.
-        } else if (notification.method === "chunk.update") {
-            if (notification.params.docPath === this.docPath) {
-                this.chunks.updateOnNotification(notification);
-            }
+        const method = notification.method;
+        switch (method) {
+            case "chunk.update":
+                if (notification.params.docPath === this.docPath) {
+                    this.chunks.updateOnNotification(notification);
+                }
+                break;
+            case "chunk.refresh":
+                // TODO(vi117): implement refreshing document.
+                break;
+            case "document.tags":
+                if (notification.params.docPath === this.docPath) {
+                    const { tags, updatedAt } = notification.params;
+                    this.updateTags(tags, updatedAt);
+                }
+                break;
         }
     }
 
@@ -98,6 +114,12 @@ export class DocumentViewModel extends makeDisposable(EventTarget)
     // TODO(vi117): extract method
     useChunks(): [IChunkViewModel[], ChunkListMutator] {
         return this.chunks.useChunks();
+    }
+
+    updateTags(tags: string[], updatedAt: number): void {
+        this.tags = tags;
+        this.tagsUpdatedAt = updatedAt;
+        this.dispatchEvent(new Event("tagsChange"));
     }
 
     useTags(): [string[], (tags: string[]) => Promise<void>] {
@@ -114,9 +136,31 @@ export class DocumentViewModel extends makeDisposable(EventTarget)
         }, [tags]);
 
         const setTags = async (tags: string[]) => {
-            this.tags = tags;
-            this.dispatchEvent(new Event("tagsChange"));
-            // TODO: update tags to server
+            const manager = this.manager;
+            try {
+                const res = await setDocumentTags(
+                    manager,
+                    this.docPath,
+                    tags,
+                    this.tagsUpdatedAt,
+                );
+                this.updateTags(tags, res.updatedAt);
+            } catch (e) {
+                if (e instanceof RPCErrorWrapper) {
+                    if (e.code === RPCErrorCode.TagsConflict) {
+                        // TODO(vi117): Replace data type of TagsConflictError
+                        const data = e.data as {
+                            tags: string[];
+                            updatedAt: number;
+                        };
+                        this.updateTags(data.tags, data.updatedAt);
+                    } else {
+                        throw e;
+                    }
+                } else {
+                    throw e;
+                }
+            }
         };
 
         return [tags, setTags];
