@@ -22,7 +22,7 @@ import FileTree from "../Component/FileTree";
 import Settings from "../Component/Settings";
 import ShareButton from "../Component/ShareButton";
 
-import { loginType, logout } from "../Model/login";
+import { logout } from "../Model/login";
 import { getOpenedManagerInstance } from "../Model/RPCManager";
 import Page from "./Page";
 
@@ -87,7 +87,7 @@ export function UI() {
                         >
                             <SettingsIcon />
                         </IconButton>
-                        {loginType() == "pass" && <ShareButton doc={path} />}
+                        <ShareButton doc={path} />
                         <LogoutButton />
                     </Toolbar>
                 </Container>

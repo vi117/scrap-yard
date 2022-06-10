@@ -46,6 +46,9 @@ function App() {
         async () => {
             const serverInfo = await getServerInfoInstance();
             const loginInfo = await getLoginInfo();
+            if (sessionStorage.getItem("logintype") === null) {
+                sessionStorage.setItem("logintype", "token");
+            }
             // return switch of login
             return serverInfo.allowAnonymous || loginInfo.login;
         },

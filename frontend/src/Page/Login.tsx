@@ -3,7 +3,7 @@
 import { Button, Input, Typography } from "@mui/material";
 import { join } from "path-browserify";
 import { useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { loginWithPassword } from "../Model/login";
 
