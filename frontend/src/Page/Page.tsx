@@ -103,6 +103,16 @@ export function TextPage(props: {
 export function Page(props: { path: string }) {
     const path = props.path;
     const ext = extname(path);
+    if (path === "") {
+        return (
+            <div className="center_container">
+                <Typography variant="h3">
+                    Welcome to Scrap Yard: a web-based file manager.<br />
+                    Please select a file or folder to view.
+                </Typography>
+            </div>
+        );
+    }
     switch (ext) {
         case ".syd":
             return <DocumentEditor path={path} />;

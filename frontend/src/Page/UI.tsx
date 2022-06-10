@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { basename } from "path-browserify";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import ErrorDialog from "../Component/ErrorDialog";
 import handleFile from "../Component/FileHandler";
@@ -43,13 +43,14 @@ function LogoutButton() {
 }
 
 export function UI() {
-    const params = useParams();
-
+    const { pathname } = useLocation();
     const [open, setOpen] = useState(false);
     const [sopen, setSopen] = useState(false);
     const [reason, setReason] = useState<undefined | string>(undefined);
     const eopen = Boolean(reason);
-    const path = params.path ?? "";
+    // it assumes that the pathname is "/app/" + path
+    // so, if routing path is changed, the pathname is changed too.
+    const path = pathname.substring(5) ?? "";
 
     const fileBasename = basename(path);
     useEffect(() => {
