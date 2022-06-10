@@ -1,20 +1,27 @@
 // login page for admin.
 
 import { Button, Input, Typography } from "@mui/material";
+import { join } from "path-browserify";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import { loginWithPassword } from "../Model/login";
 
 export function Login() {
     const navigate = useNavigate();
+    const [searchParams, _] = useSearchParams();
     const [errorMsg, setErrorMsg] = useState<string | undefined>();
     const [password, setPassword] = useState<string>("");
 
     const login = async () => {
         try {
             await loginWithPassword(password);
-            navigate("/app");
+            let path = "/app";
+            const returnTo = searchParams.get("returnTo");
+            if (returnTo) {
+                path = join(path, returnTo);
+            }
+            navigate(path);
         } catch (e) {
             if (e instanceof Error) {
                 setErrorMsg(e.message);

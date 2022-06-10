@@ -15,9 +15,17 @@ type AsyncDataAction<T> = {
 };
 
 type AsyncDataState<T> = {
-    loading: boolean;
-    data: T | null;
-    error: unknown | null;
+    loading: true;
+    data: null;
+    error: null;
+} | {
+    loading: false;
+    data: T;
+    error: null;
+} | {
+    loading: false;
+    data: null;
+    error: unknown;
 };
 
 function AsyncDataReducer<T>(
