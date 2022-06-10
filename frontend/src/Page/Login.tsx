@@ -11,13 +11,21 @@ export function Login() {
     const [errorMsg, setErrorMsg] = useState<string | undefined>();
     const [password, setPassword] = useState<string>("");
 
-    const login = () => {
-        loginWithPassword(password)
-            .then(() => navigate("/app"))
-            .catch(e => setErrorMsg(e.message));
+    const login = async () => {
+        try {
+            await loginWithPassword(password);
+            navigate("/app");
+        } catch (e) {
+            if (e instanceof Error) {
+                setErrorMsg(e.message);
+            } else {
+                console.error(e);
+                setErrorMsg(JSON.stringify(e));
+            }
+        }
     };
 
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key == "Enter") login();
     };
 

@@ -66,8 +66,8 @@ export function getServerInfo() {
     return infoInstance;
 }
 
-export async function makeEndpointURL(path: string) {
-    const info = await getServerInfoInstance();
+export function makeEndpointURL(path: string) {
+    const info = getServerInfo();
     const url = new URL(path, `http://${info.host}:${info.port}`);
     return url;
 }
