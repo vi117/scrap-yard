@@ -6,9 +6,14 @@ import {
 } from "./session.ts";
 import { createAdminUser, IUser } from "./user.ts";
 import { assert, assertEquals, assertNotEquals } from "std/assert";
+import { MemoryReadWriter } from "../watcher/mod.ts";
 
 const PASSWORD = "secret";
-const { handleLogin, handleLogout } = getAuthHandler({ "password": PASSWORD });
+const { handleLogin, handleLogout } = await getAuthHandler({
+    "password": PASSWORD,
+    rw: new MemoryReadWriter(),
+    sessionPath: "test.json",
+});
 
 Deno.test({
     name: "Session",

@@ -2,10 +2,17 @@ import { makeJsonResponse, Status } from "../router/util.ts";
 import { createAdminUser, IUser } from "./user.ts";
 import { getCookies, setCookie } from "std/http";
 import { ResponseBuilder } from "../router/mod.ts";
+import {
+    AtomicReadWriter,
+    IReadWriter,
+    QueueReadWriter,
+} from "../watcher/mod.ts";
 
-export class SessionStore<T> {
+export class SessionStore<T> extends EventTarget {
     sessions: Record<string, T>;
+
     constructor() {
+        super();
         this.sessions = {};
     }
     get(id: string): T | undefined {
@@ -13,16 +20,20 @@ export class SessionStore<T> {
     }
     set(id: string, value: T): void {
         this.sessions[id] = value;
+        this.dispatchEvent(new CustomEvent("set", { detail: { id, value } }));
     }
     delete(id: string): void {
         delete this.sessions[id];
+        this.dispatchEvent(new CustomEvent("delete", { detail: { id } }));
     }
-    async saveToFile(path: string): Promise<void> {
-        await Deno.writeTextFile(path, JSON.stringify(this.sessions));
+    toJSON() {
+        return this.sessions;
     }
-    async loadFromFile(path: string): Promise<void> {
-        const data = await Deno.readTextFile(path);
-        this.sessions = JSON.parse(data);
+    load(json: Record<string, T>): void {
+        this.sessions = {
+            ...this.sessions,
+            ...json,
+        };
     }
 }
 
@@ -57,11 +68,24 @@ function setSessionCookie(headers: Headers, {
 
 interface getAuthHandlerOption {
     password: string;
+    sessionPath: string;
+    rw?: IReadWriter;
 }
 
-export function getAuthHandler(options?: getAuthHandlerOption) {
-    options ??= { password: makeSessionId() };
+export async function getAuthHandler(options: getAuthHandlerOption) {
     const password = options.password;
+    const rw = options.rw ?? new QueueReadWriter(10, new AtomicReadWriter());
+    const sessionPath = options.sessionPath;
+
+    const loaded = await rw.read(sessionPath);
+    sessionStore.load(JSON.parse(loaded));
+    sessionStore.addEventListener("set", () => {
+        rw.write(sessionPath, JSON.stringify(sessionStore.toJSON()));
+    });
+    sessionStore.addEventListener("delete", () => {
+        rw.write(sessionPath, JSON.stringify(sessionStore.toJSON()));
+    });
+
     return { handleLogin, handleLogout };
 
     async function handleLogin(req: Request): Promise<ResponseBuilder> {

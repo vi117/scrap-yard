@@ -13,6 +13,19 @@ export interface IReadWriter {
     write(path: string, content: string): Promise<void>;
 }
 
+export class MemoryReadWriter {
+    private data: Record<string, string> = {};
+
+    read(path: string): Promise<string> {
+        return Promise.resolve(this.data[path]);
+    }
+
+    write(path: string, content: string): Promise<void> {
+        this.data[path] = content;
+        return Promise.resolve();
+    }
+}
+
 export class RawReadWriter implements IReadWriter {
     async read(path: string): Promise<string> {
         return await Deno.readTextFile(path);

@@ -9,6 +9,7 @@ interface ConfigSchema {
     sessionSecret: string;
     port: number;
     allowAnonymous: boolean;
+    sessionPath: string;
 }
 
 const configSchema: JSONSchemaType<ConfigSchema> = {
@@ -34,6 +35,9 @@ const configSchema: JSONSchemaType<ConfigSchema> = {
         },
         allowAnonymous: {
             type: "boolean",
+        },
+        sessionPath: {
+            type: "string",
         },
     },
     required: [],
@@ -73,7 +77,9 @@ const defaultConfigText = `{
     /* port to serve */
     "port": 8000,
     /* allow anonymous user*/
-    "allowAnonymous": true
+    "allowAnonymous": true,
+    /* session path */
+    "sessionPath": ".session.json",
 }`;
 
 export async function configLoadFrom(path: string) {

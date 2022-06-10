@@ -48,8 +48,9 @@ export async function serverRun() {
     const sih = getServerInformationHandler();
     router.register("info", sih);
 
-    const { handleLogin, handleLogout } = getAuthHandler({
+    const { handleLogin, handleLogout } = await getAuthHandler({
         password: "secret",
+        sessionPath: "",
     });
 
     router.register("/auth/login", handleLogin);
