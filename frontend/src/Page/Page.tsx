@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { Skeleton, Typography } from "@mui/material";
 import { extname, join as pathJoin } from "path-browserify";
 import { useEffect, useState } from "react";
 import DocumentEditor from "../Component/Document";
@@ -84,7 +84,7 @@ export function TextPage(props: {
     );
 
     if (state.loading) {
-        return <Loading />;
+        return <Skeleton />;
     }
     if (state.error) {
         if (state.error instanceof Error) {
