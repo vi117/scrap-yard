@@ -21,7 +21,7 @@ function App() {
                         element={<Navigate to={login ? "/app" : "/login"} />}
                     />
                     <Route path="app" element={<UI />} />
-                    <Route path="app/:path" element={<UI />} />
+                    <Route path="app/*" element={<UI />} />
                     <Route path="token/:token" element={<TokenLogin />} />
                     <Route path="login" element={<Login />} />
                     <Route
