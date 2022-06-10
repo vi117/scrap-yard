@@ -23,6 +23,7 @@ import Settings from "../Component/Settings";
 import ShareButton from "../Component/ShareButton";
 
 import { loginType, logout } from "../Model/login";
+import { getOpenedManagerInstance } from "../Model/RPCManager";
 import Page from "./Page";
 
 const drawerWidth = 240;
@@ -33,7 +34,11 @@ function LogoutButton() {
         <Button
             sx={{ color: "white" }}
             onClick={() => {
-                logout();
+                (async () => {
+                    await logout();
+                    const instance = await getOpenedManagerInstance();
+                    instance.close();
+                })();
                 navigate("/login");
             }}
         >
