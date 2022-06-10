@@ -1,4 +1,9 @@
 import { ConnInfo, serve } from "std/http";
+import { parse as argParse } from "std/flags";
+import "std/dotenv";
+import * as log from "std/log";
+import * as fs from "std/fs";
+
 import {
     getStaticRouter,
     Handler,
@@ -9,7 +14,6 @@ import {
 } from "./router/mod.ts";
 import { FileServeRouter } from "./fileServe.ts";
 import { rpc } from "./rpc.ts";
-import * as log from "std/log";
 import { getServerInformationHandler } from "./infoHandle.ts";
 import {
     getAuthHandler,
@@ -17,8 +21,6 @@ import {
     setAllowAnonymous,
 } from "./auth/session.ts";
 import { configLoadFrom } from "./config.ts";
-import { parse as argParse } from "std/flags";
-import "std/dotenv";
 import { ResponseBuilder } from "./router/responseBuilder.ts";
 import { fileWatcher } from "./rpc/filewatch.ts";
 
@@ -39,7 +41,16 @@ function app() {
 
 export async function serverRun() {
     const args = argParse(Deno.args);
-    const config = await configLoadFrom(args.config ?? "config.jsonc");
+    async function loadConfig() {
+        const configPath = args.config ?? Deno.env.get("CONFIG_PATH");
+        if (configPath) {
+            return await configLoadFrom(configPath);
+        } else {
+            fs.ensureDirSync(".scrap-yard");
+            return configLoadFrom(".scrap-yard/config.jsonc");
+        }
+    }
+    const config = await loadConfig();
 
     console.log(`Server Start`);
 
@@ -50,7 +61,7 @@ export async function serverRun() {
 
     const { handleLogin, handleLogout } = await getAuthHandler({
         password: "secret",
-        sessionPath: "",
+        sessionPath: config.sessionPath,
     });
 
     router.register("/auth/login", handleLogin);

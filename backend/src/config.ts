@@ -3,7 +3,7 @@ import * as logger from "std/log";
 import * as JSONC from "std/jsonc";
 import { crypto } from "std/crypto";
 
-interface ConfigSchema {
+export interface ConfigSchema {
     hosts: string[];
     staticFileHost: string[];
     sessionSecret: string;
@@ -40,7 +40,14 @@ const configSchema: JSONSchemaType<ConfigSchema> = {
             type: "string",
         },
     },
-    required: [],
+    required: [
+        "hosts",
+        "staticFileHost",
+        "sessionSecret",
+        "port",
+        "allowAnonymous",
+        "sessionPath",
+    ],
 };
 
 const ajv = new Ajv();
@@ -79,7 +86,7 @@ const defaultConfigText = `{
     /* allow anonymous user*/
     "allowAnonymous": true,
     /* session path */
-    "sessionPath": ".session.json",
+    "sessionPath": ".session.json"
 }`;
 
 export async function configLoadFrom(path: string) {

@@ -7,6 +7,8 @@ import {
     IReadWriter,
     QueueReadWriter,
 } from "../watcher/mod.ts";
+import * as log from "std/log";
+import { serializedReviver } from "../serializer.ts";
 
 export class SessionStore<T> extends EventTarget {
     sessions: Record<string, T>;
@@ -77,13 +79,25 @@ export async function getAuthHandler(options: getAuthHandlerOption) {
     const rw = options.rw ?? new QueueReadWriter(10, new AtomicReadWriter());
     const sessionPath = options.sessionPath;
 
-    const loaded = await rw.read(sessionPath);
-    sessionStore.load(JSON.parse(loaded));
+    let loaded: string;
+    try {
+        loaded = await rw.read(sessionPath);
+    } catch (e) {
+        log.info("session file not found");
+        if (e instanceof Deno.errors.NotFound) {
+            await rw.write(sessionPath, "{}");
+        } else {
+            log.error(e);
+            throw e;
+        }
+        loaded = "{}";
+    }
+    sessionStore.load(JSON.parse(loaded, serializedReviver));
     sessionStore.addEventListener("set", () => {
-        rw.write(sessionPath, JSON.stringify(sessionStore.toJSON()));
+        rw.write(sessionPath, JSON.stringify(sessionStore, undefined, 2));
     });
     sessionStore.addEventListener("delete", () => {
-        rw.write(sessionPath, JSON.stringify(sessionStore.toJSON()));
+        rw.write(sessionPath, JSON.stringify(sessionStore, undefined, 2));
     });
 
     return { handleLogin, handleLogout };

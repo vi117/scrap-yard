@@ -12,6 +12,7 @@
         "std/jsonc": "https://deno.land/std@0.141.0/encoding/jsonc.ts",
         "std/dotenv": "https://deno.land/std@0.141.0/dotenv/mod.ts",
         "std/flags": "https://deno.land/std@0.141.0/flags/mod.ts",
+        "std/fs": "https://deno.land/std@0.143.0/fs/mod.ts",
         "ajv": "https://esm.sh/ajv@8.11.0",
         "model": "../model/mod.ts"
     }
