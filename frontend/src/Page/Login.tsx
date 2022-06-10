@@ -1,23 +1,38 @@
 // login page for admin.
 
 import { Button, Input, Typography } from "@mui/material";
+import { join } from "path-browserify";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { loginWithPassword } from "../Model/login";
 
 export function Login() {
     const navigate = useNavigate();
+    const [searchParams, _] = useSearchParams();
     const [errorMsg, setErrorMsg] = useState<string | undefined>();
     const [password, setPassword] = useState<string>("");
 
-    const login = () => {
-        loginWithPassword(password)
-            .then(() => navigate("/app"))
-            .catch(e => setErrorMsg(e.message));
+    const login = async () => {
+        try {
+            await loginWithPassword(password);
+            let path = "/app";
+            const returnTo = searchParams.get("returnTo");
+            if (returnTo) {
+                path = join(path, returnTo);
+            }
+            navigate(path);
+        } catch (e) {
+            if (e instanceof Error) {
+                setErrorMsg(e.message);
+            } else {
+                console.error(e);
+                setErrorMsg(JSON.stringify(e));
+            }
+        }
     };
 
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key == "Enter") login();
     };
 

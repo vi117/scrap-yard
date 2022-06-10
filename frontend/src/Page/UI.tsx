@@ -24,6 +24,8 @@ import ShareButton from "../Component/ShareButton";
 
 import { useFileDialog } from "../Component/FileDialog";
 import { loginType, logout } from "../Model/login";
+import { getOpenedManagerInstance } from "../Model/RPCManager";
+
 import Page from "./Page";
 
 const drawerWidth = 240;
@@ -34,7 +36,11 @@ function LogoutButton() {
         <Button
             sx={{ color: "white" }}
             onClick={() => {
-                logout();
+                (async () => {
+                    await logout();
+                    const instance = await getOpenedManagerInstance();
+                    instance.close();
+                })();
                 navigate("/login");
             }}
         >
@@ -86,7 +92,7 @@ export function UI() {
                         >
                             <SettingsIcon />
                         </IconButton>
-                        {loginType() == "pass" && <ShareButton doc={path} />}
+                        <ShareButton doc={path} />
                         <LogoutButton />
                     </Toolbar>
                 </Container>

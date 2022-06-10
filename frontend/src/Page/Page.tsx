@@ -1,16 +1,13 @@
 import { Skeleton, Typography } from "@mui/material";
 import { extname, join as pathJoin } from "path-browserify";
-import { useEffect, useState } from "react";
 import DocumentEditor from "../Component/Document";
-import { Loading } from "../Component/Loading";
 import { getFsManagerInstance } from "../Model/FsManager";
+import { makeEndpointURL } from "../Model/serverInfo";
 import { useAsync } from "../util/util";
 import "../util/util.css";
 
 function makeFsUrl(path: string) {
-    // temporary hack to make the url work
-    // TODO: fix this
-    return "http://localhost:8000" + pathJoin("/fs", path);
+    return makeEndpointURL(pathJoin("/fs", path)).href;
 }
 
 function PageCover(props: {
@@ -73,7 +70,7 @@ export function TextPage(props: {
 }) {
     const { path } = props;
 
-    const state = useAsync(
+    const [state, _] = useAsync(
         async () => {
             const fsManager = await getFsManagerInstance();
             const res = await fsManager.get(path);
