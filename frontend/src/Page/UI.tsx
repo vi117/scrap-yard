@@ -6,6 +6,7 @@ import {
 } from "@mui/icons-material";
 import {
     AppBar,
+    Box,
     Button,
     Container,
     IconButton,
@@ -72,7 +73,7 @@ export function UI() {
     };
 
     return (
-        <div>
+        <Box>
             <AppBar position="static">
                 <Container>
                     <Toolbar>
@@ -124,6 +125,6 @@ export function UI() {
 
             <Page path={path} />
             {FileDialog}
-        </div>
+        </Box>
     );
 }

@@ -9,6 +9,7 @@ import TreeItem, {
 } from "@mui/lab/TreeItem";
 import TreeView from "@mui/lab/TreeView";
 import {
+    Box,
     Button,
     Dialog,
     DialogContent,
@@ -20,7 +21,7 @@ import {
 import clsx from "clsx";
 import { join as pathJoin } from "path-browserify";
 import React, { forwardRef, useCallback, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "./Link";
 
 import { getFsManagerInstance } from "../Model/FsManager";
 import { DirTree, useDirTree } from "./dirTree";
@@ -86,7 +87,7 @@ const DirContent = forwardRef(function DirContent(
     }, [ref]);
 
     return (
-        <div
+        <Box
             className={clsx(className, classes.root, {
                 [classes.expanded]: expanded,
                 [classes.selected]: selected,
@@ -98,22 +99,23 @@ const DirContent = forwardRef(function DirContent(
             onClick={handleClick}
             style={{
                 display: "flex",
-                background: isOver ? "grey" : undefined,
+                background: isOver ? "gray" : undefined,
             }}
         >
-            <div className={classes.iconContainer}>
+            <Box className={classes.iconContainer}>
                 {icon}
-            </div>
+            </Box>
 
             <Typography
                 component="div"
+                color="text.primary"
                 className={classes.label}
                 noWrap={true}
             >
                 <Link
+                    color="inherit"
                     style={{
                         textDecoration: "none",
-                        color: "black",
                         display: "block",
                     }}
                     key={path}
@@ -137,7 +139,7 @@ const DirContent = forwardRef(function DirContent(
                 handleClose={handleMenuClose}
                 handleFile={handleFile}
             />
-        </div>
+        </Box>
     );
 });
 
@@ -170,7 +172,7 @@ function NewFileButton(props: {
             <IconButton size="small" sx={{ alignSelf: "end" }} onClick={dclose}>
                 <CloseIcon />
             </IconButton>
-            <div style={{ display: "flex" }}>
+            <Box style={{ display: "flex" }}>
                 <Input
                     placeholder="filename.syd"
                     type="text"
@@ -185,7 +187,7 @@ function NewFileButton(props: {
                 >
                     Add
                 </Button>
-            </div>
+            </Box>
         </DialogContent>
     );
 
@@ -277,7 +279,7 @@ export function FileTree(props: Omit<FileTreeProp, "dirTree">) {
     if (dirTree != null) {
         return <FileTreeInner {...props} dirTree={dirTree} />;
     } else {
-        return <div>wait</div>;
+        return <Box>wait</Box>;
     }
 }
 

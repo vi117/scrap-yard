@@ -2,6 +2,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import {
+    Box,
     Button,
     FormControl,
     InputLabel,
@@ -64,15 +65,15 @@ const Preview = (props: {
     content: string;
 }) => {
     return (
-        <div
-            style={{
+        <Box
+            sx={{
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
             }}
         >
             {renderView(props.type, props.content)}
-        </div>
+        </Box>
     );
 };
 
@@ -152,14 +153,14 @@ const Chunk = (props: {
     const renderContent = () => {
         if (mode == "Read") {
             return (
-                <div
+                <Box
                     id="content"
                     className="content"
                     style={{ height: "100%" }}
                     onClick={() => setMode("Write")}
                 >
                     {renderView(chunkContent.type, chunkContent.content)}
-                </div>
+                </Box>
             );
         } else { // edit mode
             // TODO: change this to proper editor
@@ -218,7 +219,7 @@ const Chunk = (props: {
             onFocus={onFocus}
             component={"div"}
         >
-            <div // content
+            <Box // content
                 style={{
                     display: "flex",
                     flexDirection: "column",
@@ -228,9 +229,9 @@ const Chunk = (props: {
                 {renderContent()}
                 {(mode == "Write" && chunkContent.type == "katex")
                     && <Preview type={chunkContent.type} content={buffer} />}
-            </div>
+            </Box>
 
-            <div // sidebar
+            <Box // sidebar
                 style={{
                     display: "flex",
                     flexDirection: "column",
@@ -240,7 +241,7 @@ const Chunk = (props: {
                 {editButton}
                 {deleteButton}
                 {typeSelector}
-            </div>
+            </Box>
         </Paper>
     );
 };

@@ -1,4 +1,4 @@
-import { Skeleton, Typography } from "@mui/material";
+import { Box, Container, Paper, Skeleton, Typography } from "@mui/material";
 import { extname, join as pathJoin } from "path-browserify";
 import DocumentEditor from "../Component/Document";
 import { getFsManagerInstance } from "../Model/FsManager";
@@ -14,18 +14,17 @@ function PageCover(props: {
     children: React.ReactNode;
 }) {
     return (
-        <div
-            style={{
+        <Box
+            sx={{
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                width: "100%",
-                backgroundColor: "#fafafa",
+                height: "calc(100vh - 64px)",
             }}
         >
             {props.children}
-        </div>
+        </Box>
     );
 }
 
@@ -87,14 +86,22 @@ export function TextPage(props: {
         if (state.error instanceof Error) {
             return (
                 <PageCover>
-                    <Typography variant="h5">
+                    <Typography color="text.primary" variant="h5">
                         {state.error.message}
                     </Typography>
                 </PageCover>
             );
+        } else {
+            console.error(state.error);
         }
     }
-    return <p style={{ padding: "1em" }}>{state.data}</p>;
+    return (
+        <Container sx={{ padding: "1em" }}>
+            <Typography color="text.primary" variant="body1">
+                {state.data}
+            </Typography>;
+        </Container>
+    );
 }
 
 export function Page(props: { path: string }) {
@@ -102,12 +109,12 @@ export function Page(props: { path: string }) {
     const ext = extname(path);
     if (path === "") {
         return (
-            <div className="center_container">
-                <Typography variant="h3">
+            <Box className="center_container">
+                <Typography color="text.primary" variant="h3">
                     Welcome to Scrap Yard: a web-based file manager.<br />
                     Please select a file or folder to view.
                 </Typography>
-            </div>
+            </Box>
         );
     }
     switch (ext) {
@@ -135,11 +142,11 @@ export function Page(props: { path: string }) {
         case ".markdown":
         default:
             return (
-                <div className="center_container">
-                    <Typography variant="h2">
+                <Box className="center_container">
+                    <Typography color="text.primary" variant="h2">
                         Viewer Not Exist: {path}
                     </Typography>
-                </div>
+                </Box>
             );
     }
 }

@@ -1,4 +1,10 @@
-import { Button, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    ThemeProvider,
+    Typography,
+    useTheme,
+} from "@mui/material";
 import {
     BrowserRouter,
     Navigate,
@@ -8,6 +14,7 @@ import {
 } from "react-router-dom";
 import { RecoilRoot } from "recoil";
 
+import { createTheme } from "@mui/material";
 import "./App.css";
 import { Loading } from "./Component/Loading";
 import { getLoginInfo } from "./Model/login";
@@ -21,10 +28,20 @@ import { useAsync } from "./util/util";
 
 import "./util/util.css";
 
+const theme = createTheme({
+    palette: {
+        mode: "dark",
+    },
+});
+
 function AppContainer() {
     return (
         <RecoilRoot>
-            <App></App>
+            <ThemeProvider theme={theme}>
+                <Box bgcolor="background.default" className="FullScreen">
+                    <App></App>
+                </Box>
+            </ThemeProvider>
         </RecoilRoot>
     );
 }
@@ -57,19 +74,19 @@ function App() {
     );
     if (accessible.loading) {
         return (
-            <div className="center_container">
+            <Box className="center_container">
                 <Loading></Loading>
-            </div>
+            </Box>
         );
     }
     if (accessible.error) {
         return (
-            <div className="center_container">
-                <Typography variant="h5">
+            <Box className="center_container">
+                <Typography color="text.primary" variant="h5">
                     Loading Failed. Please check your network.
                 </Typography>
                 <Button onClick={reload}>reload</Button>
-            </div>
+            </Box>
         );
     }
 

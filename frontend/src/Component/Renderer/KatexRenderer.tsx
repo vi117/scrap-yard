@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 import { useEffect, useRef } from "react";
@@ -12,5 +13,5 @@ export function KatexRenderer(props: { tex: string }) {
             });
         }
     }, [props.tex]);
-    return <div ref={ref}></div>;
+    return <Box color="text.primary" ref={ref}></Box>;
 }

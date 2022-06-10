@@ -1,4 +1,4 @@
-import { Button, Chip, Input, Stack } from "@mui/material";
+import { Box, Button, Chip, Input, Stack } from "@mui/material";
 import { FormEventHandler, Fragment, useState } from "react";
 import { atom, RecoilState, useRecoilState } from "recoil";
 import { v4 as uuidv4 } from "uuid";
@@ -100,11 +100,11 @@ function InnerDocumentEditor(
     const readonly = !writable;
 
     return (
-        <div id="document">
+        <Box id="document">
             <TagBar readonly={readonly} doc={props.doc} />
             <ChunkList readonly={readonly} doc={props.doc} />
             {!readonly && <Stash />}
-        </div>
+        </Box>
     );
 }
 
@@ -114,14 +114,14 @@ export type DocumentEditorProps = {
 
 export function DocumentEditor(props: DocumentEditorProps) {
     if (props.path == "empty") {
-        return <div>please open a document</div>; // TODO: proper empty document page
+        return <Box>please open a document</Box>; // TODO: proper empty document page
     } else {
         const doc = useDocViewModel(props.path);
 
         if (doc != null) {
             return <InnerDocumentEditor doc={doc} />;
         } else {
-            return <div>please wait...</div>;
+            return <Box>please wait...</Box>;
         }
     }
 }
