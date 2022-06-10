@@ -18,6 +18,16 @@
             ]
         }
     },
+    "lint": {
+        "files": {
+            "include": [
+                "src/",
+                "app.ts",
+                "deno.json",
+                "import_map.json"
+            ]
+        }
+    },
     "tasks": {
         "test": "deno test --no-check -A",
         "test_coverage": "deno test --no-check -A --coverage=coverage",
