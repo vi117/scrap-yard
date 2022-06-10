@@ -16,5 +16,5 @@ if (import.meta.main) {
 
     Deno.chdir("testworkspace");
 
-    await serverRun();
+    await serverRun("../dist");
 }

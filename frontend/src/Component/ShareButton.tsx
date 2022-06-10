@@ -123,7 +123,7 @@ export function ShareButton(props: {
         setAnchorEl(null);
     };
 
-    const copy = (token) => {
+    const copy = (token: string) => {
         // TODO: need to change URL.
         const url = "http://localhost:3000/token/" + token;
         navigator.clipboard.writeText(url);

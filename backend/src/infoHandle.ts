@@ -16,7 +16,7 @@ export function getServerInformationHandler(): Handler {
             "name": "scrap-yard-server",
             "version": VERSION,
             "description": "A simple server",
-            "host": url.host,
+            "host": url.hostname,
             "port": url.port,
             "allowAnonymous": getAllowAnonymous(),
         });

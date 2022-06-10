@@ -69,7 +69,7 @@ export class ConfigError extends Error {
     }
 }
 
-export function configLoad(data: string) {
+export function configLoad(data: string): ConfigSchema {
     const json = JSONC.parse(data);
     if (validate(json)) {
         return json;

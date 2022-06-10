@@ -1,4 +1,5 @@
 import { Status, STATUS_TEXT } from "std/http";
+import { serveFile } from "std/file_server";
 
 export class ResponseBuilder {
     status: Status;
@@ -83,6 +84,13 @@ export class ResponseBuilder {
             .setHeader("Location", location);
         return this;
     }
+
+    async serveFile(req: Request, path: string) {
+        const res = await serveFile(req, path);
+        this.setResponse(res);
+        return this;
+    }
+
     build(): Response {
         if (this.#resolved) {
             return this.#response;

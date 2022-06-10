@@ -63,6 +63,7 @@ function App() {
         );
     }
     if (accessible.error) {
+        console.error(accessible.error);
         return (
             <div className="center_container">
                 <Typography variant="h5">
