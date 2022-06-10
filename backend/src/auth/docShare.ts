@@ -1,5 +1,9 @@
 import * as RPC from "model";
-import { AtomicReadWriter, QueueReadWriter } from "../watcher/readWriter.ts";
+import {
+    AtomicReadWriter,
+    IReadWriter,
+    QueueReadWriter,
+} from "../watcher/readWriter.ts";
 import { sessionStore } from "./session.ts";
 import { createUser } from "./user.ts";
 import * as log from "std/log";
@@ -50,10 +54,23 @@ class ShareDocStoreType extends Map<string, ShareDocInfo>
 }
 
 export const ShareDocStore = new ShareDocStoreType();
-export const ShareDocStoreRW = new QueueReadWriter(10, new AtomicReadWriter());
+let ShareDocStoreRW: IReadWriter = new QueueReadWriter(
+    10,
+    new AtomicReadWriter(),
+);
+export function setShareDocStoreRw(rw: IReadWriter): void {
+    ShareDocStoreRW = rw;
+}
+export function getShareDocStoreRw(): IReadWriter {
+    return ShareDocStoreRW;
+}
+
 let ShareDocStorePath = "";
 export function setShareDocStorePath(path: string): void {
     ShareDocStorePath = path;
+}
+export function getShareDocStorePath(): string {
+    return ShareDocStorePath;
 }
 
 export async function loadShareDocStore(): Promise<void> {
