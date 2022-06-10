@@ -188,6 +188,7 @@ export function Stash() {
                 open={open}
                 anchorEl={anchorRef.current}
                 placement="top"
+                sx={{ "zIndex": "tooltip" }}
             >
                 <ClickAwayListener
                     onClickAway={() => setOpen(false)}
