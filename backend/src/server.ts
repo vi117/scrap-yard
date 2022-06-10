@@ -62,9 +62,13 @@ export async function serverRun() {
     const sih = getServerInformationHandler();
     router.register("info", sih);
 
+    const sessionSecret = Deno.env.get("SESSION_SECRET") ??
+        config.sessionSecret;
+    const password = Deno.env.get("PASSWORD") ?? config.password;
+
     const { handleLogin, handleLogout } = await getAuthHandler({
-        password: config.password,
-        secret: config.sessionSecret,
+        password: password,
+        secret: sessionSecret,
         sessionPath: config.sessionPath,
     });
 
@@ -73,6 +77,12 @@ export async function serverRun() {
     router.register("/auth/info", handleGetSessionUserInfo);
 
     fileWatcher.startWatching();
+
+    let port = config.port ?? (parseInt(Deno.env.get("PORT") ?? ""));
+    if (isNaN(port)) {
+        log.info(`port is not a number: ${port}. use default port 8080`);
+        port = 8080;
+    }
 
     serve(async (req: Request, _info: ConnInfo) => {
         const begin = Date.now();
@@ -90,7 +100,7 @@ export async function serverRun() {
             }ms, response: ${response.status}`,
         );
         return response.build();
-    }, { port: config.port, hostname: "0.0.0.0" });
+    }, { port: port, hostname: "0.0.0.0" });
 
     async function serveRequest(req: Request) {
         const ctx = {};

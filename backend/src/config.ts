@@ -8,7 +8,7 @@ export interface ConfigSchema {
     staticFileHost: string[];
     sessionSecret: string;
     password: string;
-    port: number;
+    port?: number;
     allowAnonymous: boolean;
     sessionPath: string;
     shareDocStorePath: string;
@@ -34,6 +34,7 @@ const configSchema: JSONSchemaType<ConfigSchema> = {
         },
         port: {
             type: "number",
+            nullable: true,
         },
         allowAnonymous: {
             type: "boolean",
@@ -52,7 +53,6 @@ const configSchema: JSONSchemaType<ConfigSchema> = {
         "hosts",
         "staticFileHost",
         "sessionSecret",
-        "port",
         "allowAnonymous",
         "sessionPath",
         "shareDocStorePath",
@@ -72,11 +72,6 @@ export class ConfigError extends Error {
 export function configLoad(data: string) {
     const json = JSONC.parse(data);
     if (validate(json)) {
-        json.hosts ??= [];
-        json.staticFileHost ??= json.hosts;
-        json.sessionSecret ??= Deno.env.get("SESSION_SECRET") ??
-            crypto.randomUUID();
-        json.port ??= parseInt(Deno.env.get("PORT") ?? "8080");
         return json;
     } else {
         logger.warning(`invalid config: ${validate.errors}`);
