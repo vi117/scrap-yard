@@ -63,8 +63,9 @@ const DirContent = forwardRef(function DirContent(
     const anchorRef = useRef<HTMLAnchorElement>(null);
     const [menuOpen, setMenuOpen] = useState(false);
 
-    const handleMenuClick = () => {
+    const handleMenuClick = (e: React.MouseEvent<HTMLElement>) => {
         setMenuOpen(true);
+        e.stopPropagation();
     };
     const handleMenuClose = () => {
         setMenuOpen(false);
