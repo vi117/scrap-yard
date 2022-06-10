@@ -11,7 +11,7 @@ export function loginType(): string {
  * @throws Error if not found.
  */
 export async function loginWithToken(token: string): Promise<void> {
-    const url = await makeEndpointURL("/auth/login/");
+    const url = makeEndpointURL("/auth/login/");
     const res = await fetch(url.href, {
         method: "POST",
         credentials: "include",
@@ -31,7 +31,7 @@ export async function loginWithToken(token: string): Promise<void> {
  * @param password password of user
  */
 export async function loginWithPassword(password: string): Promise<void> {
-    const url = await makeEndpointURL("/auth/login");
+    const url = makeEndpointURL("/auth/login");
     const res = await fetch(url.href, {
         method: "POST",
         credentials: "include",
@@ -51,7 +51,7 @@ export async function loginWithPassword(password: string): Promise<void> {
  * @throws Error if not login
  */
 export async function logout(): Promise<void> {
-    const url = await makeEndpointURL("/auth/logout");
+    const url = makeEndpointURL("/auth/logout");
     const res = await fetch(url.href, {
         method: "POST",
         credentials: "include",
@@ -76,7 +76,7 @@ export type LoginInfo = {
  * @returns login info
  */
 export async function getLoginInfo(): Promise<LoginInfo> {
-    const url = await makeEndpointURL("/auth/info");
+    const url = makeEndpointURL("/auth/info");
     const res = await fetch(url.href, {
         credentials: "include",
     });

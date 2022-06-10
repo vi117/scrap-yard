@@ -15,9 +15,17 @@ type AsyncDataAction<T> = {
 };
 
 type AsyncDataState<T> = {
-    loading: boolean;
-    data: T | null;
-    error: unknown | null;
+    loading: true;
+    data: null;
+    error: null;
+} | {
+    loading: false;
+    data: T;
+    error: null;
+} | {
+    loading: false;
+    data: null;
+    error: unknown;
 };
 
 function AsyncDataReducer<T>(
@@ -56,7 +64,7 @@ export function useAsync<T>(
     fn: () => Promise<T>,
     cleanUp?: () => void,
     deps?: unknown[],
-): AsyncDataState<T> {
+): [AsyncDataState<T>, () => void] {
     const [state, dispatch] = useReducer(
         AsyncDataReducer as (
             state: AsyncDataState<T>,
@@ -84,5 +92,9 @@ export function useAsync<T>(
         return cleanUp;
     }, deps);
 
-    return state;
+    const reload = () => {
+        dipatchData();
+    };
+
+    return [state, reload];
 }

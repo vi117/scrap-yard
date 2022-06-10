@@ -105,6 +105,7 @@ export class RPCMessageManager extends EventTarget
     close() {
         if (this.ws) {
             this.ws.close();
+            this.ws = undefined;
         }
         this.callbackList.clear();
     }
@@ -178,20 +179,19 @@ let RPCManagerLock: null | Promise<void> = null;
 
 export async function getOpenedManagerInstance(): Promise<IRPCMessageManager> {
     if (!RPCManager.opened) {
-        if (RPCManagerLock !== null) {
-            await RPCManagerLock;
-        } else {
+        if (RPCManagerLock === null) {
             RPCManagerLock = (async () => {
                 const info = await getServerInfoInstance();
                 const url = new URL(`ws://${info.host}:${info.port}/ws`);
                 await RPCManager.open(url);
             })();
-            await RPCManagerLock;
         }
+        await RPCManagerLock;
+        RPCManagerLock = null;
     }
     return RPCManager;
 }
 
 // for debugging
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-(window as any).getOpenedManagerInstance = getOpenedManagerInstance;
+(window as any).RPCManager = RPCManager;
