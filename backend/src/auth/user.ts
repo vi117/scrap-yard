@@ -1,5 +1,10 @@
-import { createPermission, IPermissionDescriptor } from "./permission.ts";
+import {
+    AdminPermission,
+    createPermission,
+    IPermissionDescriptor,
+} from "./permission.ts";
 import { join as pathJoin, relative } from "std/path";
+import { registerReconstructor } from "../serializer.ts";
 export interface IUser extends IPermissionDescriptor {
     readonly id: string;
     readonly expiredAt: number;
@@ -10,7 +15,18 @@ export interface IUser extends IPermissionDescriptor {
 
     setExpired(seconds: number): void;
     isExpired(): boolean;
+
+    // deno-lint-ignore no-explicit-any
+    toJSON(): any;
 }
+
+type UserSessionImplJSON = {
+    __type__: "UserSessionImpl";
+    id: string;
+    expiredAt: number;
+    basepath: string;
+    permissionSet: IPermissionDescriptor;
+};
 
 class UserSessionImpl implements IUser {
     id: string;
@@ -26,6 +42,15 @@ class UserSessionImpl implements IUser {
         this.expiredAt = Date.now() + 1000 * 60 * 60 * 24 * 30;
         this.permissionSet = permissionSet;
         this.basepath = basepath;
+    }
+    toJSON(): UserSessionImplJSON {
+        return {
+            __type__: "UserSessionImpl",
+            id: this.id,
+            permissionSet: this.permissionSet,
+            expiredAt: this.expiredAt,
+            basepath: this.basepath,
+        };
     }
 
     joinPath(path: string): string {
@@ -55,13 +80,18 @@ class UserSessionImpl implements IUser {
             this.permissionSet.canCustom(path, options);
     }
 }
+registerReconstructor("UserSessionImpl", (value: UserSessionImplJSON) => {
+    const ret = new UserSessionImpl(
+        value.id,
+        value.permissionSet,
+        value.basepath,
+    );
+    ret.expiredAt = value.expiredAt;
+    return ret;
+});
 
 export function createAdminUser(tokenKey: string): IUser {
-    return new UserSessionImpl(tokenKey, {
-        canRead: (_path) => true,
-        canWrite: (_path) => true,
-        canCustom: (_path, _options) => true,
-    }, "");
+    return new UserSessionImpl(tokenKey, new AdminPermission(), "");
 }
 
 export type createUserOptions = {

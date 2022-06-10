@@ -1,6 +1,12 @@
 import * as RPC from "model";
+import {
+    AtomicReadWriter,
+    IReadWriter,
+    QueueReadWriter,
+} from "../watcher/readWriter.ts";
 import { sessionStore } from "./session.ts";
 import { createUser } from "./user.ts";
+import * as log from "std/log";
 
 export interface ShareDocInfo extends RPC.ShareDocDescription {
     shareToken: string;
@@ -32,6 +38,59 @@ class ShareDocStoreType extends Map<string, ShareDocInfo>
         }
         return super.delete(docPath);
     }
+
+    toJSON(): { [key: string]: ShareDocInfo } {
+        const json: { [key: string]: ShareDocInfo } = {};
+        for (const [k, v] of super.entries()) {
+            json[k] = v;
+        }
+        return json;
+    }
+    load(json: { [key: string]: ShareDocInfo }): void {
+        for (const [k, v] of Object.entries(json)) {
+            this.set(k, v);
+        }
+    }
 }
 
 export const ShareDocStore = new ShareDocStoreType();
+let ShareDocStoreRW: IReadWriter = new QueueReadWriter(
+    10,
+    new AtomicReadWriter(),
+);
+export function setShareDocStoreRw(rw: IReadWriter): void {
+    ShareDocStoreRW = rw;
+}
+export function getShareDocStoreRw(): IReadWriter {
+    return ShareDocStoreRW;
+}
+
+let ShareDocStorePath = "";
+export function setShareDocStorePath(path: string): void {
+    ShareDocStorePath = path;
+}
+export function getShareDocStorePath(): string {
+    return ShareDocStorePath;
+}
+
+export async function loadShareDocStore(): Promise<void> {
+    let data: string;
+    try {
+        data = await ShareDocStoreRW.read(ShareDocStorePath);
+    } catch (error) {
+        if (error instanceof Deno.errors.NotFound) {
+            log.info("share doc store file not found");
+            await ShareDocStoreRW.write(ShareDocStorePath, "{}");
+        } else {
+            throw error;
+        }
+        data = "{}";
+    }
+    ShareDocStore.load(JSON.parse(data));
+}
+export async function saveShareDocStore() {
+    await ShareDocStoreRW.write(
+        ShareDocStorePath,
+        JSON.stringify(ShareDocStore),
+    );
+}

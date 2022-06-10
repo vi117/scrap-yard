@@ -1,0 +1,11 @@
+{
+    "329fc920-e542-405d-9c73-137c37fc7499": {
+        "__type__": "UserSessionImpl",
+        "id": "329fc920-e542-405d-9c73-137c37fc7499",
+        "permissionSet": {
+            "__type__": "AdminPermission"
+        },
+        "expiredAt": 1657449399002,
+        "basepath": ""
+    }
+}

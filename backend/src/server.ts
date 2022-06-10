@@ -1,4 +1,9 @@
 import { ConnInfo, serve } from "std/http";
+import { parse as argParse } from "std/flags";
+import "std/dotenv";
+import * as log from "std/log";
+import * as fs from "std/fs";
+
 import {
     getStaticRouter,
     Handler,
@@ -9,7 +14,6 @@ import {
 } from "./router/mod.ts";
 import { FileServeRouter } from "./fileServe.ts";
 import { rpc } from "./rpc.ts";
-import * as log from "std/log";
 import { getServerInformationHandler } from "./infoHandle.ts";
 import {
     getAuthHandler,
@@ -17,10 +21,9 @@ import {
     setAllowAnonymous,
 } from "./auth/session.ts";
 import { configLoadFrom } from "./config.ts";
-import { parse as argParse } from "std/flags";
-import "std/dotenv";
 import { ResponseBuilder } from "./router/responseBuilder.ts";
 import { fileWatcher } from "./rpc/filewatch.ts";
+import { loadShareDocStore, setShareDocStorePath } from "./auth/docShare.ts";
 
 const router = new TreeRouter<Handler>();
 
@@ -39,17 +42,34 @@ function app() {
 
 export async function serverRun() {
     const args = argParse(Deno.args);
-    const config = await configLoadFrom(args.config ?? "config.jsonc");
+    async function loadConfig() {
+        const configPath = args.config ?? Deno.env.get("CONFIG_PATH");
+        if (configPath) {
+            return await configLoadFrom(configPath);
+        } else {
+            fs.ensureDirSync(".scrap-yard");
+            return configLoadFrom(".scrap-yard/config.jsonc");
+        }
+    }
+    const config = await loadConfig();
 
     console.log(`Server Start`);
 
     setAllowAnonymous(config.allowAnonymous);
+    setShareDocStorePath(config.shareDocStorePath);
+    await loadShareDocStore();
 
     const sih = getServerInformationHandler();
     router.register("info", sih);
 
-    const { handleLogin, handleLogout } = getAuthHandler({
-        password: "secret",
+    const sessionSecret = Deno.env.get("SESSION_SECRET") ??
+        config.sessionSecret;
+    const password = Deno.env.get("PASSWORD") ?? config.password;
+
+    const { handleLogin, handleLogout } = await getAuthHandler({
+        password: password,
+        secret: sessionSecret,
+        sessionPath: config.sessionPath,
     });
 
     router.register("/auth/login", handleLogin);
@@ -57,6 +77,12 @@ export async function serverRun() {
     router.register("/auth/info", handleGetSessionUserInfo);
 
     fileWatcher.startWatching();
+
+    let port = config.port ?? (parseInt(Deno.env.get("PORT") ?? ""));
+    if (isNaN(port)) {
+        log.info(`port is not a number: ${port}. use default port 8080`);
+        port = 8080;
+    }
 
     serve(async (req: Request, _info: ConnInfo) => {
         const begin = Date.now();
@@ -74,7 +100,7 @@ export async function serverRun() {
             }ms, response: ${response.status}`,
         );
         return response.build();
-    }, { port: config.port, hostname: "0.0.0.0" });
+    }, { port: port, hostname: "0.0.0.0" });
 
     async function serveRequest(req: Request) {
         const ctx = {};

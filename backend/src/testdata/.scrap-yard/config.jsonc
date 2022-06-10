@@ -1,0 +1,18 @@
+{
+    /* hosts of this server */
+    "hosts": [],
+    /* hosts of static files server */
+    "staticFileHost": [],
+    /* session secret */
+    "sessionSecret": "secret",
+    /* port */
+    "port": 4567,
+    /* allow anonymous user*/
+    "allowAnonymous": true,
+    /* session path */
+    "sessionPath": ".scrap-yard/session.json",
+    /* session doc path */
+    "shareDocStorePath": ".scrap-yard/session_doc.json",
+    /* password */
+    "password": "secret"
+}

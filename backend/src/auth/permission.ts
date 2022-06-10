@@ -1,4 +1,5 @@
 import { normalize as normalizePath, relative } from "std/path";
+import { registerReconstructor } from "../serializer.ts";
 
 export interface IPermissionDescriptor {
     /**
@@ -17,11 +18,32 @@ export interface IPermissionDescriptor {
      */
     // deno-lint-ignore no-explicit-any
     canCustom(path: string, options: any): boolean;
+
+    // deno-lint-ignore no-explicit-any
+    toJSON(): any;
 }
 
 type createPermissionOption = {
     writable?: boolean;
 };
+
+export class AdminPermission implements IPermissionDescriptor {
+    canRead(): boolean {
+        return true;
+    }
+    canWrite(): boolean {
+        return true;
+    }
+    canCustom(): boolean {
+        return true;
+    }
+    toJSON() {
+        return {
+            __type__: "AdminPermission",
+        };
+    }
+}
+registerReconstructor("AdminPermission", () => new AdminPermission());
 
 class PermissionImpl implements IPermissionDescriptor {
     basePath: string;
@@ -33,6 +55,13 @@ class PermissionImpl implements IPermissionDescriptor {
         }
         this.basePath = basePath;
         this.writable = options?.writable ?? false;
+    }
+    toJSON() {
+        return {
+            __type__: "PermissionImpl",
+            basePath: this.basePath,
+            writable: this.writable,
+        };
     }
 
     canRead(path: string): boolean {
@@ -53,6 +82,10 @@ class PermissionImpl implements IPermissionDescriptor {
         return false;
     }
 }
+// deno-lint-ignore no-explicit-any
+registerReconstructor("PermissionImpl", (value: any) => {
+    return new PermissionImpl(value.basePath, { writable: value.writable });
+});
 
 export function createPermission(
     basePath: string,

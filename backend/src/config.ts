@@ -3,12 +3,15 @@ import * as logger from "std/log";
 import * as JSONC from "std/jsonc";
 import { crypto } from "std/crypto";
 
-interface ConfigSchema {
+export interface ConfigSchema {
     hosts: string[];
     staticFileHost: string[];
     sessionSecret: string;
-    port: number;
+    password: string;
+    port?: number;
     allowAnonymous: boolean;
+    sessionPath: string;
+    shareDocStorePath: string;
 }
 
 const configSchema: JSONSchemaType<ConfigSchema> = {
@@ -31,12 +34,30 @@ const configSchema: JSONSchemaType<ConfigSchema> = {
         },
         port: {
             type: "number",
+            nullable: true,
         },
         allowAnonymous: {
             type: "boolean",
         },
+        sessionPath: {
+            type: "string",
+        },
+        shareDocStorePath: {
+            type: "string",
+        },
+        password: {
+            type: "string",
+        },
     },
-    required: [],
+    required: [
+        "hosts",
+        "staticFileHost",
+        "sessionSecret",
+        "allowAnonymous",
+        "sessionPath",
+        "shareDocStorePath",
+        "password",
+    ],
 };
 
 const ajv = new Ajv();
@@ -51,11 +72,6 @@ export class ConfigError extends Error {
 export function configLoad(data: string) {
     const json = JSONC.parse(data);
     if (validate(json)) {
-        json.hosts ??= [];
-        json.staticFileHost ??= json.hosts;
-        json.sessionSecret ??= Deno.env.get("SESSION_SECRET") ??
-            crypto.randomUUID();
-        json.port ??= parseInt(Deno.env.get("PORT") ?? "8080");
         return json;
     } else {
         logger.warning(`invalid config: ${validate.errors}`);
@@ -73,7 +89,13 @@ const defaultConfigText = `{
     /* port to serve */
     "port": 8000,
     /* allow anonymous user*/
-    "allowAnonymous": true
+    "allowAnonymous": true,
+    /* session path */
+    "sessionPath": ".scrap-yard/session.json",
+    /* session doc path */
+    "shareDocStorePath": ".scrap-yard/session_doc.json",
+    /* password */
+    "password": "secret"
 }`;
 
 export async function configLoadFrom(path: string) {

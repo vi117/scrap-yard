@@ -92,6 +92,7 @@ class WebSocketConnection {
 
 Deno.test({
     name: "server rpc test",
+
     fn: async () => {
         try {
             await startServer();

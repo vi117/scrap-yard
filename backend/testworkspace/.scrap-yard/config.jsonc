@@ -1,0 +1,18 @@
+{
+    /* hosts of this server */
+    "hosts": ["http://localhost:8000", "http://localhost:3000"],
+    /* hosts of static files server */
+    "staticFileHost": ["http://localhost:3000", "http://localhost:8000"],
+    /* session secret */
+    "sessionSecret": "329fc920-e542-405d-9c73-137c37fc7499",
+    /* port to serve */
+    "port": 8000,
+    /* allow anonymous user*/
+    "allowAnonymous": true,
+    /* session path */
+    "sessionPath": ".scrap-yard/session.json",
+    /* session doc path */
+    "shareDocStorePath": ".scrap-yard/session_doc.json",
+    /* password */
+    "password": "secret"
+}

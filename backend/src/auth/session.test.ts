@@ -6,9 +6,16 @@ import {
 } from "./session.ts";
 import { createAdminUser, IUser } from "./user.ts";
 import { assert, assertEquals, assertNotEquals } from "std/assert";
+import { MemoryReadWriter } from "../watcher/mod.ts";
 
-const PASSWORD = "secret";
-const { handleLogin, handleLogout } = getAuthHandler({ "password": PASSWORD });
+const PASSWORD = "password";
+const SECRET = "secret";
+const { handleLogin, handleLogout } = await getAuthHandler({
+    password: PASSWORD,
+    secret: SECRET,
+    rw: new MemoryReadWriter(),
+    sessionPath: "test.json",
+});
 
 Deno.test({
     name: "Session",
@@ -64,7 +71,7 @@ Deno.test({
 
         await t.step("login", async () => {
             const body = JSON.stringify({
-                PASSWORD,
+                password: PASSWORD,
             });
             const res = await handleLogin(
                 makeJSONRequest({}, body),
@@ -73,6 +80,7 @@ Deno.test({
             const cookies = res.headers.get("Set-Cookie");
             assert(cookies !== null, "no cookies");
             uuid = cookies.split(";")[0].split("=")[1];
+            assertEquals(uuid, SECRET);
         });
 
         await t.step("logout with no session", async () => {
@@ -97,7 +105,7 @@ Deno.test({
     name: "getSession",
     fn: async () => {
         const body = JSON.stringify({
-            PASSWORD,
+            password: PASSWORD,
         });
         const res = await handleLogin(
             makeJSONRequest({}, body),
