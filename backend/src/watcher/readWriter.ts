@@ -50,6 +50,7 @@ export class AtomicReadWriter implements IReadWriter {
     async write(path: string, content: string): Promise<void> {
         const tempFile = await Deno.makeTempFile({
             prefix: ".deno_tmp_",
+            dir: ".",
         });
         await Deno.writeTextFile(tempFile, content);
         // rename is atomic on POSIX
