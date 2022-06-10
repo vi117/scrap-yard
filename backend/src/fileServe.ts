@@ -39,8 +39,19 @@ export class FileServeRouter implements Router<Handler> {
                     msg: "Forbidden",
                 });
             }
-
-            const stat = await Deno.stat(path);
+            let stat: Deno.FileInfo;
+            try {
+                stat = await Deno.stat(path);
+            } catch (e) {
+                if (e instanceof Deno.errors.NotFound) {
+                    return makeJsonResponse(Status.NotFound, {
+                        ok: false,
+                        msg: "Not found: File does not exist",
+                    });
+                } else {
+                    throw e;
+                }
+            }
             if (isStat) {
                 if (stat.isDirectory) {
                     return makeJsonResponse(Status.OK, {
@@ -54,7 +65,7 @@ export class FileServeRouter implements Router<Handler> {
                     });
                 }
             } else {
-                if (stat.isDirectory) {
+                if (!stat.isFile) {
                     return makeJsonResponse(Status.BadRequest, {
                         ok: false,
                         msg: "Not file",
@@ -81,7 +92,7 @@ export class FileServeRouter implements Router<Handler> {
                 });
             }
 
-            const p = url.searchParams.get("renameTo");
+            const p = url.searchParams.get("newPath");
 
             if (p) {
                 const newPath = user.joinPath(p);
@@ -99,7 +110,7 @@ export class FileServeRouter implements Router<Handler> {
             }
             return makeJsonResponse(Status.BadRequest, {
                 ok: false,
-                msg: "Bad request",
+                msg: "Bad request: format are invalid.",
             });
         }
 

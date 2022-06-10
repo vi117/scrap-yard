@@ -290,6 +290,18 @@ export class FsManager extends EventTarget implements IFsManager {
         await res.json();
         return res.status;
     }
+
+    async rename(oldPath: string, newPath: string): Promise<number> {
+        const url = this.getURL(oldPath);
+        url.searchParams.set("newPath", newPath);
+        const res = await this.#fetchRequest(url, {
+            method: "POST",
+        });
+        if (!res.ok) {
+            throw new Error(res.statusText);
+        }
+        return res.status;
+    }
 }
 
 let fs: IFsManager | null = null;
