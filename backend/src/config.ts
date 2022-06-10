@@ -10,6 +10,7 @@ export interface ConfigSchema {
     port: number;
     allowAnonymous: boolean;
     sessionPath: string;
+    shareDocStorePath: string;
 }
 
 const configSchema: JSONSchemaType<ConfigSchema> = {
@@ -39,6 +40,9 @@ const configSchema: JSONSchemaType<ConfigSchema> = {
         sessionPath: {
             type: "string",
         },
+        shareDocStorePath: {
+            type: "string",
+        },
     },
     required: [
         "hosts",
@@ -47,6 +51,7 @@ const configSchema: JSONSchemaType<ConfigSchema> = {
         "port",
         "allowAnonymous",
         "sessionPath",
+        "shareDocStorePath",
     ],
 };
 
@@ -86,7 +91,9 @@ const defaultConfigText = `{
     /* allow anonymous user*/
     "allowAnonymous": true,
     /* session path */
-    "sessionPath": ".session.json"
+    "sessionPath": ".scrap-yard/session.json",
+    /* session doc path */
+    "shareDocStorePath": ".scrap-yard/session_doc.json",
 }`;
 
 export async function configLoadFrom(path: string) {

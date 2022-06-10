@@ -23,6 +23,7 @@ import {
 import { configLoadFrom } from "./config.ts";
 import { ResponseBuilder } from "./router/responseBuilder.ts";
 import { fileWatcher } from "./rpc/filewatch.ts";
+import { loadShareDocStore, setShareDocStorePath } from "./auth/docShare.ts";
 
 const router = new TreeRouter<Handler>();
 
@@ -55,6 +56,8 @@ export async function serverRun() {
     console.log(`Server Start`);
 
     setAllowAnonymous(config.allowAnonymous);
+    setShareDocStorePath(config.shareDocStorePath);
+    await loadShareDocStore();
 
     const sih = getServerInformationHandler();
     router.register("info", sih);

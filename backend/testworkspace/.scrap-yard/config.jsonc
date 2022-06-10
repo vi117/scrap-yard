@@ -10,5 +10,7 @@
     /* allow anonymous user*/
     "allowAnonymous": true,
     /* session path */
-    "sessionPath": ".scrap-yard/session.json"
+    "sessionPath": ".scrap-yard/session.json",
+    /* session doc path */
+    "shareDocStorePath": ".scrap-yard/session_doc.json"
 }

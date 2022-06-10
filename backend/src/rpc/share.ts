@@ -11,13 +11,13 @@ import {
     ShareMethod,
 } from "model";
 import { makeSessionId } from "../auth/session.ts";
-import { ShareDocStore } from "../auth/docShare.ts";
+import { saveShareDocStore, ShareDocStore } from "../auth/docShare.ts";
 import { dirname } from "std/path";
 
-export function handleShareDocMethod(
+export async function handleShareDocMethod(
     conn: Participant,
     method: ShareDocMethod,
-): void {
+): Promise<void> {
     const param = method.params;
     if (!conn.user.canCustom("shareToken", {})) {
         conn.responseWith(
@@ -47,6 +47,7 @@ export function handleShareDocMethod(
             write: param.write ?? shareInfo.write,
         });
     }
+    await saveShareDocStore();
     const result: ShareDocResult = {
         docPath: param.docPath,
         token: shareToken,
@@ -83,14 +84,14 @@ export function handleShareGetInfo(
     conn.responseWith(makeRPCResult(method.id, result));
 }
 
-export function handleShareMethod(
+export async function handleShareMethod(
     conn: Participant,
     method: ShareMethod,
-): void {
+): Promise<void> {
     const m = method.method;
     switch (m) {
         case "share.doc":
-            handleShareDocMethod(conn, method as ShareDocMethod);
+            await handleShareDocMethod(conn, method as ShareDocMethod);
             break;
         case "share.info":
             handleShareGetInfo(conn, method as ShareGetInfoMethod);

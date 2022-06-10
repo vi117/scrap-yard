@@ -83,8 +83,8 @@ export async function getAuthHandler(options: getAuthHandlerOption) {
     try {
         loaded = await rw.read(sessionPath);
     } catch (e) {
-        log.info("session file not found");
         if (e instanceof Deno.errors.NotFound) {
+            log.info("session file not found");
             await rw.write(sessionPath, "{}");
         } else {
             log.error(e);
