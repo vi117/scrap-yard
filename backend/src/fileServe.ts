@@ -14,6 +14,14 @@ import { copy, readerFromStreamReader } from "std/streams";
 import { asyncAll } from "./util.ts";
 import { getSessionUser } from "./auth/session.ts";
 import * as log from "std/log";
+import { isHidden } from "./watcher/util.ts";
+
+function returnNotFound() {
+    return makeJsonResponse(Status.NotFound, {
+        ok: false,
+        msg: "Not found",
+    });
+}
 
 export class FileServeRouter implements Router<Handler> {
     fn: Handler;
@@ -31,6 +39,9 @@ export class FileServeRouter implements Router<Handler> {
             const path = user.joinPath(ctx["path"]);
             const url = new URL(req.url);
             const isStat = url.searchParams.get("stat") === "true";
+            if (isHidden(path)) {
+                return returnNotFound();
+            }
 
             if (!user.canRead(path)) {
                 log.warning(`${user.id} try to read ${path}`);
@@ -39,25 +50,13 @@ export class FileServeRouter implements Router<Handler> {
                     msg: "Forbidden",
                 });
             }
-            let stat: Deno.FileInfo;
-            try {
-                stat = await Deno.stat(path);
-            } catch (e) {
-                if (e instanceof Deno.errors.NotFound) {
-                    return makeJsonResponse(Status.NotFound, {
-                        ok: false,
-                        msg: "Not found: File does not exist",
-                    });
-                } else {
-                    throw e;
-                }
-            }
+            const stat = await Deno.stat(path);
             if (isStat) {
                 if (stat.isDirectory) {
                     return makeJsonResponse(Status.OK, {
                         ...stat,
                         entries: (await asyncAll(await Deno.readDir(path)))
-                            .map((v) => v),
+                            .filter((v) => !isHidden(v.name)),
                     });
                 } else {
                     return makeJsonResponse(Status.OK, {
@@ -83,6 +82,9 @@ export class FileServeRouter implements Router<Handler> {
             const user = getSessionUser(req);
             const path = user.joinPath(ctx["path"]);
             const url = new URL(req.url);
+            if (isHidden(path)) {
+                return returnNotFound();
+            }
 
             if (!user.canWrite(path)) {
                 log.warning(`${user.id} try to write ${path}`);
@@ -95,6 +97,12 @@ export class FileServeRouter implements Router<Handler> {
             const p = url.searchParams.get("newPath");
 
             if (p) {
+                if (isHidden(p)) {
+                    return makeJsonResponse(Status.Forbidden, {
+                        ok: false,
+                        msg: "Hidden file name not allowed (dot prefix file name or directory name)",
+                    });
+                }
                 const newPath = user.joinPath(p);
                 if (!user.canWrite(newPath)) {
                     log.warning(`${user.id} try to write ${newPath}`);
@@ -117,6 +125,13 @@ export class FileServeRouter implements Router<Handler> {
         async function putHandler(req: Request, ctx: MatchContext) {
             const user = getSessionUser(req);
             const path = user.joinPath(ctx["path"]);
+            if (isHidden(path)) {
+                return makeJsonResponse(Status.Forbidden, {
+                    ok: false,
+                    msg: "Hidden file name not allowed (dot prefix file name or directory name)",
+                });
+            }
+
             const url = new URL(req.url);
             if (!user.canWrite(path)) {
                 log.warning(`${user.id} try to write ${path}`);
@@ -150,8 +165,6 @@ export class FileServeRouter implements Router<Handler> {
                         ok: true,
                     },
                 );
-            } catch (error) {
-                throw error;
             } finally {
                 if (file) {
                     file.close();
@@ -162,6 +175,10 @@ export class FileServeRouter implements Router<Handler> {
         async function deleteHandler(req: Request, ctx: MatchContext) {
             const user = getSessionUser(req);
             const path = user.joinPath(ctx["path"]);
+            if (isHidden(path)) {
+                return returnNotFound();
+            }
+
             if (!user.canWrite(path)) {
                 log.warning(`${user.id} try to delete ${path}`);
                 return makeJsonResponse(Status.Forbidden, {
@@ -169,27 +186,14 @@ export class FileServeRouter implements Router<Handler> {
                     msg: "Forbidden",
                 });
             }
-            try {
-                await Deno.remove(path, { recursive: true });
-                return makeResponse(
-                    Status.OK,
-                    JSON.stringify({
-                        ok: true,
-                    }),
-                );
-            } catch (error) {
-                if (error instanceof Deno.errors.NotFound) {
-                    return makeJsonResponse(Status.NotFound, {
-                        ok: false,
-                        msg: "Not found",
-                    });
-                } else if (error instanceof Deno.errors.PermissionDenied) {
-                    return makeJsonResponse(Status.Forbidden, {
-                        ok: false,
-                        msg: "Permission denied",
-                    });
-                } else throw error;
-            }
+
+            await Deno.remove(path, { recursive: true });
+            return makeResponse(
+                Status.OK,
+                JSON.stringify({
+                    ok: true,
+                }),
+            );
         }
     }
 
@@ -210,9 +214,11 @@ export class FileServeRouter implements Router<Handler> {
                 return await this.fn(req, ctx);
             } catch (e) {
                 if (e instanceof Deno.errors.NotFound) {
-                    return makeJsonResponse(Status.NotFound, {
+                    return returnNotFound();
+                } else if (e instanceof Deno.errors.PermissionDenied) {
+                    return makeJsonResponse(Status.Forbidden, {
                         ok: false,
-                        msg: "Not found",
+                        msg: "Permission denied",
                     });
                 }
                 throw e;
