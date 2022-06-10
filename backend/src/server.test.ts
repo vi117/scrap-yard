@@ -145,6 +145,8 @@ Deno.test({
             const chunkDelete = res as unknown as RPC.ChunkDeleteResult;
             assertEquals(chunkDelete.chunkId, "2");
             assertEquals(chunkDelete.seq, seq + 2);
+            // Wait 1100 ms for graceful shutdown.
+            await new Promise((resolve) => setTimeout(resolve, 1100));
         } finally {
             await stopServer();
         }
