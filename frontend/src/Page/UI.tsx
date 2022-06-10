@@ -22,6 +22,7 @@ import FileTree from "../Component/FileTree";
 import Settings from "../Component/Settings";
 import ShareButton from "../Component/ShareButton";
 
+import { useFileDialog } from "../Component/FileDialog";
 import { loginType, logout } from "../Model/login";
 import Page from "./Page";
 
@@ -48,11 +49,14 @@ export function UI() {
     const [sopen, setSopen] = useState(false);
     const [reason, setReason] = useState<undefined | string>(undefined);
     const eopen = Boolean(reason);
+
+    const [FileDialog, filePrompt] = useFileDialog();
+
     // it assumes that the pathname is "/app/" + path
     // so, if routing path is changed, the pathname is changed too.
     const path = pathname.substring(5) ?? "";
-
     const fileBasename = basename(path);
+
     useEffect(() => {
         document.title = "scrap yard : " + fileBasename;
     }, [fileBasename]);
@@ -92,8 +96,14 @@ export function UI() {
             <FileTree
                 width={drawerWidth}
                 handleFile={(com: string, f: string) => {
-                    console.log(`${com} ${f}`);
-                    handleFile(com, { path: f }, raise);
+                    if (com == "rename") {
+                        // use filePrompt to delay renaming until the user types a name.
+                        filePrompt((np) =>
+                            handleFile(com, { path: f, newpath: np }, raise)
+                        );
+                    } else {
+                        handleFile(com, { path: f }, raise);
+                    }
                 }}
                 open={open}
                 onClose={() => setOpen(false)}
@@ -107,6 +117,7 @@ export function UI() {
             />
 
             <Page path={path} />
+            {FileDialog}
         </div>
     );
 }
