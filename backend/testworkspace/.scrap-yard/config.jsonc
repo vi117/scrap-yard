@@ -12,5 +12,7 @@
     /* session path */
     "sessionPath": ".scrap-yard/session.json",
     /* session doc path */
-    "shareDocStorePath": ".scrap-yard/session_doc.json"
+    "shareDocStorePath": ".scrap-yard/session_doc.json",
+    /* password */
+    "password": "secret"
 }

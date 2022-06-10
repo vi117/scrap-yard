@@ -70,6 +70,7 @@ function setSessionCookie(headers: Headers, {
 
 interface getAuthHandlerOption {
     password: string;
+    secret: string;
     sessionPath: string;
     rw?: IReadWriter;
 }
@@ -117,7 +118,7 @@ export async function getAuthHandler(options: getAuthHandlerOption) {
                     },
                 );
             }
-            const id = makeSessionId();
+            const id = options.secret;
             const user = createAdminUser(id);
             sessionStore.set(id, user);
             const res = makeJsonResponse(Status.OK, { ok: true });

@@ -7,6 +7,7 @@ export interface ConfigSchema {
     hosts: string[];
     staticFileHost: string[];
     sessionSecret: string;
+    password: string;
     port: number;
     allowAnonymous: boolean;
     sessionPath: string;
@@ -43,6 +44,9 @@ const configSchema: JSONSchemaType<ConfigSchema> = {
         shareDocStorePath: {
             type: "string",
         },
+        password: {
+            type: "string",
+        },
     },
     required: [
         "hosts",
@@ -52,6 +56,7 @@ const configSchema: JSONSchemaType<ConfigSchema> = {
         "allowAnonymous",
         "sessionPath",
         "shareDocStorePath",
+        "password",
     ],
 };
 
@@ -94,6 +99,8 @@ const defaultConfigText = `{
     "sessionPath": ".scrap-yard/session.json",
     /* session doc path */
     "shareDocStorePath": ".scrap-yard/session_doc.json",
+    /* password */
+    "password": "secret"
 }`;
 
 export async function configLoadFrom(path: string) {

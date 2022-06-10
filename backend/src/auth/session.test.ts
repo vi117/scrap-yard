@@ -10,7 +10,8 @@ import { MemoryReadWriter } from "../watcher/mod.ts";
 
 const PASSWORD = "secret";
 const { handleLogin, handleLogout } = await getAuthHandler({
-    "password": PASSWORD,
+    password: PASSWORD,
+    secret: "secret",
     rw: new MemoryReadWriter(),
     sessionPath: "test.json",
 });
@@ -78,6 +79,7 @@ Deno.test({
             const cookies = res.headers.get("Set-Cookie");
             assert(cookies !== null, "no cookies");
             uuid = cookies.split(";")[0].split("=")[1];
+            assertEquals(uuid, "secret");
         });
 
         await t.step("logout with no session", async () => {

@@ -63,7 +63,8 @@ export async function serverRun() {
     router.register("info", sih);
 
     const { handleLogin, handleLogout } = await getAuthHandler({
-        password: "secret",
+        password: config.password,
+        secret: config.sessionSecret,
         sessionPath: config.sessionPath,
     });
 
