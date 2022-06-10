@@ -17,7 +17,11 @@ export class MemoryReadWriter {
     private data: Record<string, string> = {};
 
     read(path: string): Promise<string> {
-        return Promise.resolve(this.data[path]);
+        if (this.data[path]) {
+            return Promise.resolve(this.data[path]);
+        } else {
+            return Promise.reject(new Deno.errors.NotFound("File not found"));
+        }
     }
 
     write(path: string, content: string): Promise<void> {
