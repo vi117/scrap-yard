@@ -50,16 +50,7 @@ export class FileServeRouter implements Router<Handler> {
                     msg: "Forbidden",
                 });
             }
-            let stat: Deno.FileInfo;
-            try {
-                stat = await Deno.stat(path);
-            } catch (e) {
-                if (e instanceof Deno.errors.NotFound) {
-                    return returnNotFound();
-                } else {
-                    throw e;
-                }
-            }
+            const stat = await Deno.stat(path);
             if (isStat) {
                 if (stat.isDirectory) {
                     return makeJsonResponse(Status.OK, {
@@ -174,8 +165,6 @@ export class FileServeRouter implements Router<Handler> {
                         ok: true,
                     },
                 );
-            } catch (error) {
-                throw error;
             } finally {
                 if (file) {
                     file.close();
@@ -197,27 +186,14 @@ export class FileServeRouter implements Router<Handler> {
                     msg: "Forbidden",
                 });
             }
-            try {
-                await Deno.remove(path, { recursive: true });
-                return makeResponse(
-                    Status.OK,
-                    JSON.stringify({
-                        ok: true,
-                    }),
-                );
-            } catch (error) {
-                if (error instanceof Deno.errors.NotFound) {
-                    return makeJsonResponse(Status.NotFound, {
-                        ok: false,
-                        msg: "Not found",
-                    });
-                } else if (error instanceof Deno.errors.PermissionDenied) {
-                    return makeJsonResponse(Status.Forbidden, {
-                        ok: false,
-                        msg: "Permission denied",
-                    });
-                } else throw error;
-            }
+
+            await Deno.remove(path, { recursive: true });
+            return makeResponse(
+                Status.OK,
+                JSON.stringify({
+                    ok: true,
+                }),
+            );
         }
     }
 
@@ -239,6 +215,11 @@ export class FileServeRouter implements Router<Handler> {
             } catch (e) {
                 if (e instanceof Deno.errors.NotFound) {
                     return returnNotFound();
+                } else if (e instanceof Deno.errors.PermissionDenied) {
+                    return makeJsonResponse(Status.Forbidden, {
+                        ok: false,
+                        msg: "Permission denied",
+                    });
                 }
                 throw e;
             }
