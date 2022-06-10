@@ -17,10 +17,15 @@ export async function handleFile(
     switch (com) {
         case "create":
             // create document by uploading Blob
-            fs.upload(args.path, emptyFile);
+            fs.upload(args.path, emptyFile).catch(raise);
             break;
 
         case "rename":
+            if (args.newpath) {
+                fs.rename(args.path, args.newpath).catch(raise);
+            } else {
+                raise(new Error("No new name"));
+            }
             break;
         case "move":
             break;
