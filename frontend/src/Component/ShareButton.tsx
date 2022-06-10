@@ -154,7 +154,7 @@ export function ShareButton(props: {
 
     return (
         <>
-            <Button variant="contained" onClick={handleClick}>
+            <Button sx={{ color: "white" }} onClick={handleClick}>
                 Share
                 <KeyboardArrowDownIcon />
             </Button>

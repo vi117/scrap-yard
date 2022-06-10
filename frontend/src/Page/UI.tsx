@@ -1,6 +1,6 @@
 // main UI of the app.
 
-import { Button, Toolbar } from "@mui/material";
+import { AppBar, Button, Container, Toolbar } from "@mui/material";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -19,7 +19,7 @@ function LogoutButton() {
     const navigate = useNavigate();
     return (
         <Button
-            variant="contained"
+            sx={{ color: "white" }}
             onClick={() => {
                 logout();
                 navigate("/login");
@@ -45,16 +45,26 @@ export function UI() {
 
     return (
         <div>
-            <Toolbar>
-                <Button variant="contained" onClick={() => setOpen(!open)}>
-                    {open ? "Close" : "Open"}
-                </Button>
-                <Button variant="contained" onClick={() => setSopen(!open)}>
-                    settings
-                </Button>
-                {loginType() == "pass" && <ShareButton doc={path} />}
-                <LogoutButton />
-            </Toolbar>
+            <AppBar position="static">
+                <Container>
+                    <Toolbar>
+                        <Button
+                            sx={{ color: "white" }}
+                            onClick={() => setOpen(!open)}
+                        >
+                            {open ? "Close" : "Open"}
+                        </Button>
+                        <Button
+                            sx={{ color: "white" }}
+                            onClick={() => setSopen(!open)}
+                        >
+                            settings
+                        </Button>
+                        {loginType() == "pass" && <ShareButton doc={path} />}
+                        <LogoutButton />
+                    </Toolbar>
+                </Container>
+            </AppBar>
 
             <Settings open={sopen} onClose={() => setSopen(false)} />
             <FileTree

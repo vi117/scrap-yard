@@ -1,4 +1,5 @@
 import ArticleIcon from "@mui/icons-material/Article";
+import CloseIcon from "@mui/icons-material/Close";
 import FolderIcon from "@mui/icons-material/Folder";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import TreeItem, {
@@ -7,7 +8,15 @@ import TreeItem, {
     useTreeItem,
 } from "@mui/lab/TreeItem";
 import TreeView from "@mui/lab/TreeView";
-import { Drawer, IconButton, Typography } from "@mui/material";
+import {
+    Button,
+    Dialog,
+    DialogContent,
+    Drawer,
+    IconButton,
+    Input,
+    Typography,
+} from "@mui/material";
 import clsx from "clsx";
 import { join as pathJoin } from "path-browserify";
 import React, { forwardRef, useCallback, useRef, useState } from "react";
@@ -139,6 +148,56 @@ const DirItem = (props: TreeItemProps & { handle: DirHandleProp }) => (
     />
 );
 
+function NewFileButton(props: {
+    handleFile;
+}) {
+    const [dopen, setDopen] = useState(false);
+    const [nf, setNf] = useState("");
+
+    const dclose = () => {
+        setNf("");
+        setDopen(false);
+    };
+
+    const newFileDialogContent = (
+        <DialogContent
+            sx={{
+                display: "flex",
+                flexDirection: "column",
+            }}
+        >
+            <IconButton size="small" sx={{ alignSelf: "end" }} onClick={dclose}>
+                <CloseIcon />
+            </IconButton>
+            <div style={{ display: "flex" }}>
+                <Input
+                    placeholder="filename.syd"
+                    type="text"
+                    onChange={(e) => setNf(e.target.value)}
+                    value={nf}
+                />
+                <Button
+                    onClick={() => {
+                        props.handleFile("create", nf);
+                        dclose();
+                    }}
+                >
+                    Add
+                </Button>
+            </div>
+        </DialogContent>
+    );
+
+    return (
+        <>
+            <Button onClick={() => setDopen(true)}>Add document</Button>
+            <Dialog open={dopen} onClose={dclose}>
+                {newFileDialogContent}
+            </Dialog>
+        </>
+    );
+}
+
 type FileTreeProp = {
     dirTree: DirTree;
     width: number;
@@ -197,6 +256,7 @@ export function FileTreeInner(props: FileTreeProp) {
             open={props.open}
             onClose={props.onClose}
         >
+            <NewFileButton handleFile={props.handleFile} />
             <TreeView
                 sx={{
                     width: props.width,
