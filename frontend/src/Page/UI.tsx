@@ -1,7 +1,19 @@
 // main UI of the app.
 
-import { AppBar, Button, Container, Toolbar } from "@mui/material";
-import { useState } from "react";
+import {
+    Menu as MenuIcon,
+    Settings as SettingsIcon,
+} from "@mui/icons-material";
+import {
+    AppBar,
+    Button,
+    Container,
+    IconButton,
+    Toolbar,
+    Typography,
+} from "@mui/material";
+import { basename } from "path-browserify";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import ErrorDialog from "../Component/ErrorDialog";
@@ -39,6 +51,11 @@ export function UI() {
     const eopen = Boolean(reason);
     const path = params.path ?? "";
 
+    const fileBasename = basename(path);
+    useEffect(() => {
+        document.title = "scrap yard : " + fileBasename;
+    }, [fileBasename]);
+
     const raise = (e: Error) => {
         setReason(e?.message);
     };
@@ -48,18 +65,22 @@ export function UI() {
             <AppBar position="static">
                 <Container>
                     <Toolbar>
-                        <Button
-                            sx={{ color: "white" }}
+                        <IconButton
+                            edge="start"
+                            color="inherit"
                             onClick={() => setOpen(!open)}
                         >
-                            {open ? "Close" : "Open"}
-                        </Button>
-                        <Button
-                            sx={{ color: "white" }}
+                            <MenuIcon />
+                        </IconButton>
+                        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                            {fileBasename}
+                        </Typography>
+                        <IconButton
+                            color="inherit"
                             onClick={() => setSopen(!open)}
                         >
-                            settings
-                        </Button>
+                            <SettingsIcon />
+                        </IconButton>
                         {loginType() == "pass" && <ShareButton doc={path} />}
                         <LogoutButton />
                     </Toolbar>
