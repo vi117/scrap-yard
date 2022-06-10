@@ -105,7 +105,7 @@ export function UI() {
                 handleFile={(com: string, f: string) => {
                     if (com == "rename") {
                         // use filePrompt to delay renaming until the user types a name.
-                        filePrompt((np) =>
+                        filePrompt((np: string) =>
                             handleFile(com, { path: f, newpath: np }, raise)
                         );
                     } else {

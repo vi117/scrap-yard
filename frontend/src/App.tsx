@@ -3,7 +3,7 @@ import {
     Button,
     ThemeProvider,
     Typography,
-    useTheme,
+    useMediaQuery,
 } from "@mui/material";
 import {
     BrowserRouter,
@@ -26,22 +26,43 @@ import TokenLogin from "./Page/TokenLogin";
 import { UI } from "./Page/UI";
 import { useAsync } from "./util/util";
 
+import { createContext, useContext, useState } from "react";
 import "./util/util.css";
 
-const theme = createTheme({
+const darkTheme = createTheme({
     palette: {
         mode: "dark",
     },
 });
+const lightTheme = createTheme({
+    palette: {
+        mode: "light",
+    },
+});
+
+export const ThemeTypeContext = createContext({
+    themeType: "light",
+    // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+    setThemeType: (_: string) => {},
+});
 
 function AppContainer() {
+    const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+    const [themeType, setThemeType] = useState(
+        prefersDarkMode ? "dark" : "light",
+    );
+    const theme = themeType === "dark" ? darkTheme : lightTheme;
+    const themeTypeContext = { themeType, setThemeType };
+
     return (
         <RecoilRoot>
-            <ThemeProvider theme={theme}>
-                <Box bgcolor="background.default" className="FullScreen">
-                    <App></App>
-                </Box>
-            </ThemeProvider>
+            <ThemeTypeContext.Provider value={themeTypeContext}>
+                <ThemeProvider theme={theme}>
+                    <Box bgcolor="background.default" className="FullScreen">
+                        <App></App>
+                    </Box>
+                </ThemeProvider>
+            </ThemeTypeContext.Provider>
         </RecoilRoot>
     );
 }
