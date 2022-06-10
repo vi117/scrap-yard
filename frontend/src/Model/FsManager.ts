@@ -124,6 +124,18 @@ export interface IFsManager extends EventTarget {
      */
     delete(filePath: string): Promise<number>;
     /**
+     * rename file or directory
+     * @param oldPath old file path
+     * @param newPath new file path
+     * @returns status code
+     * @throws Error is very various reasons on platform
+     * @example
+     * ```
+     * await fs.rename("test.txt", "test2.txt");
+     * ```
+     */
+    rename(oldPath: string, newPath: string): Promise<number>;
+    /**
      * make directory
      * it will create parent directory if not exists.
      * @param path file path
