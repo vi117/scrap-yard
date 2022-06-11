@@ -14,15 +14,8 @@ import {
 import React, { useContext, useState } from "react";
 import { ThemeTypeContext } from "../App";
 
-// TODO: move these consts to datas
 const languages = ["korean", "english"];
 const themes = ["light", "dark"];
-
-// TODO: use real context
-const context = {
-    language: "korean",
-    theme: "light",
-};
 
 const rightAlign = { marginLeft: "auto" };
 
@@ -32,6 +25,7 @@ export function Settings(props: {
 }) {
     const { themeType, setThemeType } = useContext(ThemeTypeContext);
 
+    // NOTE: language setting is delayed.
     const langSetting = (
         <>
             <InputLabel id="settings-language-select-label">
@@ -39,9 +33,8 @@ export function Settings(props: {
             </InputLabel>
             <Select
                 labelId="settings-language-select-label"
-                value={context.language}
-                // eslint-disable-next-line @typescript-eslint/no-empty-function
-                onChange={() => {}} // TODO: fill here
+                value={"korean"}
+                // onChange={() => {}} // TODO: fill here
                 style={{ ...rightAlign }}
             >
                 {languages.map((l) => <MenuItem key={l} value={l}>{l}
@@ -58,7 +51,7 @@ export function Settings(props: {
                 value={themeType}
                 onChange={(e) => {
                     setThemeType(e.target.value);
-                }} // TODO: fill here
+                }}
                 style={{ ...rightAlign }}
             >
                 {themes.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}

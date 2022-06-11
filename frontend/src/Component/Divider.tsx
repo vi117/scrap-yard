@@ -35,7 +35,6 @@ export function Divider(props: {
                         moveChunk(item.chunk.id, position);
                     }
                 } else { // document-by-document move
-                    // TODO: need to test this (dnd doc-by-doc).
                     insertChunk(position, item.chunk);
                 }
             } else if (t == "text/plain") {
@@ -64,7 +63,6 @@ export function Divider(props: {
 
                 reader.readAsDataURL(file);
             } else { // upload file & link URL
-                // TODO: where to upload multimedia?
                 const path = encodeURI(`media/${Date.now()}-${file.name}`);
                 getFsManagerInstance()
                     .then(fs => fs.upload(path, file))
@@ -86,7 +84,7 @@ export function Divider(props: {
             ref={drop}
             sx={{
                 display: "flex",
-                ...(isOver ? { background: "grey" } : {}), // TODO: change color & move this outside
+                ...(isOver ? { background: "grey" } : {}),
             }}
         >
             <IconButton

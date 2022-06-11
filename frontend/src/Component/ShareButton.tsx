@@ -11,9 +11,10 @@ import {
     Select,
     SelectChangeEvent,
 } from "@mui/material";
-import React, { MouseEvent, useEffect, useState } from "react";
+import React, { MouseEvent, useState } from "react";
 
 import { getOpenedManagerInstance } from "../Model/RPCManager";
+import { makeEndpointURL } from "../Model/serverInfo";
 import { shareDoc, shareGetInfo } from "../Model/share";
 
 const defaultOption = {
@@ -125,9 +126,8 @@ export function ShareButton(props: {
     };
 
     const copy = (token: string) => {
-        // TODO: need to change URL.
-        const url = "http://localhost:3000/token/" + token;
-        navigator.clipboard.writeText(url);
+        const url = makeEndpointURL("token/" + token);
+        navigator.clipboard.writeText(url.href);
     };
 
     const handleConfirm = (option: ShareOption) => {

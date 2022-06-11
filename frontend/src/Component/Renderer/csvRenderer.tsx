@@ -1,4 +1,3 @@
-// dummy module
 // TODO: should be replaced to proper library
 import { Table, TableBody, TableCell, TableRow } from "@mui/material";
 
