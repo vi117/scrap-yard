@@ -93,12 +93,12 @@ export interface IFsManager extends EventTarget {
      * @returns file info
      * @throws Error if not found
      * @example
-     * ```
+     * ```ts
      * const info = await fs.getInfo("test.txt");
      * console.log(info.isFile);
      * ```
      * @example
-     * ```
+     * ```ts
      * const info = await fs.getInfo("directory");
      * console.log(info.isDirectory);
      * console.log(info.entries);
@@ -118,7 +118,7 @@ export interface IFsManager extends EventTarget {
      * @returns status code
      * @throws Error if not found
      * @example
-     * ```
+     * ```ts
      * await fs.delete("test.txt");
      * ```
      */
@@ -130,7 +130,7 @@ export interface IFsManager extends EventTarget {
      * @returns status code
      * @throws Error is very various reasons on platform
      * @example
-     * ```
+     * ```ts
      * await fs.rename("test.txt", "test2.txt");
      * ```
      */

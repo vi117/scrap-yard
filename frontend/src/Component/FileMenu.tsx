@@ -20,7 +20,7 @@ const fileOps = [
 ];
 
 export function FileMenu(props: {
-    anchorEl: HTMLElement;
+    anchorEl?: HTMLElement | null;
     open: boolean;
     handleClose: () => void;
     handleFile: (command: string) => void;

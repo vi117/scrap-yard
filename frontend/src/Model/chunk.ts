@@ -63,6 +63,7 @@ export async function chunkCreate(
  * }
  * const {chunkId, updatedAt} = await manager.invokeMethod(manager, params);
  * console.log(chunkId); // "some chunk id"
+ * ```
  */
 export async function chunkDelete(
     manager: IRPCMessageManager,
@@ -99,6 +100,7 @@ export async function chunkDelete(
  * }
  * const {chunkId, updatedAt} = await manager.invokeMethod(manager, params);
  * console.log(chunkId); // "some chunk id"
+ * ```
  */
 export async function chunkModify(
     manager: IRPCMessageManager,

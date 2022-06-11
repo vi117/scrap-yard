@@ -5,3 +5,4 @@ export * from "./login";
 export * from "./RPCError";
 export * from "./RPCManager";
 export * from "./serverInfo";
+export * from "./share";

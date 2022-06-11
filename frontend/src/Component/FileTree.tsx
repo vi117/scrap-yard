@@ -35,7 +35,10 @@ interface DirHandleProp {
     isOver: boolean;
 }
 
-const DirContent = forwardRef(function DirContent(
+const DirContent = forwardRef<
+    HTMLDivElement,
+    TreeItemContentProps & DirHandleProp
+>(function DirContent(
     props: TreeItemContentProps & DirHandleProp,
     ref,
 ) {
@@ -50,7 +53,6 @@ const DirContent = forwardRef(function DirContent(
         drop,
         isOver,
     } = props;
-
     const {
         disabled,
         expanded,
@@ -61,7 +63,7 @@ const DirContent = forwardRef(function DirContent(
         preventSelection,
     } = useTreeItem(nodeId);
 
-    const anchorRef = useRef<HTMLAnchorElement>(null);
+    const anchorRef = useRef<HTMLButtonElement>(null);
     const [menuOpen, setMenuOpen] = useState(false);
 
     const handleMenuClick = (e: React.MouseEvent<HTMLElement>) => {
@@ -81,8 +83,12 @@ const DirContent = forwardRef(function DirContent(
         handleSelection(event);
     };
 
-    const rootRef = useCallback((elem) => {
-        ref.current = elem;
+    const rootRef = useCallback<(elem: HTMLDivElement) => void>((elem) => {
+        if (ref instanceof Function) {
+            ref(elem);
+        } else if (ref !== null && ref !== undefined) {
+            ref.current = elem;
+        }
         if (drop) drop(elem);
     }, [ref]);
 
@@ -145,14 +151,19 @@ const DirContent = forwardRef(function DirContent(
 
 const DirItem = (props: TreeItemProps & { handle: DirHandleProp }) => (
     <TreeItem
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         ContentComponent={DirContent}
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         ContentProps={props.handle}
         {...props}
     />
 );
 
 function NewFileButton(props: {
-    handleFile;
+    handleFile: (command: string, newfile: string) => void;
 }) {
     const [dopen, setDopen] = useState(false);
     const [nf, setNf] = useState("");
