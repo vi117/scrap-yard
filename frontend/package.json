@@ -11,7 +11,8 @@
     "fmt": "dprint fmt --config dprint.json",
     "lint": "eslint --fix ./src",
     "test": "vitest",
-    "gendoc": "typedoc"
+    "gendoc": "typedoc",
+    "genmddoc": "typedoc --plugin typedoc-plugin-markdown"
   },
   "dependencies": {
     "@emotion/react": "^11.9.0",
@@ -57,6 +58,7 @@
     "jsdom": "^19.0.0",
     "ts-node": "^10.8.0",
     "typedoc": "^0.22.17",
+    "typedoc-plugin-markdown": "^3.12.1",
     "typescript": "^4.5.4",
     "vite": "^2.9.0",
     "vitest": "^0.12.9"
