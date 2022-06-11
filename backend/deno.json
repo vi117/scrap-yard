@@ -5,6 +5,27 @@
         "options": {
             "indentWidth": 4,
             "lineWidth": 80
+        },
+        "files": {
+            "exclude": [
+                "dist/**/*"
+            ],
+            "include": [
+                "src/",
+                "app.ts",
+                "deno.json",
+                "import_map.json"
+            ]
+        }
+    },
+    "lint": {
+        "files": {
+            "include": [
+                "src/",
+                "app.ts",
+                "deno.json",
+                "import_map.json"
+            ]
         }
     },
     "tasks": {

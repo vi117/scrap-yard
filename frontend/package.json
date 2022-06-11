@@ -5,7 +5,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && rm -r ../backend/dist && cp -r dist ../backend/",
     "preview": "vite preview",
     "fmt:check": "dprint check --config dprint.json",
     "fmt": "dprint fmt --config dprint.json",

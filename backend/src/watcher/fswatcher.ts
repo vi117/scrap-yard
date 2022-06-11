@@ -1,4 +1,4 @@
-import { join as pathJoin, relative } from "std/path";
+import { relative } from "std/path";
 import { isHidden } from "./util.ts";
 
 export type FsWatchEventType = "create" | "modify" | "remove";

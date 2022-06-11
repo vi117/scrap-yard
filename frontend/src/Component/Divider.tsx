@@ -3,7 +3,7 @@
 import AddIcon from "@mui/icons-material/Add";
 import { Box, IconButton } from "@mui/material";
 
-import { getFsManagerInstance } from "../Model/mod";
+import { getFsManagerInstance, makeEndpointURL } from "../Model/mod";
 
 import { Chunk as ChunkType, ChunkContent } from "model";
 import { useDrop } from "./dnd";
@@ -70,10 +70,10 @@ export function Divider(props: {
                     .then(fs => fs.upload(path, file))
                     .then((res) => {
                         if (res == 200) {
+                            const url = makeEndpointURL("/fs/" + path);
                             add(position, {
                                 type: type,
-                                // TODO: need a way to get file URL
-                                content: "http://localhost:8000/fs/" + path,
+                                content: url.href,
                             });
                         }
                     });
