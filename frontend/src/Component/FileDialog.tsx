@@ -20,11 +20,11 @@ export function useFileDialog(): [
     };
 
     const filePrompt = (cb: (f: string) => void) => {
-        setCallb(() => cb); // DO NOT REMOVE CLOSURE; extra closure ensures cb is begin called
+        setCallb(() => cb); // DO NOT REMOVE CLOSURE; extra closure stops cb from being called
         setOpen(true);
     };
 
-    // I want make this as a React component, but that makes it flicker when a character is
+    // I want to make this as a React component, but that makes it flicker when a character is
     // typed...(basically the refresh of this hook).
     const component = (
         <Dialog open={open} onClose={close}>
