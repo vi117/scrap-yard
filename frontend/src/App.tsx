@@ -1,4 +1,10 @@
-import { Button, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    ThemeProvider,
+    Typography,
+    useMediaQuery,
+} from "@mui/material";
 import {
     BrowserRouter,
     Navigate,
@@ -8,6 +14,7 @@ import {
 } from "react-router-dom";
 import { RecoilRoot } from "recoil";
 
+import { createTheme } from "@mui/material";
 import "./App.css";
 import { Loading } from "./Component/Loading";
 import { getLoginInfo } from "./Model/login";
@@ -19,12 +26,43 @@ import TokenLogin from "./Page/TokenLogin";
 import { UI } from "./Page/UI";
 import { useAsync } from "./util/util";
 
+import { createContext, useContext, useState } from "react";
 import "./util/util.css";
 
+const darkTheme = createTheme({
+    palette: {
+        mode: "dark",
+    },
+});
+const lightTheme = createTheme({
+    palette: {
+        mode: "light",
+    },
+});
+
+export const ThemeTypeContext = createContext({
+    themeType: "light",
+    // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+    setThemeType: (_: string) => {},
+});
+
 function AppContainer() {
+    const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+    const [themeType, setThemeType] = useState(
+        prefersDarkMode ? "dark" : "light",
+    );
+    const theme = themeType === "dark" ? darkTheme : lightTheme;
+    const themeTypeContext = { themeType, setThemeType };
+
     return (
         <RecoilRoot>
-            <App></App>
+            <ThemeTypeContext.Provider value={themeTypeContext}>
+                <ThemeProvider theme={theme}>
+                    <Box bgcolor="background.default" className="FullScreen">
+                        <App></App>
+                    </Box>
+                </ThemeProvider>
+            </ThemeTypeContext.Provider>
         </RecoilRoot>
     );
 }
@@ -57,20 +95,20 @@ function App() {
     );
     if (accessible.loading) {
         return (
-            <div className="center_container">
+            <Box className="center_container">
                 <Loading></Loading>
-            </div>
+            </Box>
         );
     }
     if (accessible.error) {
         console.error(accessible.error);
         return (
-            <div className="center_container">
-                <Typography variant="h5">
+            <Box className="center_container">
+                <Typography color="text.primary" variant="h5">
                     Loading Failed. Please check your network.
                 </Typography>
                 <Button onClick={reload}>reload</Button>
-            </div>
+            </Box>
         );
     }
 

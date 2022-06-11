@@ -1,6 +1,6 @@
 // login page for admin.
 
-import { Button, Input, Typography } from "@mui/material";
+import { Box, Button, Input, Typography } from "@mui/material";
 import { join } from "path-browserify";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -37,8 +37,8 @@ export function Login() {
     };
 
     return (
-        <main
-            style={{
+        <Box
+            sx={{
                 maxWidth: "600px",
                 margin: "2em auto",
                 display: "flex",
@@ -46,9 +46,11 @@ export function Login() {
                 alignItems: "center",
             }}
         >
-            <Typography variant="h3">Welcome to Scrapyard!</Typography>
+            <Typography color="text.primary" variant="h3">
+                Welcome to Scrapyard!
+            </Typography>
 
-            <div>
+            <Box>
                 <Input
                     type="password"
                     onChange={(e) => {
@@ -58,15 +60,15 @@ export function Login() {
                     placeholder="password"
                 />
                 <Button type="button" onClick={login}>Login</Button>
-            </div>
+            </Box>
 
-            <div
+            <Box
                 style={{ color: "red" }}
                 id="error"
             >
                 {errorMsg}
-            </div>
-        </main>
+            </Box>
+        </Box>
     );
 }
 

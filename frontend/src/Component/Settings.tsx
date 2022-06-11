@@ -11,7 +11,8 @@ import {
     Select,
     TextField,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { ThemeTypeContext } from "../App";
 
 // TODO: move these consts to datas
 const languages = ["korean", "english"];
@@ -29,6 +30,8 @@ export function Settings(props: {
     open: boolean;
     onClose: () => void;
 }) {
+    const { themeType, setThemeType } = useContext(ThemeTypeContext);
+
     const langSetting = (
         <>
             <InputLabel id="settings-language-select-label">
@@ -51,8 +54,10 @@ export function Settings(props: {
             <InputLabel id="settings-theme-select-label">Theme</InputLabel>
             <Select
                 labelId="settings-theme-select-label"
-                value={context.theme}
-                onChange={() => {}} // TODO: fill here
+                value={themeType}
+                onChange={(e) => {
+                    setThemeType(e.target.value);
+                }} // TODO: fill here
                 style={{ ...rightAlign }}
             >
                 {themes.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}

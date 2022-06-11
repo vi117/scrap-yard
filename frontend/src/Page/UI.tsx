@@ -6,6 +6,7 @@ import {
 } from "@mui/icons-material";
 import {
     AppBar,
+    Box,
     Button,
     Container,
     IconButton,
@@ -72,7 +73,7 @@ export function UI() {
     };
 
     return (
-        <div>
+        <Box>
             <AppBar position="static">
                 <Container>
                     <Toolbar>
@@ -104,7 +105,7 @@ export function UI() {
                 handleFile={(com: string, f: string) => {
                     if (com == "rename") {
                         // use filePrompt to delay renaming until the user types a name.
-                        filePrompt((np) =>
+                        filePrompt((np: string) =>
                             handleFile(com, { path: f, newpath: np }, raise)
                         );
                     } else {
@@ -124,6 +125,6 @@ export function UI() {
 
             <Page path={path} />
             {FileDialog}
-        </div>
+        </Box>
     );
 }

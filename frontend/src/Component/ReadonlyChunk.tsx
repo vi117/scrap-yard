@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import { IChunkViewModel } from "../ViewModel/chunklist";
 import renderView from "./Renderer/mod";
 
@@ -7,9 +8,9 @@ export function ReadonlyChunk(props: {
     const [{ id, type, content }] = props.chunk.useChunk();
 
     return (
-        <div key={"chunk-" + id} style={{ padding: "0.5em" }}>
+        <Box key={"chunk-" + id} style={{ padding: "0.5em" }}>
             {renderView(type, content)}
-        </div>
+        </Box>
     );
 }
 

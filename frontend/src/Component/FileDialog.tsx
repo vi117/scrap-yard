@@ -1,11 +1,14 @@
 import { Button, Dialog, DialogContent, Input } from "@mui/material";
 import { useEffect, useState } from "react";
 
-export function useFileDialog() {
+export function useFileDialog(): [
+    JSX.Element,
+    (cb: (text: string) => void) => void,
+] {
     const [open, setOpen] = useState(false);
     const close = () => setOpen(false);
     const [text, setText] = useState("");
-    const [callb, setCallb] = useState(null);
+    const [callb, setCallb] = useState<null | ((text: string) => void)>(null);
 
     const handleClick = () => {
         if (text != "") {
