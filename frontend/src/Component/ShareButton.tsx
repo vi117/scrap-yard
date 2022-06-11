@@ -9,8 +9,9 @@ import {
     Paper,
     Popover,
     Select,
+    SelectChangeEvent,
 } from "@mui/material";
-import { MouseEvent, useEffect, useState } from "react";
+import React, { MouseEvent, useEffect, useState } from "react";
 
 import { getOpenedManagerInstance } from "../Model/RPCManager";
 import { shareDoc, shareGetInfo } from "../Model/share";
@@ -42,12 +43,12 @@ function ShareOption(props: {
     const { open, onClose, anchorEl } = props;
     const [option, setOption] = useState(defaultOption);
 
-    const updateWritable = (e: Event) => {
+    const updateWritable = (e: React.ChangeEvent<HTMLInputElement>) => {
         setOption({ ...option, writable: e.target.checked });
     };
 
-    const updateDay = (e: Event) => {
-        setOption({ ...option, expires_after: e.target.value });
+    const updateDay = (e: SelectChangeEvent) => {
+        setOption({ ...option, expires_after: parseInt(e.target.value) });
     };
 
     return (
@@ -88,7 +89,7 @@ function ShareOption(props: {
                     <Select
                         labelId="option-expires-after"
                         label="Expires After"
-                        value={option.expires_after}
+                        value={option.expires_after.toString()}
                         onChange={updateDay}
                     >
                         {dayOptions.map((d) => (

@@ -56,10 +56,10 @@ export function Divider(props: {
             } else if (file.size <= 2048) { // embed file as dataURL
                 const reader = new FileReader();
                 reader.addEventListener("load", () => {
-                    add(position, {
+                    add(position, { // TODO: check if this is correct
                         type: type,
                         content: reader.result,
-                    });
+                    } as ChunkContent);
                 });
 
                 reader.readAsDataURL(file);
@@ -72,9 +72,9 @@ export function Divider(props: {
                         if (res == 200) {
                             const url = makeEndpointURL("/fs/" + path);
                             add(position, {
-                                type: type,
+                                type: type, // TODO: check if this is correct
                                 content: url.href,
-                            });
+                            } as ChunkContent);
                         }
                     });
             }

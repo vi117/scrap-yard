@@ -40,6 +40,7 @@ export function Settings(props: {
             <Select
                 labelId="settings-language-select-label"
                 value={context.language}
+                // eslint-disable-next-line @typescript-eslint/no-empty-function
                 onChange={() => {}} // TODO: fill here
                 style={{ ...rightAlign }}
             >

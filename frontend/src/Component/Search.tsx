@@ -16,7 +16,11 @@ function search_word(chunks: Chunk[], target: string): SearchResult[] {
     for (const chunk of chunks) {
         const matched = chunk.content.matchAll(new RegExp(target, "g"));
         for (const r of matched) {
-            result.push({ id: chunk.id, index: r.index, input: r.input });
+            result.push({
+                id: chunk.id,
+                index: r.index ?? 0,
+                input: r.input ?? "",
+            });
         }
     }
 
