@@ -10,10 +10,12 @@ import { MemoryReadWriter } from "../watcher/mod.ts";
 
 const PASSWORD = "password";
 const SECRET = "secret";
+const rw = new MemoryReadWriter();
+await rw.write("test.json", "{}");
 const { handleLogin, handleLogout } = await getAuthHandler({
     password: PASSWORD,
     secret: SECRET,
-    rw: new MemoryReadWriter(),
+    rw: rw,
     sessionPath: "test.json",
 });
 

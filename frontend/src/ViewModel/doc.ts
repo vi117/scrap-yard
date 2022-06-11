@@ -17,11 +17,10 @@ import {
     ChunkListViewModel,
     IChunkViewModel,
 } from "./chunklist";
-import { IPageViewModel } from "./page";
 
 import { IDisposable, makeDisposable } from "./IDisposable";
 
-export interface IDocumentViewModel extends IPageViewModel {
+export interface IDocumentViewModel {
     docPath: string;
     readonly writable: boolean;
 
@@ -104,11 +103,6 @@ export class DocumentViewModel extends makeDisposable(EventTarget)
                 }
                 break;
         }
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    updateAsSource(_path: string, _updatedAt: number): void {
-        throw new Error("Method not implemented.");
     }
 
     // TODO(vi117): extract method
