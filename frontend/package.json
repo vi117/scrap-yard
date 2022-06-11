@@ -10,7 +10,8 @@
     "fmt:check": "dprint check --config dprint.json",
     "fmt": "dprint fmt --config dprint.json",
     "lint": "eslint --fix ./src",
-    "test": "vitest"
+    "test": "vitest",
+    "gendoc": "typedoc"
   },
   "dependencies": {
     "@emotion/react": "^11.9.0",
@@ -55,6 +56,7 @@
     "eslint-plugin-react": "^7.29.4",
     "jsdom": "^19.0.0",
     "ts-node": "^10.8.0",
+    "typedoc": "^0.22.17",
     "typescript": "^4.5.4",
     "vite": "^2.9.0",
     "vitest": "^0.12.9"

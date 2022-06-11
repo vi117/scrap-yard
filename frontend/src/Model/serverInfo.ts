@@ -42,7 +42,7 @@ let infoInstance: ServerInfo | null = null;
  * @throws Error if not found
  * @example
  * ```ts
- * const info = await getServerInfo();
+ * const info = await getServerInfoInstance();
  * console.log(info.name); // "scrap-yard-server"
  * ```
  */
@@ -58,6 +58,12 @@ export async function getServerInfoInstance(): Promise<ServerInfo> {
 
 /**
  * get server info cached
+ * @returns ServerInfo
+ * @throws Error if not found or not loaded
+ * @example
+ * ```ts
+ * const info = getServerInfo();
+ * console.log(info.name); // "scrap-yard-server"
  */
 export function getServerInfo() {
     if (infoInstance === null) {
