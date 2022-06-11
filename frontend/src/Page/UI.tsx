@@ -23,7 +23,7 @@ import FileTree from "../Component/FileTree";
 import Settings from "../Component/Settings";
 import ShareButton from "../Component/ShareButton";
 
-import { useFileDialog } from "../Component/FileDialog";
+import { useInputDialog } from "../Component/InputDialog";
 import { loginType, logout } from "../Model/login";
 import { getOpenedManagerInstance } from "../Model/RPCManager";
 
@@ -57,7 +57,7 @@ export function UI() {
     const [reason, setReason] = useState<undefined | string>(undefined);
     const eopen = Boolean(reason);
 
-    const [FileDialog, filePrompt] = useFileDialog();
+    const [inputDialog, inputPrompt] = useInputDialog("enter new file name");
 
     // it assumes that the pathname is "/app/" + path
     // so, if routing path is changed, the pathname is changed too.
@@ -104,8 +104,8 @@ export function UI() {
                 width={drawerWidth}
                 handleFile={(com: string, f: string) => {
                     if (com == "rename") {
-                        // use filePrompt to delay renaming until the user types a name.
-                        filePrompt((np: string) =>
+                        // use inputPrompt to delay renaming until the user types a name.
+                        inputPrompt((np) =>
                             handleFile(com, { path: f, newpath: np }, raise)
                         );
                     } else {
@@ -124,7 +124,7 @@ export function UI() {
             />
 
             <Page path={path} />
-            {FileDialog}
+            {inputDialog}
         </Box>
     );
 }
