@@ -40,7 +40,8 @@ export type DocumentViewModelOptions = {
 };
 
 export class DocumentViewModel extends makeDisposable(EventTarget)
-    implements IDocumentViewModel, IDisposable {
+    implements IDocumentViewModel, IDisposable
+{
     readonly type = "document";
     readonly docPath: string;
     chunks: ChunkListViewModel;
