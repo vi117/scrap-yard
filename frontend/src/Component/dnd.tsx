@@ -5,6 +5,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 const nativeTypes = [
     "text/plain",
     "text/html",
+    "text/uri-list",
 ];
 
 export type DragData<T> = {

@@ -23,7 +23,7 @@ export function Divider(props: {
     const [{ isOver }, drop] = useDrop<
         { chunk: ChunkType; doc: string; cur: number }
     >(() => ({
-        accept: ["chunk", "text/html", "text/plain"],
+        accept: ["chunk", "text/uri-list", "text/html", "text/plain"],
         acceptFile: true,
 
         drop: (t, item) => {
@@ -37,6 +37,13 @@ export function Divider(props: {
                 } else { // document-by-document move
                     insertChunk(position, item.chunk);
                 }
+            } else if (t == "text/uri-list") {
+                (item as string).split("\n").filter((l: string) =>
+                    !l.startsWith("#")
+                )
+                    .forEach((l: string) => {
+                        add(position, { type: "text", content: l });
+                    });
             } else if (t == "text/plain") {
                 addFromText(position, item as string);
             } else if (t == "text/html") {
