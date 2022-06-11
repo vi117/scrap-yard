@@ -1,17 +1,24 @@
-import { Button, Dialog, DialogContent, Input } from "@mui/material";
-import { useEffect, useState } from "react";
+import {
+    Button,
+    Dialog,
+    DialogContent,
+    Input,
+    Typography,
+} from "@mui/material";
+import { useState } from "react";
 
-export function useFileDialog(): [
-    JSX.Element,
-    (cb: (text: string) => void) => void,
-] {
+type CallbackFunction = (t: string) => void;
+
+export function useInputDialog(
+    description: string,
+): [JSX.Element, (cb: CallbackFunction) => void] {
     const [open, setOpen] = useState(false);
     const close = () => setOpen(false);
     const [text, setText] = useState("");
-    const [callb, setCallb] = useState<null | ((text: string) => void)>(null);
+    const [callb, setCallb] = useState<CallbackFunction | null>(null);
 
     const handleClick = () => {
-        if (text != "") {
+        if (text != "" && callb != null) {
             callb(text);
             setText("");
         }
@@ -19,16 +26,17 @@ export function useFileDialog(): [
         close();
     };
 
-    const filePrompt = (cb: (f: string) => void) => {
+    const inputPrompt = (cb: CallbackFunction) => {
         setCallb(() => cb); // DO NOT REMOVE CLOSURE; extra closure stops cb from being called
         setOpen(true);
     };
 
     // I want to make this as a React component, but that makes it flicker when a character is
     // typed...(basically the refresh of this hook).
-    const component = (
+    const inputDialog = (
         <Dialog open={open} onClose={close}>
             <DialogContent>
+                <Typography>{description}</Typography>
                 <Input
                     autoFocus
                     type="text"
@@ -40,5 +48,5 @@ export function useFileDialog(): [
         </Dialog>
     );
 
-    return [component, filePrompt];
+    return [inputDialog, inputPrompt];
 }
