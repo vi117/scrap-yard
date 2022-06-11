@@ -64,6 +64,7 @@ export async function getServerInfoInstance(): Promise<ServerInfo> {
  * ```ts
  * const info = getServerInfo();
  * console.log(info.name); // "scrap-yard-server"
+ * ```
  */
 export function getServerInfo() {
     if (infoInstance === null) {
