@@ -128,7 +128,7 @@ export function ShareButton(props: {
 
     const copy = (token: string) => {
         const url = window.location.origin + "/token/" + token;
-        navigator.clipboard.writeText(url.href);
+        navigator.clipboard.writeText(url);
     };
 
     const handleConfirm = (option: ShareOption) => {
