@@ -1,5 +1,4 @@
 import ArticleIcon from "@mui/icons-material/Article";
-import CloseIcon from "@mui/icons-material/Close";
 import FolderIcon from "@mui/icons-material/Folder";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import TreeItem, {
@@ -8,16 +7,7 @@ import TreeItem, {
     useTreeItem,
 } from "@mui/lab/TreeItem";
 import TreeView from "@mui/lab/TreeView";
-import {
-    Box,
-    Button,
-    Dialog,
-    DialogContent,
-    Drawer,
-    IconButton,
-    Input,
-    Typography,
-} from "@mui/material";
+import { Box, Button, Drawer, IconButton, Typography } from "@mui/material";
 import clsx from "clsx";
 import { join as pathJoin } from "path-browserify";
 import React, { forwardRef, useCallback, useRef, useState } from "react";
@@ -27,6 +17,7 @@ import { getFsManagerInstance } from "../Model/FsManager";
 import { DirTree, useDirTree } from "./dirTree";
 import { useDrop } from "./dnd";
 import FileMenu from "./FileMenu";
+import { useInputDialog } from "./InputDialog";
 
 interface DirHandleProp {
     handleFile: (command: string) => void;
@@ -165,49 +156,19 @@ const DirItem = (props: TreeItemProps & { handle: DirHandleProp }) => (
 function NewFileButton(props: {
     handleFile: (command: string, newfile: string) => void;
 }) {
-    const [dopen, setDopen] = useState(false);
-    const [nf, setNf] = useState("");
-
-    const dclose = () => {
-        setNf("");
-        setDopen(false);
-    };
-
-    const newFileDialogContent = (
-        <DialogContent
-            sx={{
-                display: "flex",
-                flexDirection: "column",
-            }}
-        >
-            <IconButton size="small" sx={{ alignSelf: "end" }} onClick={dclose}>
-                <CloseIcon />
-            </IconButton>
-            <Box style={{ display: "flex" }}>
-                <Input
-                    placeholder="filename.syd"
-                    type="text"
-                    onChange={(e) => setNf(e.target.value)}
-                    value={nf}
-                />
-                <Button
-                    onClick={() => {
-                        props.handleFile("create", nf);
-                        dclose();
-                    }}
-                >
-                    Add
-                </Button>
-            </Box>
-        </DialogContent>
+    const [inputDialog, inputPrompt] = useInputDialog(
+        "enter file name",
+        "filename.syd",
     );
+
+    const newfile = (nf: string) => {
+        props.handleFile("create", nf);
+    };
 
     return (
         <>
-            <Button onClick={() => setDopen(true)}>Add document</Button>
-            <Dialog open={dopen} onClose={dclose}>
-                {newFileDialogContent}
-            </Dialog>
+            <Button onClick={() => inputPrompt(newfile)}>Add document</Button>
+            {inputDialog}
         </>
     );
 }
