@@ -2,8 +2,8 @@ import {
     Button,
     Dialog,
     DialogContent,
+    DialogTitle,
     Input,
-    Typography,
 } from "@mui/material";
 import { useState } from "react";
 
@@ -11,6 +11,7 @@ type CallbackFunction = (t: string) => void;
 
 export function useInputDialog(
     description: string,
+    placeholder?: string,
 ): [JSX.Element, (cb: CallbackFunction) => void] {
     const [open, setOpen] = useState(false);
     const close = () => setOpen(false);
@@ -36,14 +37,16 @@ export function useInputDialog(
     const inputDialog = (
         <Dialog open={open} onClose={close}>
             <DialogContent>
-                <Typography>{description}</Typography>
+                <DialogTitle>{description}</DialogTitle>
                 <Input
                     autoFocus
+                    placeholder={placeholder ?? ""}
                     type="text"
                     onChange={(e) => setText(e.target.value)}
                     value={text}
                 />
                 <Button onClick={handleClick}>Ok</Button>
+                <Button onClick={close}>Cancel</Button>
             </DialogContent>
         </Dialog>
     );
