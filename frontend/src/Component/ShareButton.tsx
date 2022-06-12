@@ -111,6 +111,7 @@ function ShareOption(props: {
 
 export function ShareButton(props: {
     doc: string;
+    onError: (e: Error) => void;
 }) {
     const [token, setToken] = useState<string | null>(null);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -149,7 +150,7 @@ export function ShareButton(props: {
                     setToken(res.token);
                     copy(res.token);
                 })
-                .catch(console.error);
+                .catch(props.onError);
         }
     };
 

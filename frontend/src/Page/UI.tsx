@@ -93,7 +93,7 @@ export function UI() {
                         >
                             <SettingsIcon />
                         </IconButton>
-                        <ShareButton doc={path} />
+                        <ShareButton doc={path} onError={raise} />
                         <LogoutButton />
                     </Toolbar>
                 </Container>
