@@ -5,6 +5,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 const nativeTypes = [
     "text/plain",
     "text/html",
+    "text/uri-list",
 ];
 
 export type DragData<T> = {
@@ -38,7 +39,6 @@ export function useDrag<T>(
         }
     };
 
-    // TODO: finish handleDragEnd
     const handleDragEnd = (e: DragEvent) => {
         e.preventDefault();
         if (e.dataTransfer?.dropEffect == "none") { // canceled
@@ -113,7 +113,7 @@ export function useDrop<T>(
                 if (item.kind === "file") {
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     data.filedrop(item.type, item.getAsFile()!);
-                    break; // TODO: support multiple file drop
+                    break;
                 }
             }
         } else {

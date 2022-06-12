@@ -111,7 +111,7 @@ export function Page(props: { path: string }) {
         return (
             <Box className="center_container">
                 <Typography color="text.primary" variant="h3">
-                    Welcome to Scrap Yard: a web-based file manager.<br />
+                    Welcome to Scrap Yard: a web-based notebook.<br />
                     Please select a file or folder to view.
                 </Typography>
             </Box>

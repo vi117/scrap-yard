@@ -90,14 +90,14 @@ const Chunk = (props: {
     const [chunkContent, { setType, setContent }] = props.chunk.useChunk();
     const fc = chunk.useFocus();
     const [, drag] = useDrag(() => ({
-        type: "chunk", // TODO: make this constant
+        type: "chunk",
         item: {
             chunk: chunkContent,
             doc: props.chunk.parent.docPath,
             cur: props.position,
         },
         end: () => {
-            // TODO: fill here to delete when moving document-by-document.
+            return;
         },
     }), [props.position]);
 
