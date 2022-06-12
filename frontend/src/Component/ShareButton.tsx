@@ -127,7 +127,7 @@ export function ShareButton(props: {
     };
 
     const copy = (token: string) => {
-        const url = makeEndpointURL("token/" + token);
+        const url = window.location.origin + "/token/" + token;
         navigator.clipboard.writeText(url.href);
     };
 
