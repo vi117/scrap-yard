@@ -1,0 +1,24 @@
+# model build
+FROM denoland/deno:alpine as model
+COPY ./model /scrap-yard/model
+WORKDIR /scrap-yard/model
+RUN ["deno", "task", "build"]
+# frontend build
+FROM node:alpine as frontend
+RUN [ "apk", "add", "curl" ]
+COPY . /scrap-yard/
+RUN npm --silent install --global --depth 0 pnpm
+COPY --from=model /scrap-yard/model/dist /scrap-yard/model/dist
+WORKDIR /scrap-yard/frontend
+RUN ["pnpm", "install"]
+RUN ["pnpm", "build"]
+# run server
+FROM denoland/deno:alpine as backend
+COPY ./backend/src /scrap-yard/backend/src
+COPY ./backend/app.ts ./backend/deno.json ./backend/import_map.json /scrap-yard/backend/
+COPY ./model /scrap-yard/model
+COPY --from=frontend /scrap-yard/frontend/dist /scrap-yard/backend/dist
+WORKDIR /scrap-yard/backend
+
+EXPOSE 8000
+CMD ["deno", "task", "serve"]

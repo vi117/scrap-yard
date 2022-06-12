@@ -1,0 +1,6 @@
+backend/coverage/
+.pnpm-debug.log
+node_modules/
+frontend/docs/
+frontend/dist/
+model/dist/
